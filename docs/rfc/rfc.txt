@@ -1,0 +1,180 @@
+Kevin Mauge : kmauge@etud.u-pem.fr
+Pape NDIAYE : pndiaye@etud.u-pem.fr
+
+
+
+
+Name : Matou, a Chat service
+
+Description: 
+The purpose of Matou project is to realize a discussion and file exchanger service.
+
+The clients are connected to a primary server. Each connected client is identified by a unique alias. The server must guarantee that two client will not have the same alias. Once connected and identified by that same alias, the client can:
+    * Send message to all connected clients
+	* Send privates messages or files to a particular client
+
+
+
+
+Requirements:
+    * All private communication are made by a direct connection between the two clients. The server will only be sollicited for the purpose of exchanging the address of those two clients.
+    * Client will be managed to send a request for private messaging. And this client can't accept or refuse any private request.
+	* Exchanging file should not block the messaging and vice versa
+
+
+
+
+
+Specifications :
+	* The numbers are in Big Endian format
+	* String are encoded into UTF-8
+	* The transport protocol used is TCP(limit size specified 
+	* The max size of an encoded pseudo  is 32 bytes wihtout special caracters
+	* The max size of a message is 512 bytes
+	* The size of a chunk of file is 512 bytes
+
+Acronym formats : 
+	* C-S : Client to Server
+	* S-C : Server to Client
+	* S-A : Server to All Client
+	* C-C : Client to Client
+
+
+
+Interactions :
+	Request for public connection
+		[C-S] Request connection to Server
+		Le client demande une connection au serveur avec un certain pseudo.
+		+------+------------+--------+
+		| int  |    int     | String |
+		+------+------------+--------+
+		| Type | SizePseudo | Pseudo |
+		+------+------------+--------+
+
+		[S-C] Validation of the connection
+		Le serveur renvoie un boolean correspondant à la validité du pseudo. Si le pseudo est valide, la connection est établie.
+		+------+-------------+
+		| int  |    byte     |
+		+------+-------------+
+		| Type | Acceptation |
+		+------+-------------+
+		
+		[S-A] Notification of the new connection
+		Le serveur notifie les clients déjà connectés l'arrivée d'un nouveau client.
+		+------+------------+--------+
+		| int  | int        | String |
+		+------+------------+--------+
+		| Type | SizePseudo | Pseudo |  
+		+------+------------+--------+
+
+	Sending message to the public domain
+		[C-S] Sending message
+		Le client envoie son message publique au serveur.
+		+------+-------------+---------+
+		| int  |     int     | String  |
+		+------+-------------+---------+
+		| Type | SizeMessage | Message |
+		+------+-------------+---------+
+
+		[S-A] Retransmission of the message
+		Le serveur fait une retransmission du message publique à tous les clients connectés.
+		+------+------------+--------+-------------+---------+
+		| int  |    int     | String |     int     | String  |
+		+------+------------+--------+-------------+---------+
+		| Type | SizePseudo | Pseudo | SizeMessage | Message |
+		+------+------------+--------+-------------+---------+
+
+	Requesting private connection
+		[C-S] Requesting connection between the source(Src) and the destination(Dst)
+		Le client Src notifie au serveur qu'il souhaite se connecter en privé au client Dst.
+		+------+---------------+-----------+
+		| int  |      int      |  String   |
+		+------+---------------+-----------+
+		| Type | SizePseudoDst | PseudoDst |
+		+------+---------------+-----------+
+
+		[S-C] Requesting acceptation of the connection from Dst
+		Le serveur notifie au client Dst qu'il a reçu une demande de connection privée de la part du client Src.
+		+------+---------------+-----------+
+		| int  |      int      |  String   |
+		+------+---------------+-----------+
+		| Type | SizePseudoSrc | PseudoSrc |
+		+------+---------------+-----------+
+
+		[C-S] Confirm the connection request to Src
+		Le client Dst indique au serveur s'il accepte ou refuse la demande de connection privée à client Src.
+		+------+---------------+-----------+--------+
+		| int  |      int      |  String   |  byte  |
+		+------+---------------+-----------+--------+
+		| Type | SizePseudoSrc | PseudoSrc | Accept |
+		+------+---------------+-----------+--------+
+
+		[S-C] Notification of the private 
+		Le serveur transfere la réponse de Client Dst à Client Src.
+		+------+---------------+-----------+--------+
+		| int  |      int      |  String   |  byte  |
+		+------+---------------+-----------+--------+
+		| Type | SizePseudoDst | PseudoDst | Accept |
+		+------+---------------+-----------+--------+
+
+		[S-C] Connection between the source(Src) and the destination(Dst)
+		Le serveur envoie les données de connection privée de Client Dst à Client Src
+		+------+---------------+-----------+-------------------+
+		| int  |      int      |  String   | InetSocketAddress |
+		+------+---------------+-----------+-------------------+
+		| Type | SizePseudoDst | PseudoDst | AddressDst        |
+		+------+---------------+-----------+-------------------+
+		
+		[S-C] Le serveur envoie les données de connection privée de Client Src à Client Dst
+		+------+---------------+-----------+-------------------+---------+
+		| int  |      int      |  String   | InetSocketAddress |   int   |
+		+------+---------------+-----------+-------------------+---------+
+		| Type | SizePseudoSrc | PseudoSrc | AddressSrc        | PortSrc |
+		+------+---------------+-----------+-------------------+---------+
+
+	Sending private message
+		[C-C] Sending private message between Src and Dst
+		Le client Src envoie un message à Client Dst.
+		+------+-------------+---------+
+		| int  |     int     | String  |
+		+------+-------------+---------+
+		| Type | SizeMessage | Message |
+		+------+-------------+---------+
+
+	Sending file in private
+		[C-C] Sending file between Src and Dst
+		
+		Le client Src envoie un fichier à client Dst. Le fichier est découpé en Chunk de taille fixe (seul le dernier Chunk peut être éventuellement plus petit).
+		+------+------------+------------+-------+
+		| int  |    long    |    bytes   | bytes |
+		+------+------------+------------+-------+
+		| Type |  SizeFile  |  FileChunk |  ...  |
+		+------+------------+------------+-------+
+		
+		
+
+	Private sign Out
+		[C-C] Sign Out
+		Le client notifie son interlocuteur qu'il souhaite interrompre la connection privée.
+		+------+
+		| int  |
+		+------+
+		| Type |
+		+------+
+
+	Public Sign Out
+		[C-S] Sign Out
+		Le client notifie le serveur qu'il souhaite se deconnecter.
+		+------+
+		| int  |
+		+------+
+		| Type |
+		+------+
+
+		[S-A] Sign Out notification
+		Le serveur notifie les clients d'une déconnexion
+		+------+------------+--------+
+		| int  |    int     | String |
+		+------+------------+--------+
+		| Type | SizePseudo | Pseudo |
+		+------+------------+--------+
