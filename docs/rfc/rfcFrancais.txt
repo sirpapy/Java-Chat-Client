@@ -44,7 +44,7 @@ Acronym formats :
 Interactions :
 	Request for public connection
 		[C-S] Request connection to Server
-		The client requests a connection to the server with a specified pseudo
+		Le client demande une connection au serveur avec un certain pseudo.
 		+------+------------+--------+
 		| int  |    int     | String |
 		+------+------------+--------+
@@ -52,7 +52,7 @@ Interactions :
 		+------+------------+--------+
 
 		[S-C] Validation of the connection
-		The serveur answers with a boolean which will indicate whether the pseudo is valid or not. If the pseudo is valid the connection is established.
+		Le serveur renvoie un boolean correspondant à la validité du pseudo. Si le pseudo est valide, la connection est établie.
 		+------+-------------+
 		| int  |    byte     |
 		+------+-------------+
@@ -60,7 +60,7 @@ Interactions :
 		+------+-------------+
 		
 		[S-A] Notification of the new connection
-		The server notifies to all clients that a new one is connected.
+		Le serveur notifie les clients déjà connectés l'arrivée d'un nouveau client.
 		+------+------------+--------+
 		| int  | int        | String |
 		+------+------------+--------+
@@ -69,7 +69,7 @@ Interactions :
 
 	Sending message to the public domain
 		[C-S] Sending message
-		The client sends his public message to the server.
+		Le client envoie son message publique au serveur.
 		+------+-------------+---------+
 		| int  |     int     | String  |
 		+------+-------------+---------+
@@ -77,7 +77,7 @@ Interactions :
 		+------+-------------+---------+
 
 		[S-A] Retransmission of the message
-		The server forwards the public message to all connected clients.
+		Le serveur fait une retransmission du message publique à tous les clients connectés.
 		+------+------------+--------+-------------+---------+
 		| int  |    int     | String |     int     | String  |
 		+------+------------+--------+-------------+---------+
@@ -86,7 +86,7 @@ Interactions :
 
 	Requesting private connection
 		[C-S] Requesting connection between the source(Src) and the destination(Dst)
-		The client Src is notifying to the server that he wants to be connected with the client Dst.
+		Le client Src notifie au serveur qu'il souhaite se connecter en privé au client Dst.
 		+------+---------------+-----------+
 		| int  |      int      |  String   |
 		+------+---------------+-----------+
@@ -94,7 +94,7 @@ Interactions :
 		+------+---------------+-----------+
 
 		[S-C] Requesting acceptation of the connection from Dst
-		The server is notifying to the client Dst that he received a request form client Src.
+		Le serveur notifie au client Dst qu'il a reçu une demande de connection privée de la part du client Src.
 		+------+---------------+-----------+
 		| int  |      int      |  String   |
 		+------+---------------+-----------+
@@ -102,7 +102,7 @@ Interactions :
 		+------+---------------+-----------+
 
 		[C-S] Confirm the connection request to Src
-		The client Dst notifies the server whether he accepted or refused the client Src's private's connection request.
+		Le client Dst indique au serveur s'il accepte ou refuse la demande de connection privée à client Src.
 		+------+---------------+-----------+--------+
 		| int  |      int      |  String   |  byte  |
 		+------+---------------+-----------+--------+
@@ -110,7 +110,7 @@ Interactions :
 		+------+---------------+-----------+--------+
 
 		[S-C] Notification of the private 
-		The server forwards the answer of client Dst to client Src.
+		Le serveur transfere la réponse de Client Dst à Client Src.
 		+------+---------------+-----------+--------+
 		| int  |      int      |  String   |  byte  |
 		+------+---------------+-----------+--------+
@@ -118,14 +118,14 @@ Interactions :
 		+------+---------------+-----------+--------+
 
 		[S-C] Connection between the source(Src) and the destination(Dst)
-		The server sends the private connection data for the private connection of client Dst to client Src.
+		Le serveur envoie les données de connection privée de Client Dst à Client Src
 		+------+---------------+-----------+-------------------+
 		| int  |      int      |  String   | InetSocketAddress |
 		+------+---------------+-----------+-------------------+
 		| Type | SizePseudoDst | PseudoDst | AddressDst        |
 		+------+---------------+-----------+-------------------+
 		
-		[S-C] The server sends the private connection data for the private connection of client Src to client Dst.
+		[S-C] Le serveur envoie les données de connection privée de Client Src à Client Dst
 		+------+---------------+-----------+-------------------+---------+
 		| int  |      int      |  String   | InetSocketAddress |   int   |
 		+------+---------------+-----------+-------------------+---------+
@@ -134,7 +134,7 @@ Interactions :
 
 	Sending private message
 		[C-C] Sending private message between Src and Dst
-		The client Src send a message to client Dst.
+		Le client Src envoie un message à Client Dst.
 		+------+-------------+---------+
 		| int  |     int     | String  |
 		+------+-------------+---------+
@@ -142,8 +142,9 @@ Interactions :
 		+------+-------------+---------+
 
 	Sending file in private
-		[C-C] Sending file between Src and Dst		
-		The client Src sends a file to client Dst. The file is segmented into chunk with a fixed size (Only the last part will eventually be smaller).
+		[C-C] Sending file between Src and Dst
+		
+		Le client Src envoie un fichier à client Dst. Le fichier est découpé en Chunk de taille fixe (seul le dernier Chunk peut être éventuellement plus petit).
 		+------+------------+------------+-------+
 		| int  |    long    |    bytes   | bytes |
 		+------+------------+------------+-------+
@@ -154,7 +155,7 @@ Interactions :
 
 	Private sign Out
 		[C-C] Sign Out
-		The client notifies his interlocutor that he want to terminate the private connection.
+		Le client notifie son interlocuteur qu'il souhaite interrompre la connection privée.
 		+------+
 		| int  |
 		+------+
@@ -163,7 +164,7 @@ Interactions :
 
 	Public Sign Out
 		[C-S] Sign Out
-		The client notifies to the server that he want to terminate the private connection.
+		Le client notifie le serveur qu'il souhaite se deconnecter.
 		+------+
 		| int  |
 		+------+
@@ -171,7 +172,7 @@ Interactions :
 		+------+
 
 		[S-A] Sign Out notification
-		The server notifies all clients that a another client has left the chat room.
+		Le serveur notifie les clients d'une déconnexion
 		+------+------------+--------+
 		| int  |    int     | String |
 		+------+------------+--------+
