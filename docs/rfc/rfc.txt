@@ -9,17 +9,17 @@ Name : Matou, a Chat service
 Description: 
 The purpose of Matou project is to realize a discussion and file exchanger service.
 
-The clients are connected to a primary server. Each connected client is identified by a unique alias. The server must guarantee that two client will not have the same alias. Once connected and identified by that same alias, the client can:
-    * Send message to all connected clients
+The clients are connected to a primary server. Each connected client is identified by a unique pseudo. The server must guarantee that two client will not have the same pseudo. After etablishing the connection, the client can:
+	* Send message to all connected clients
 	* Send privates messages or files to a particular client
 
 
 
 
 Requirements:
-    * All private communication are made by a direct connection between the two clients. The server will only be sollicited for the purpose of exchanging the address of those two clients.
-    * Client will be managed to send a request for private messaging. And this client can't accept or refuse any private request.
-	* Exchanging file should not block the messaging and vice versa
+	* All private communication are made by a direct connection between the two clients. The server will only be sollicited for the purpose of exchanging the address of those two clients.
+	* Client will be managed to send a request for private messaging. And this client can't accept or refuse any private request.
+	* Exchanging file should not block the messaging and vice versa.
 
 
 
@@ -27,9 +27,9 @@ Requirements:
 
 Specifications :
 	* The numbers are in Big Endian format
-	* String are encoded into UTF-8
-	* The transport protocol used is TCP(limit size specified 
-	* The max size of an encoded pseudo  is 32 bytes wihtout special caracters
+	* String are encoded into UTF-8 charset
+	* The transport protocol used is TCP (with limit size specified)
+	* The max size of an encoded pseudo is 32 bytes wihtout some special caracters (\n, \r ...)
 	* The max size of a message is 512 bytes
 	* The size of a chunk of file is 512 bytes
 
@@ -60,7 +60,7 @@ Interactions :
 		+------+-------------+
 		
 		[S-A] Notification of the new connection
-		The server notifies to all clients that a new one is connected.
+		The server notifies all clients that a new one is connected.
 		+------+------------+--------+
 		| int  | int        | String |
 		+------+------------+--------+
@@ -86,7 +86,7 @@ Interactions :
 
 	Requesting private connection
 		[C-S] Requesting connection between the source(Src) and the destination(Dst)
-		The client Src is notifying to the server that he wants to be connected with the client Dst.
+		The client Src notifies the server that he wants to be connected with the client Dst.
 		+------+---------------+-----------+
 		| int  |      int      |  String   |
 		+------+---------------+-----------+
@@ -94,7 +94,7 @@ Interactions :
 		+------+---------------+-----------+
 
 		[S-C] Requesting acceptation of the connection from Dst
-		The server is notifying to the client Dst that he received a request form client Src.
+		The server notifies the client Dst that he received a connection request form client Src.
 		+------+---------------+-----------+
 		| int  |      int      |  String   |
 		+------+---------------+-----------+
@@ -125,7 +125,8 @@ Interactions :
 		| Type | SizePseudoDst | PseudoDst | AddressDst        |
 		+------+---------------+-----------+-------------------+
 		
-		[S-C] The server sends the private connection data for the private connection of client Src to client Dst.
+		[S-C] Connection between the source(Src) and the destination(Dst)
+		The server sends the private connection data for the private connection of client Src to client Dst.
 		+------+---------------+-----------+-------------------+---------+
 		| int  |      int      |  String   | InetSocketAddress |   int   |
 		+------+---------------+-----------+-------------------+---------+
@@ -149,29 +150,27 @@ Interactions :
 		+------+------------+------------+-------+
 		| Type |  SizeFile  |  FileChunk |  ...  |
 		+------+------------+------------+-------+
-		
-		
 
-	Private sign Out
-		[C-C] Sign Out
-		The client notifies his interlocutor that he want to terminate the private connection.
+	Private sign out
+		[C-C] Sign out
+		The client notifies his interlocutor that he wants to terminate the private connection.
 		+------+
 		| int  |
 		+------+
 		| Type |
 		+------+
 
-	Public Sign Out
-		[C-S] Sign Out
-		The client notifies to the server that he want to terminate the private connection.
+	Public sign out
+		[C-S] Sign out
+		The client notifies the server that he wants to terminate the connection.
 		+------+
 		| int  |
 		+------+
 		| Type |
 		+------+
 
-		[S-A] Sign Out notification
-		The server notifies all clients that a another client has left the chat room.
+		[S-A] Sign out notification
+		The server notifies all clients that a client has left the chat room.
 		+------+------------+--------+
 		| int  |    int     | String |
 		+------+------------+--------+
