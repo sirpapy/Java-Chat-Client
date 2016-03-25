@@ -1,10 +1,10 @@
-package fr.upem.matou.test2;
+package fr.upem.matou.blocking.test2;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.Optional;
 
-import fr.upem.matou.test.NetworkTCP;
+import fr.upem.matou.blocking.test.NetworkTCP;
 
 public enum NetworkProtocol2 {
     /* COREQ */ CLIENT_PUBLIC_CONNECTION_REQUEST("COREQ"),

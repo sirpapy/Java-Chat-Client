@@ -1,11 +1,11 @@
-package fr.upem.matou.test1;
+package fr.upem.matou.blocking.test1;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
-import fr.upem.matou.test.NetworkTCP;
+import fr.upem.matou.blocking.test.NetworkTCP;
 
 public enum NetworkProtocol1 {
     

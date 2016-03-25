@@ -1,4 +1,4 @@
-package fr.upem.matou.test2;
+package fr.upem.matou.blocking.test2;
 
 import java.io.Closeable;
 import java.io.IOException;

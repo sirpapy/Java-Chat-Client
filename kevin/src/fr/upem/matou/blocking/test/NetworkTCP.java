@@ -1,4 +1,4 @@
-package fr.upem.matou.test;
+package fr.upem.matou.blocking.test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
