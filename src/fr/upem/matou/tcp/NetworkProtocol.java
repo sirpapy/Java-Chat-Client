@@ -1,10 +1,11 @@
-package fr.upem.matou.nonblocking.test;
+package fr.upem.matou.tcp;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.Optional;
 
-public enum NetworkProtocol {
+/*
+ * This class defines the communication protocol.
+ */
+enum NetworkProtocol {
 	/* COREQ */ CLIENT_PUBLIC_CONNECTION_REQUEST("COREQ"),
 	/* CORES */ SERVER_PUBLIC_CONNECTION_RESPONSE("CORES"),
 	/* CODISP */ SERVER_PUBLIC_CONNECTION_NOTIFICATION("CODISP"),
@@ -21,8 +22,6 @@ public enum NetworkProtocol {
 	/* DISCO */ CLIENT_PUBLIC_DISCONNECTION("DISCO"),
 	;
 
-	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-
 	private final String code;
 
 	private NetworkProtocol(String code) {
@@ -31,9 +30,12 @@ public enum NetworkProtocol {
 
 	@Override
 	public String toString() {
-		return "[" + ordinal() + " - " + code + "]";
+		return "[" + ordinal() + " - " + code + " - " + name() + "]";
 	}
 
+	/*
+	 * Returns the protocol from the ordinal number.
+	 */
 	public static Optional<NetworkProtocol> getProtocol(int ordinal) {
 		NetworkProtocol[] values = values();
 		if (ordinal < 0 || ordinal >= values.length) {
@@ -42,6 +44,5 @@ public enum NetworkProtocol {
 		NetworkProtocol protocol = values[ordinal];
 		return Optional.of(protocol);
 	}
-
 
 }

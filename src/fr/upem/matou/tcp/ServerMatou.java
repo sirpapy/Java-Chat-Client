@@ -1,4 +1,4 @@
-package fr.upem.matou.nonblocking.test;
+package fr.upem.matou.tcp;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -11,6 +11,9 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 
+/*
+ * This class is the core of the server.
+ */
 @SuppressWarnings("resource")
 public class ServerMatou implements Closeable {
 

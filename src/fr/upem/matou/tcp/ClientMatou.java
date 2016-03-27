@@ -1,4 +1,4 @@
-package fr.upem.matou.nonblocking.test;
+package fr.upem.matou.tcp;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -6,9 +6,13 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Optional;
 
+import fr.upem.matou.ui.Message;
 import fr.upem.matou.ui.ShellInterface;
 import fr.upem.matou.ui.UserInterface;
 
+/*
+ * This class is the core of the client.
+ */
 public class ClientMatou implements Closeable {
 
 	private final SocketChannel sc;
@@ -17,13 +21,25 @@ public class ClientMatou implements Closeable {
 		InetSocketAddress address = new InetSocketAddress(hostname, port);
 		sc = SocketChannel.open(address);
 	}
+	
+	private void threadSender() {
+		// TODO : Thread "Sender"
+	}
+	
+	private void threadReceiver() {
+		// TODO : Thread "Receiver"
+	}
+	
+	private void threadCleaner() {
+		// TODO : Thread "Cleaner"
+	}
 
 	private void processPseudo(UserInterface ui) throws IOException {
 		while (true) {
 			String pseudo = ui.readPseudo();
-			NetworkClientCommunication.sendRequestCOREQ(sc, pseudo);
+			ClientCommunication.sendRequestCOREQ(sc, pseudo);
 
-			Optional<NetworkProtocol> optionalRequestType = NetworkClientCommunication.receiveRequestType(sc);
+			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
 			if (!optionalRequestType.isPresent()) {
 				throw new IOException("Protocol exception");
 			}
@@ -32,7 +48,7 @@ public class ClientMatou implements Closeable {
 			System.out.println("PROTOCOL : " + protocol);
 			switch (protocol) {
 			case SERVER_PUBLIC_CONNECTION_RESPONSE:
-				Optional<Boolean> optionalRequestCORES = NetworkClientCommunication.receiveRequestCORES(sc);
+				Optional<Boolean> optionalRequestCORES = ClientCommunication.receiveRequestCORES(sc);
 				if (!optionalRequestCORES.isPresent()) {
 					throw new IOException("Protocol exception");
 				}
@@ -50,10 +66,10 @@ public class ClientMatou implements Closeable {
 
 	private void processMessages(UserInterface ui) throws IOException {
 		while (!Thread.interrupted()) {
-			String message = ui.readMessage();
-			NetworkClientCommunication.sendRequestMSG(sc, message);
+			String inputMessage = ui.readMessage();
+			ClientCommunication.sendRequestMSG(sc, inputMessage);
 
-			Optional<NetworkProtocol> optionalRequestType = NetworkClientCommunication.receiveRequestType(sc);
+			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
 			if (!optionalRequestType.isPresent()) {
 				throw new IOException("Protocol exception");
 			}
@@ -62,12 +78,12 @@ public class ClientMatou implements Closeable {
 			System.out.println("PROTOCOL : " + protocol);
 			switch (protocol) {
 			case SERVER_PUBLIC_MESSAGE_BROADCAST:
-				Optional<String> optionalRequestMSGBC = NetworkClientCommunication.receiveRequestMSGBC(sc);
+				Optional<Message> optionalRequestMSGBC = ClientCommunication.receiveRequestMSGBC(sc);
 				if (!optionalRequestMSGBC.isPresent()) {
 					throw new IOException("Protocol exception");
 				}
-				String received = optionalRequestMSGBC.get();
-				System.out.println("MESSAGE : " + received);
+				Message receivedMessage = optionalRequestMSGBC.get();
+				ui.displayMessage(receivedMessage);
 				break;
 			default:
 				throw new AssertionError("PROTOCOL EXCEPTION");

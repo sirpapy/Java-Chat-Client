@@ -1,10 +1,13 @@
-package fr.upem.matou.nonblocking.test;
+package fr.upem.matou.tcp;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Optional;
 
+/*
+ * This class represents the state of a client connected to the chat server.
+ */
 class ServerSession {
 
 	private final SocketChannel sc;
@@ -18,11 +21,13 @@ class ServerSession {
 		// Marker interface
 	}
 
+	/* State of a COREQ request */
 	static class StateCOREQ implements ClientState {
 		int sizePseudo;
 		String pseudo;
 	}
 
+	/* State of a MSG request */
 	static class StateMSG implements ClientState {
 		int sizeMessage;
 		String message;
@@ -32,14 +37,17 @@ class ServerSession {
 		this.sc = sc;
 	}
 
-	public ByteBuffer getReadBuffer() {
+	ByteBuffer getReadBuffer() {
 		return bbRead;
 	}
 
-	public ByteBuffer getWriteBuffer() {
+	ByteBuffer getWriteBuffer() {
 		return bbWrite;
 	}
 
+	/*
+	 * Retrives the protocol request type from the read buffer and updates current state.
+	 */
 	private void processRequestType() {
 		bbRead.flip();
 		int ordinal = bbRead.getInt();
@@ -52,12 +60,18 @@ class ServerSession {
 		arg++;
 	}
 
+	/*
+	 * Initializes the COREQ state.
+	 */
 	private void processCOREQinit() {
 		bbRead = ByteBuffer.allocate(Integer.BYTES);
 		clientState = new StateCOREQ();
 		arg++;
 	}
 
+	/*
+	 * Process the read buffer to retrieves the first argument of the COREQ request and updates current state.
+	 */
 	private void processCOREQarg1(StateCOREQ state) {
 		bbRead.flip();
 		state.sizePseudo = bbRead.getInt();
@@ -67,9 +81,12 @@ class ServerSession {
 		arg++;
 	}
 
+	/*
+	 * Process the read buffer to retrieves the second argument of the COREQ request and updates current state.
+	 */
 	private void processCOREQarg2(StateCOREQ state) {
 		bbRead.flip();
-		state.pseudo = NetworkServerCommunication.readStringUTF8(bbRead);
+		state.pseudo = ServerCommunication.readStringUTF8(bbRead);
 		System.out.println("PSEUDO : " + state.pseudo);
 
 		bbRead = ByteBuffer.allocate(Integer.BYTES);
@@ -77,13 +94,19 @@ class ServerSession {
 		protocol = null;
 	}
 
+	/*
+	 * Answers by a CORES request and fills the write buffer.
+	 */
 	private void answerCORES(ServerDataBase db, String pseudo) {
 		boolean acceptation = db.addNewClient(sc, pseudo);
 		System.out.println("ACCEPTATION : " + acceptation);
 
-		bbWrite = NetworkServerCommunication.encodeRequestCORES(acceptation);
+		bbWrite = ServerCommunication.encodeRequestCORES(acceptation);
 	}
 
+	/*
+	 * Process a COREQ request.
+	 */
 	private void processCOREQ(ServerDataBase db) {
 		if (arg == 0) {
 			processCOREQinit();
@@ -110,7 +133,7 @@ class ServerSession {
 		clientState = new StateMSG();
 		arg++;
 	}
-	
+
 	private void processMSGarg1(StateMSG state) {
 		bbRead.flip();
 		state.sizeMessage = bbRead.getInt();
@@ -122,7 +145,7 @@ class ServerSession {
 
 	private void processMSGarg2(StateMSG state) {
 		bbRead.flip();
-		state.message = NetworkServerCommunication.readStringUTF8(bbRead);
+		state.message = ServerCommunication.readStringUTF8(bbRead);
 		System.out.println("MESSAGE : " + state.message);
 
 		bbRead = ByteBuffer.allocate(Integer.BYTES);
@@ -133,8 +156,8 @@ class ServerSession {
 	private void answerMSGBC(ServerDataBase db, String message) {
 		String pseudo = db.pseudoOf(sc);
 		System.out.println("MESSAGE : <" + pseudo + "> " + message);
-		
-		bbWrite = NetworkServerCommunication.encodeRequestMSGBC(pseudo, message);
+
+		bbWrite = ServerCommunication.encodeRequestMSGBC(pseudo, message);
 	}
 
 	private void processMSG(ServerDataBase db) {
@@ -158,6 +181,9 @@ class ServerSession {
 		}
 	}
 
+	/*
+	 * Updates the state of the current session after reading.
+	 */
 	void updateStateRead(ServerDataBase db) {
 		System.out.println("BUFFER = " + bbRead);
 		if (bbRead.hasRemaining()) { // Not finished to read
@@ -184,12 +210,18 @@ class ServerSession {
 		}
 	}
 
+	/*
+	 * Updates the state of the current session after writing.
+	 */
 	void updateStateWrite(ServerDataBase db) {
 		if (bbWrite.position() > 0) { // Not finished to write
 			return;
 		}
 	}
 
+	/*
+	 * Updates the interest operations after reading or writing.
+	 */
 	boolean updateInterestOps(SelectionKey key) {
 		int ops = 0;
 
