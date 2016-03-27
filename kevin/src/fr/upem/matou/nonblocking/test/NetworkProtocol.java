@@ -2,56 +2,46 @@ package fr.upem.matou.nonblocking.test;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.Optional;
 
 public enum NetworkProtocol {
-    /* COREQ */ CLIENT_PUBLIC_CONNECTION_REQUEST("COREQ"),
-    /* MSG */ CLIENT_PUBLIC_MESSAGE("MSG"),
-    ;
+	/* COREQ */ CLIENT_PUBLIC_CONNECTION_REQUEST("COREQ"),
+	/* CORES */ SERVER_PUBLIC_CONNECTION_RESPONSE("CORES"),
+	/* CODISP */ SERVER_PUBLIC_CONNECTION_NOTIFICATION("CODISP"),
+	/* MSG */ CLIENT_PUBLIC_MESSAGE("MSG"),
+	/* MSGBC */ SERVER_PUBLIC_MESSAGE_BROADCAST("MSGBC"),
+	// /* PVCOREQ */ CLIENT_PRIVATE_CONNECTION_REQUEST("PVCOREQ"),
+	// /* PVCOTR */ SERVER_PRIVATE_CONNECTION_TRANSFER("PVCOTR"),
+	// /* PVCOACC */ CLIENT_PRIVATE_CONNECTION_CONFIRM("PVCOACC"),
+	// /* PVCORES */ SERVER_PRIVATE_CONNECTION_RESPONSE("PVCORES"),
+	// /* PVCOETA */ SERVER_PRIVATE_CONNECTION_ETABLISHMENT("PVCOETA"),
+	// /* PVMSG */ CLIENT_PRIVATE_MESSAGE("PVMSG"),
+	// /* PVFILE */ CLIENT_PRIVATE_FILE("PVFILE"),
+	// /* PVDISCO */ CLIENT_PRIVATE_DISCONNECTION("PVDISCO"),
+	/* DISCO */ CLIENT_PUBLIC_DISCONNECTION("DISCO"),
+	;
 
-    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
-    private final String code;
+	private final String code;
 
-    private NetworkProtocol(String code) {
-	this.code = code;
-    }
+	private NetworkProtocol(String code) {
+		this.code = code;
+	}
 
-    @Override
-    public String toString() {
-	return "[" + ordinal() + " - " + code + "]";
-    }
+	@Override
+	public String toString() {
+		return "[" + ordinal() + " - " + code + "]";
+	}
 
-    public static NetworkProtocol valueOf(int ordinal) {
-	// XXX : tester ordinal
-	return values()[ordinal];
-    }
+	public static Optional<NetworkProtocol> getProtocol(int ordinal) {
+		NetworkProtocol[] values = values();
+		if (ordinal < 0 || ordinal >= values.length) {
+			return Optional.empty();
+		}
+		NetworkProtocol protocol = values[ordinal];
+		return Optional.of(protocol);
+	}
 
-    public static ByteBuffer encodeRequestCOREQ(String pseudo) {
-	ByteBuffer encodedPseudo = UTF8_CHARSET.encode(pseudo);
-
-	int length = encodedPseudo.remaining();
-
-	int capacity = Integer.BYTES + Integer.BYTES + length;
-	ByteBuffer request = ByteBuffer.allocate(capacity);
-
-	request.putInt(NetworkProtocol.CLIENT_PUBLIC_CONNECTION_REQUEST.ordinal());
-	request.putInt(length).put(encodedPseudo);
-	
-	return request;
-    }
-    
-    public static ByteBuffer encodeRequestMSG(String message) {
-	ByteBuffer encodedMessage = UTF8_CHARSET.encode(message);
-
-	int length = encodedMessage.remaining();
-
-	int capacity = Integer.BYTES + Integer.BYTES + length;
-	ByteBuffer request = ByteBuffer.allocate(capacity);
-
-	request.putInt(NetworkProtocol.CLIENT_PUBLIC_MESSAGE.ordinal());
-	request.putInt(length).put(encodedMessage);
-	
-	return request;
-    }
 
 }
