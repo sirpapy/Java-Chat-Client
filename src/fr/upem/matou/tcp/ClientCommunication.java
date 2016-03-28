@@ -44,7 +44,7 @@ class ClientCommunication {
 		int capacity = Integer.BYTES + Integer.BYTES + length;
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 
-		request.putInt(NetworkProtocol.CLIENT_PUBLIC_CONNECTION_REQUEST.ordinal());
+		request.putInt(NetworkProtocol.COREQ.ordinal());
 		request.putInt(length).put(encodedPseudo);
 
 		return request;
@@ -61,7 +61,7 @@ class ClientCommunication {
 		int capacity = Integer.BYTES + Integer.BYTES + length;
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 
-		request.putInt(NetworkProtocol.CLIENT_PUBLIC_MESSAGE.ordinal());
+		request.putInt(NetworkProtocol.MSG.ordinal());
 		request.putInt(length).put(encodedMessage);
 
 		return request;

@@ -5,6 +5,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Optional;
 
+import fr.upem.matou.logger.Logger;
+import fr.upem.matou.logger.Logger.LogType;
+
 /*
  * This class represents the state of a client connected to the chat server.
  */
@@ -68,7 +71,7 @@ class ServerSession {
 			return;
 		}
 		protocol = optionalProtocol.get();
-		System.out.println("PROTOCOL : " + protocol);
+		Logger.network(LogType.READ,"PROTOCOL : " + protocol);
 		arg++;
 	}
 
@@ -87,7 +90,7 @@ class ServerSession {
 	private void processCOREQarg1(StateCOREQ state) {
 		bbRead.flip();
 		state.sizePseudo = bbRead.getInt();
-		System.out.println("SIZE PSEUDO : " + state.sizePseudo);
+		Logger.network(LogType.READ,"SIZE PSEUDO : " + state.sizePseudo);
 
 		bbRead = ByteBuffer.allocate(state.sizePseudo);
 		arg++;
@@ -99,7 +102,7 @@ class ServerSession {
 	private void processCOREQarg2(StateCOREQ state) {
 		bbRead.flip();
 		state.pseudo = ServerCommunication.readStringUTF8(bbRead);
-		System.out.println("PSEUDO : " + state.pseudo);
+		Logger.network(LogType.READ,"PSEUDO : " + state.pseudo);
 
 		bbRead = ByteBuffer.allocate(Integer.BYTES);
 		arg = -1;
@@ -111,7 +114,8 @@ class ServerSession {
 	 */
 	private void answerCORES(ServerDataBase db, String pseudo) {
 		boolean acceptation = db.addNewClient(sc, pseudo);
-		System.out.println("ACCEPTATION : " + acceptation);
+		Logger.network(LogType.WRITE,"PROTOCOL : " + NetworkProtocol.CORES);
+		Logger.network(LogType.WRITE,"ACCEPTATION : " + acceptation);
 
 		if(acceptation) {
 			setAuthent();
@@ -153,7 +157,7 @@ class ServerSession {
 	private void processMSGarg1(StateMSG state) {
 		bbRead.flip();
 		state.sizeMessage = bbRead.getInt();
-		System.out.println("SIZE MESSAGE : " + state.sizeMessage);
+		Logger.network(LogType.READ,"SIZE MESSAGE : " + state.sizeMessage);
 
 		bbRead = ByteBuffer.allocate(state.sizeMessage);
 		arg++;
@@ -162,7 +166,7 @@ class ServerSession {
 	private void processMSGarg2(StateMSG state) {
 		bbRead.flip();
 		state.message = ServerCommunication.readStringUTF8(bbRead);
-		System.out.println("MESSAGE : " + state.message);
+		Logger.network(LogType.READ,"MESSAGE : " + state.message);
 
 		bbRead = ByteBuffer.allocate(Integer.BYTES);
 		arg = -1;
@@ -171,7 +175,9 @@ class ServerSession {
 
 	private void answerMSGBC(ServerDataBase db, String message) {
 		String pseudo = db.pseudoOf(sc);
-		System.out.println("MESSAGE : <" + pseudo + "> " + message);
+		Logger.network(LogType.WRITE,"PROTOCOL : " + NetworkProtocol.MSGBC);
+		Logger.network(LogType.WRITE,"PSEUDO : " + pseudo);
+		Logger.network(LogType.WRITE,"MESSAGE : " + message);
 
 		ByteBuffer bbWriteAll = ServerCommunication.encodeRequestMSGBC(pseudo, message);
 		db.addBroadcast(bbWriteAll);
@@ -202,7 +208,7 @@ class ServerSession {
 	 * Updates the state of the current session after reading.
 	 */
 	void updateStateRead(ServerDataBase db) {
-		System.out.println("BUFFER = " + bbRead);
+		Logger.network(LogType.READ,"BUFFER = " + bbRead);
 		if (bbRead.hasRemaining()) { // Not finished to read
 			return;
 		}
@@ -216,10 +222,10 @@ class ServerSession {
 		}
 
 		switch (protocol) {
-		case CLIENT_PUBLIC_CONNECTION_REQUEST:
+		case COREQ:
 			processCOREQ(db);
 			return;
-		case CLIENT_PUBLIC_MESSAGE:
+		case MSG:
 			processMSG(db);
 			return;
 		default:

@@ -11,6 +11,8 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 
+import fr.upem.matou.logger.Logger;
+
 /*
  * This class is the core of the server.
  */
@@ -43,7 +45,7 @@ public class ServerMatou implements Closeable {
 
 			selectedKeys.clear();
 			
-			System.out.println();
+			Logger.selectInfo("");
 		}
 	}
 
@@ -93,7 +95,7 @@ public class ServerMatou implements Closeable {
 
 		boolean active = session.updateInterestOps(key);
 		if(!active) {
-			System.out.println("INACTIVE AFTER READ");
+			Logger.debug("INACTIVE AFTER READ");
 			silentlyClose(channel);
 		}
 	}
@@ -111,7 +113,7 @@ public class ServerMatou implements Closeable {
 
 		boolean active = session.updateInterestOps(key);
 		if(!active) {
-			System.out.println("INACTIVE AFTER WRITE");
+			Logger.debug("INACTIVE AFTER WRITE");
 			silentlyClose(channel);
 		}
 	}
@@ -122,7 +124,7 @@ public class ServerMatou implements Closeable {
 	}
 	
 	private static void silentlyClose(SelectableChannel channel) {
-		System.out.println("SILENTLY CLOSE OF : " + channel);
+		Logger.debug("SILENTLY CLOSE OF : " + channel);
 		try {
 			channel.close();
 		} catch (@SuppressWarnings("unused") IOException ignored) {

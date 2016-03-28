@@ -3,10 +3,16 @@ package fr.upem.matou.logger;
 import java.io.PrintStream;
 
 public class Logger {
+
+	public static enum LogType {
+		READ, WRITE;
+	}
+
 	private static final PrintStream STREAM_OUTPUT = System.out;
 
 	private static final boolean LOG_DEBUG = true;
-	private static final boolean LOG_INFO = true;
+	private static final boolean LOG_NETWORK = true;
+	private static final boolean LOG_SELECT = true;
 	private static final boolean LOG_WARNING = true;
 	private static final boolean LOG_ERROR = true;
 	private static final boolean LOG_EXCEPTION = true;
@@ -20,8 +26,26 @@ public class Logger {
 		}
 	}
 
-	public static void info(String message) {
-		if (LOG_INFO) {
+	public static void network(LogType type, String message) {
+		if (LOG_NETWORK) {
+			String string = "";
+			switch (type) {
+			case READ:
+				string = "[R]";
+				break;
+			case WRITE:
+				string = "[W]";
+				break;
+			default:
+				break;
+			}
+			string = string + " " + message;
+			STREAM_OUTPUT.println(string);
+		}
+	}
+
+	public static void selectInfo(String message) {
+		if (LOG_SELECT) {
 			STREAM_OUTPUT.println(message);
 		}
 	}
@@ -31,7 +55,7 @@ public class Logger {
 			STREAM_OUTPUT.println(message);
 		}
 	}
-	
+
 	public static void error(String message) {
 		if (LOG_ERROR) {
 			STREAM_OUTPUT.println(message);

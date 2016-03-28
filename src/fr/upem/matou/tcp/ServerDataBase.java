@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
+import fr.upem.matou.logger.Logger;
+
 /*
  * This class represents the state of the chat server.
  */
@@ -20,12 +22,21 @@ class ServerDataBase {
 	private final Collection<String> valuesView = connected.values();
 	private final ArrayDeque<ByteBuffer> broadcast = new ArrayDeque<>();
 
+	
+	private static boolean checkValidity(String pseudo) {
+		return pseudo.chars().allMatch(Character::isLetterOrDigit);
+	}
+	
+	private boolean checkAvailability(String pseudo) {
+		return !valuesView.contains(pseudo);
+	}
+	
 	/*
 	 * Add a new client.
 	 * Check if : available & no illegal characters
 	 */
 	boolean addNewClient(SocketChannel sc, String pseudo) {
-		if (valuesView.contains(pseudo)) {
+		if(!(checkAvailability(pseudo) && checkValidity(pseudo))) {
 			return false;
 		}
 		connected.put(sc, pseudo);
@@ -49,31 +60,31 @@ class ServerDataBase {
 
 	void updateStateReadAll(Set<SelectionKey> keys) {
 		ByteBuffer bbBroadcast = broadcast.pollFirst();
-		System.out.println("BROADCAST : " + bbBroadcast);
+		Logger.debug("BROADCAST : " + bbBroadcast);
 		if (bbBroadcast == null) {
 			return;
 		}
 
-		System.out.println("KEYS : " + keys);
+		Logger.debug("KEYS NUMBER : " + keys.size());
 		for (SelectionKey key : keys) {
-			System.out.println("KEY : " + key);
+			Logger.debug("KEY : " + key);
 			if (!key.isValid()) {
-				System.out.println("\tINVALID");
+				Logger.debug("\tINVALID");
 				continue;
 			}
 			
 			ServerSession session = (ServerSession) key.attachment();
 			if (session == null) {
-				System.out.println("\tNO SESSION");
+				Logger.debug("\tNO SESSION");
 				continue;
 			}
 			
 			if(!session.isAuthent()) {
-				System.out.println("\tNOT AUTHENT");
+				Logger.debug("\tNOT AUTHENT");
 				continue;
 			}
 			
-			System.out.println("\tOK");
+			Logger.debug("\tOK");
 
 			ByteBuffer bb = ByteBuffers.copy(bbBroadcast);
 			session.appendWriteBuffer(bb);

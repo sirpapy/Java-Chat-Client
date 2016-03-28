@@ -25,7 +25,7 @@ class ServerCommunication {
 		int capacity = Integer.BYTES + Byte.BYTES;
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 
-		request.putInt(NetworkProtocol.SERVER_PUBLIC_CONNECTION_RESPONSE.ordinal());
+		request.putInt(NetworkProtocol.CORES.ordinal());
 
 		if (acceptation) {
 			request.put((byte) 1);
@@ -49,7 +49,7 @@ class ServerCommunication {
 		int capacity = Integer.BYTES + Integer.BYTES + sizePseudo + Integer.BYTES + sizeMessage;
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 
-		request.putInt(NetworkProtocol.SERVER_PUBLIC_MESSAGE_BROADCAST.ordinal());
+		request.putInt(NetworkProtocol.MSGBC.ordinal());
 		request.putInt(sizePseudo).put(encodedPseudo);
 		request.putInt(sizeMessage).put(encodedMessage);
 

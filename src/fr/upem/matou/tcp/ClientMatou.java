@@ -6,6 +6,8 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Optional;
 
+import fr.upem.matou.logger.Logger;
+import fr.upem.matou.logger.Logger.LogType;
 import fr.upem.matou.ui.Message;
 import fr.upem.matou.ui.ShellInterface;
 import fr.upem.matou.ui.UserInterface;
@@ -28,6 +30,8 @@ public class ClientMatou implements Closeable {
 			return true;
 		}
 		String inputMessage = optionalInput.get();
+		Logger.network(LogType.WRITE,"PROTOCOL : " + NetworkProtocol.MSG);
+		Logger.network(LogType.WRITE,"MESSAGE : " + inputMessage);
 		ClientCommunication.sendRequestMSG(sc, inputMessage);
 		return false;
 	}
@@ -47,22 +51,24 @@ public class ClientMatou implements Closeable {
 	private void receiver(UserInterface ui) throws IOException {
 		Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
 		if (!optionalRequestType.isPresent()) {
-			throw new IOException("Protocol exception");
+			throw new IOException("Protocol violation");
 		}
 
 		NetworkProtocol protocol = optionalRequestType.get();
-		System.out.println("PROTOCOL : " + protocol);
+		Logger.network(LogType.READ,"PROTOCOL : " + protocol);
 		switch (protocol) {
-		case SERVER_PUBLIC_MESSAGE_BROADCAST:
+		case MSGBC:
 			Optional<Message> optionalRequestMSGBC = ClientCommunication.receiveRequestMSGBC(sc);
 			if (!optionalRequestMSGBC.isPresent()) {
-				throw new IOException("Protocol exception");
+				throw new IOException("Protocol violation : " + protocol);
 			}
 			Message receivedMessage = optionalRequestMSGBC.get();
+			Logger.network(LogType.READ, "PSEUDO : " + receivedMessage.getPseudo());
+			Logger.network(LogType.READ, "MESSAGE : " + receivedMessage.getContent());
 			ui.displayMessage(receivedMessage);
 			break;
 		default:
-			throw new AssertionError("PROTOCOL EXCEPTION");
+			throw new AssertionError("Unexpected protocol request : " + protocol);
 		}
 	}
 
@@ -88,29 +94,31 @@ public class ClientMatou implements Closeable {
 				throw new IOException("User exited");
 			}
 			String pseudo = optionalInput.get();
+			Logger.network(LogType.WRITE,"PROTOCOL : " + NetworkProtocol.COREQ);
+			Logger.network(LogType.WRITE,"PSEUDO : " + pseudo);
 			ClientCommunication.sendRequestCOREQ(sc, pseudo);
 
 			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
 			if (!optionalRequestType.isPresent()) {
-				throw new IOException("Protocol exception");
+				throw new IOException("Protocol violation");
 			}
 
 			NetworkProtocol protocol = optionalRequestType.get();
-			System.out.println("PROTOCOL : " + protocol);
+			Logger.network(LogType.READ,"PROTOCOL : " + protocol);
 			switch (protocol) {
-			case SERVER_PUBLIC_CONNECTION_RESPONSE:
+			case CORES:
 				Optional<Boolean> optionalRequestCORES = ClientCommunication.receiveRequestCORES(sc);
 				if (!optionalRequestCORES.isPresent()) {
-					throw new IOException("Protocol exception");
+					throw new IOException("Protocol violation : " + protocol);
 				}
 				boolean acceptation = optionalRequestCORES.get();
-				System.out.println("ACCEPTATION : " + acceptation);
+				Logger.network(LogType.READ,"ACCEPTATION : " + acceptation);
 				if (acceptation == true) {
 					return;
 				}
 				break;
 			default:
-				throw new AssertionError("PROTOCOL EXCEPTION");
+				throw new AssertionError("Unexpected protocol request : " + protocol);
 			}
 		}
 	}
@@ -131,7 +139,7 @@ public class ClientMatou implements Closeable {
 		processPseudo(ui);
 		processMessages(ui);
 
-		System.out.println("DISCONNECTION");
+		Logger.debug("DISCONNECTION");
 	}
 
 	@Override
