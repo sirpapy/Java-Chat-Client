@@ -55,10 +55,6 @@ class ServerDataBase {
 		return connected.get(sc);
 	}
 
-	Set<SocketChannel> connectedClients() {
-		return Collections.unmodifiableSet(keysView);
-	}
-
 	void addBroadcast(ByteBuffer bbWriteAll) {
 		broadcast.add(bbWriteAll);
 	}
@@ -98,6 +94,10 @@ class ServerDataBase {
 			key.interestOps(ops | SelectionKey.OP_WRITE);
 		}
 	}
+	
+	void updateStateWriteAll() {
+		// TEMP
+	}
 
 	String removeClient(SocketChannel channel) {
 		String disconnected = connected.remove(channel);
@@ -109,4 +109,5 @@ class ServerDataBase {
 
 		return disconnected;
 	}
+
 }

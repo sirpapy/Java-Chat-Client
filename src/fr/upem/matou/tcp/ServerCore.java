@@ -16,13 +16,13 @@ import fr.upem.matou.logger.Logger;
  * This class is the core of the server.
  */
 @SuppressWarnings("resource")
-public class ServerMatou implements Closeable {
+public class ServerCore implements Closeable {
 
 	private final ServerSocketChannel ssc;
 	private final Selector selector;
 	private final ServerDataBase db;
 
-	public ServerMatou(int port) throws IOException {
+	public ServerCore(int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(port);
 		ssc = ServerSocketChannel.open();
 		ssc.bind(address);
@@ -101,7 +101,6 @@ public class ServerMatou implements Closeable {
 		}
 	}
 
-	@SuppressWarnings("static-method") // TEMP
 	private void doWrite(SelectionKey key) throws IOException {
 		SocketChannel channel = (SocketChannel) key.channel();
 		ServerSession session = (ServerSession) key.attachment();
@@ -112,6 +111,7 @@ public class ServerMatou implements Closeable {
 		bb.compact();
 
 		session.updateStateWrite();
+		db.updateStateWriteAll();
 
 		boolean active = session.updateInterestOps(key);
 		if (!active) {
@@ -123,21 +123,6 @@ public class ServerMatou implements Closeable {
 	@Override
 	public void close() throws IOException {
 		ssc.close();
-	}
-
-	private static void usage() {
-		System.err.println("Usage : port");
-	}
-
-	public static void main(String[] args) throws IOException {
-		if (args.length != 1) {
-			usage();
-			return;
-		}
-		int port = Integer.parseInt(args[0]);
-		try (ServerMatou server = new ServerMatou(port)) {
-			server.launch();
-		}
 	}
 
 }

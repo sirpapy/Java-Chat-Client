@@ -15,11 +15,11 @@ import fr.upem.matou.ui.UserInterface;
 /*
  * This class is the core of the client.
  */
-public class ClientMatou implements Closeable {
+public class ClientCore implements Closeable {
 
 	private final SocketChannel sc;
 
-	public ClientMatou(String hostname, int port) throws IOException {
+	public ClientCore(String hostname, int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(hostname, port);
 		sc = SocketChannel.open(address);
 	}
@@ -192,24 +192,6 @@ public class ClientMatou implements Closeable {
 	@Override
 	public void close() throws IOException {
 		sc.close();
-	}
-
-	private static void usage() {
-		System.err.println("Usage : host port");
-	}
-
-	public static void main(String[] args) throws IOException, InterruptedException {
-		if (args.length != 2) {
-			usage();
-			return;
-		}
-
-		String host = args[0];
-		int port = Integer.parseInt(args[1]);
-
-		try (ClientMatou client = new ClientMatou(host, port)) {
-			client.startChat();
-		}
 	}
 
 }
