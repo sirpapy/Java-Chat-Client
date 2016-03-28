@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
+import fr.upem.matou.buffer.ByteBuffers;
 import fr.upem.matou.logger.Logger;
 
 /*
