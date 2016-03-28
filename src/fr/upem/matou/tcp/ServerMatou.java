@@ -42,7 +42,8 @@ public class ServerMatou implements Closeable {
 			processSelectedKeys(selectedKeys);
 
 			selectedKeys.clear();
-
+			
+			System.out.println();
 		}
 	}
 
@@ -88,6 +89,7 @@ public class ServerMatou implements Closeable {
 		}
 
 		session.updateStateRead(db);
+		db.updateStateReadAll(selector.keys());
 
 		boolean active = session.updateInterestOps(key);
 		if(!active) {

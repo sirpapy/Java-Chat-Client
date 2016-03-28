@@ -9,8 +9,8 @@ import java.util.Optional;
  * This class represents the state of a client connected to the chat server.
  */
 class ServerSession {
-
 	private final SocketChannel sc;
+	private boolean authent = false;
 	private NetworkProtocol protocol = null;
 	private int arg = -1;
 	private ByteBuffer bbRead = ByteBuffer.allocate(Integer.BYTES);
@@ -37,6 +37,14 @@ class ServerSession {
 		this.sc = sc;
 	}
 
+	boolean isAuthent() {
+		return authent;
+	}
+	
+	void setAuthent() {
+		authent = true;
+	}
+	
 	ByteBuffer getReadBuffer() {
 		return bbRead;
 	}
@@ -45,6 +53,10 @@ class ServerSession {
 		return bbWrite;
 	}
 
+	void appendWriteBuffer(ByteBuffer bb) {
+		bbWrite = ByteBuffers.merge(bbWrite,bb);
+	}
+	
 	/*
 	 * Retrives the protocol request type from the read buffer and updates current state.
 	 */
@@ -101,6 +113,10 @@ class ServerSession {
 		boolean acceptation = db.addNewClient(sc, pseudo);
 		System.out.println("ACCEPTATION : " + acceptation);
 
+		if(acceptation) {
+			setAuthent();
+		}
+		
 		bbWrite = ServerCommunication.encodeRequestCORES(acceptation);
 	}
 
@@ -157,7 +173,8 @@ class ServerSession {
 		String pseudo = db.pseudoOf(sc);
 		System.out.println("MESSAGE : <" + pseudo + "> " + message);
 
-		bbWrite = ServerCommunication.encodeRequestMSGBC(pseudo, message);
+		ByteBuffer bbWriteAll = ServerCommunication.encodeRequestMSGBC(pseudo, message);
+		db.addBroadcast(bbWriteAll);
 	}
 
 	private void processMSG(ServerDataBase db) {
@@ -208,6 +225,7 @@ class ServerSession {
 		default:
 			throw new UnsupportedOperationException("Not implemented yet");
 		}
+
 	}
 
 	/*

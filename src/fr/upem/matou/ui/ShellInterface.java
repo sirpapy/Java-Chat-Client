@@ -2,6 +2,7 @@ package fr.upem.matou.ui;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Optional;
 import java.util.Scanner;
 
 /**
@@ -13,19 +14,22 @@ public class ShellInterface implements UserInterface {
 	private final Scanner scanner = new Scanner(input);
 	private final PrintStream output = System.out;
 
-	private String readLine() {
-		return scanner.nextLine();
+	private Optional<String> readLine() {
+		if (scanner.hasNextLine()) {
+			String line = scanner.nextLine();
+			return Optional.of(line);
+		}
+		return Optional.empty();
 	}
 
 	@Override
-	public String readPseudo() {
+	public Optional<String> readPseudo() {
 		output.print("Pseudo > ");
 		return readLine();
 	}
 
 	@Override
-	public String readMessage() {
-		output.print("Message > ");
+	public Optional<String> readMessage() {
 		return readLine();
 	}
 

@@ -1,5 +1,7 @@
 package fr.upem.matou.ui;
 
+import java.util.Optional;
+
 /**
  * This interface provides methods to display information to the user and retrieve information entered by the user.
  * All implementations of this interface should be transparent.
@@ -11,14 +13,14 @@ public interface UserInterface {
 	 * 
 	 * @return The pseudo
 	 */
-	public String readPseudo();
+	public Optional<String> readPseudo();
 
 	/**
 	 * Reads a message entered by the user.
 	 * 
 	 * @return The message
 	 */
-	public String readMessage();
+	public Optional<String> readMessage();
 
 	/**
 	 * Displays a message to the user.

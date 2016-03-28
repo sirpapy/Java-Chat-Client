@@ -21,22 +21,73 @@ public class ClientMatou implements Closeable {
 		InetSocketAddress address = new InetSocketAddress(hostname, port);
 		sc = SocketChannel.open(address);
 	}
-	
-	private void threadSender() {
-		// TODO : Thread "Sender"
+
+	private boolean sender(UserInterface ui) throws IOException {
+		Optional<String> optionalInput = ui.readMessage();
+		if (!optionalInput.isPresent()) {
+			return true;
+		}
+		String inputMessage = optionalInput.get();
+		ClientCommunication.sendRequestMSG(sc, inputMessage);
+		return false;
 	}
-	
-	private void threadReceiver() {
-		// TODO : Thread "Receiver"
+
+	private void threadSender(UserInterface ui) {
+		boolean exit = false;
+		while (!Thread.interrupted() && exit == false) {
+			try {
+				exit = sender(ui);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return;
+			}
+		}
 	}
-	
+
+	private void receiver(UserInterface ui) throws IOException {
+		Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
+		if (!optionalRequestType.isPresent()) {
+			throw new IOException("Protocol exception");
+		}
+
+		NetworkProtocol protocol = optionalRequestType.get();
+		System.out.println("PROTOCOL : " + protocol);
+		switch (protocol) {
+		case SERVER_PUBLIC_MESSAGE_BROADCAST:
+			Optional<Message> optionalRequestMSGBC = ClientCommunication.receiveRequestMSGBC(sc);
+			if (!optionalRequestMSGBC.isPresent()) {
+				throw new IOException("Protocol exception");
+			}
+			Message receivedMessage = optionalRequestMSGBC.get();
+			ui.displayMessage(receivedMessage);
+			break;
+		default:
+			throw new AssertionError("PROTOCOL EXCEPTION");
+		}
+	}
+
+	private void threadReceiver(UserInterface ui) {
+		while (!Thread.interrupted()) {
+			try {
+				receiver(ui);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return;
+			}
+		}
+	}
+
 	private void threadCleaner() {
 		// TODO : Thread "Cleaner"
 	}
 
 	private void processPseudo(UserInterface ui) throws IOException {
 		while (true) {
-			String pseudo = ui.readPseudo();
+			Optional<String> optionalInput = ui.readPseudo();
+			if(!optionalInput.isPresent()) {
+				throw new IOException("User exited");
+			}
+			String pseudo = optionalInput.get();
 			ClientCommunication.sendRequestCOREQ(sc, pseudo);
 
 			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
@@ -64,34 +115,17 @@ public class ClientMatou implements Closeable {
 		}
 	}
 
-	private void processMessages(UserInterface ui) throws IOException {
-		while (!Thread.interrupted()) {
-			String inputMessage = ui.readMessage();
-			ClientCommunication.sendRequestMSG(sc, inputMessage);
+	private void processMessages(UserInterface ui) throws InterruptedException {
+		Thread sender = new Thread(() -> threadSender(ui));
+		Thread receiver = new Thread(() -> threadReceiver(ui));
+		sender.start();
+		receiver.start();
 
-			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
-			if (!optionalRequestType.isPresent()) {
-				throw new IOException("Protocol exception");
-			}
-
-			NetworkProtocol protocol = optionalRequestType.get();
-			System.out.println("PROTOCOL : " + protocol);
-			switch (protocol) {
-			case SERVER_PUBLIC_MESSAGE_BROADCAST:
-				Optional<Message> optionalRequestMSGBC = ClientCommunication.receiveRequestMSGBC(sc);
-				if (!optionalRequestMSGBC.isPresent()) {
-					throw new IOException("Protocol exception");
-				}
-				Message receivedMessage = optionalRequestMSGBC.get();
-				ui.displayMessage(receivedMessage);
-				break;
-			default:
-				throw new AssertionError("PROTOCOL EXCEPTION");
-			}
-		}
+		sender.join();
+		receiver.interrupt();
 	}
 
-	public void startChat() throws IOException {
+	public void startChat() throws IOException, InterruptedException {
 		UserInterface ui = new ShellInterface();
 
 		processPseudo(ui);
@@ -109,7 +143,7 @@ public class ClientMatou implements Closeable {
 		System.err.println("Usage : host port");
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		if (args.length != 2) {
 			usage();
 			return;
