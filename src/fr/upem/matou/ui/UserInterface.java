@@ -30,4 +30,8 @@ public interface UserInterface {
 	 */
 	public void displayMessage(Message message);
 
+	public void displayNewConnectionEvent(String pseudo);
+
+	public void displayNewDisconnectionEvent(String pseudo);
+
 }

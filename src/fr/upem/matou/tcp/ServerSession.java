@@ -1,5 +1,6 @@
 package fr.upem.matou.tcp;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -13,6 +14,7 @@ import fr.upem.matou.logger.Logger.LogType;
  * This class represents the state of a client connected to the chat server.
  */
 class ServerSession {
+	private final ServerDataBase db;
 	private final SocketChannel sc;
 	private boolean authent = false;
 	private NetworkProtocol protocol = null;
@@ -37,18 +39,19 @@ class ServerSession {
 		String message;
 	}
 
-	ServerSession(SocketChannel sc) {
+	ServerSession(ServerDataBase db, SocketChannel sc) {
+		this.db = db;
 		this.sc = sc;
 	}
 
 	boolean isAuthent() {
 		return authent;
 	}
-	
+
 	void setAuthent() {
 		authent = true;
 	}
-	
+
 	ByteBuffer getReadBuffer() {
 		return bbRead;
 	}
@@ -58,9 +61,9 @@ class ServerSession {
 	}
 
 	void appendWriteBuffer(ByteBuffer bb) {
-		bbWrite = ByteBuffers.merge(bbWrite,bb);
+		bbWrite = ByteBuffers.merge(bbWrite, bb);
 	}
-	
+
 	/*
 	 * Retrives the protocol request type from the read buffer and updates current state.
 	 */
@@ -72,7 +75,7 @@ class ServerSession {
 			return;
 		}
 		protocol = optionalProtocol.get();
-		Logger.network(LogType.READ,"PROTOCOL : " + protocol);
+		Logger.network(LogType.READ, "PROTOCOL : " + protocol);
 		arg++;
 	}
 
@@ -91,7 +94,7 @@ class ServerSession {
 	private void processCOREQarg1(StateCOREQ state) {
 		bbRead.flip();
 		state.sizePseudo = bbRead.getInt();
-		Logger.network(LogType.READ,"SIZE PSEUDO : " + state.sizePseudo);
+		Logger.network(LogType.READ, "SIZE PSEUDO : " + state.sizePseudo);
 
 		bbRead = ByteBuffer.allocate(state.sizePseudo);
 		arg++;
@@ -103,7 +106,7 @@ class ServerSession {
 	private void processCOREQarg2(StateCOREQ state) {
 		bbRead.flip();
 		state.pseudo = ServerCommunication.readStringUTF8(bbRead);
-		Logger.network(LogType.READ,"PSEUDO : " + state.pseudo);
+		Logger.network(LogType.READ, "PSEUDO : " + state.pseudo);
 
 		bbRead = ByteBuffer.allocate(Integer.BYTES);
 		arg = -1;
@@ -113,22 +116,28 @@ class ServerSession {
 	/*
 	 * Answers by a CORES request and fills the write buffer.
 	 */
-	private void answerCORES(ServerDataBase db, String pseudo) {
+	private void answerCORES(String pseudo) {
 		boolean acceptation = db.addNewClient(sc, pseudo);
-		Logger.network(LogType.WRITE,"PROTOCOL : " + NetworkProtocol.CORES);
-		Logger.network(LogType.WRITE,"ACCEPTATION : " + acceptation);
+		Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES);
+		Logger.network(LogType.WRITE, "ACCEPTATION : " + acceptation);
 
-		if(acceptation) {
-			setAuthent();
-		}
-		
 		bbWrite = ServerCommunication.encodeRequestCORES(acceptation);
+
+		if (acceptation) {
+			setAuthent();
+
+			Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.CODISP);
+			Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
+
+			ByteBuffer bbWriteAll = ServerCommunication.encodeRequestCODISP(pseudo);
+			db.addBroadcast(bbWriteAll);
+		}
 	}
 
 	/*
 	 * Process a COREQ request.
 	 */
-	private void processCOREQ(ServerDataBase db) {
+	private void processCOREQ() {
 		if (arg == 0) {
 			processCOREQinit();
 			return;
@@ -142,7 +151,7 @@ class ServerSession {
 			return;
 		case 2:
 			processCOREQarg2(state);
-			answerCORES(db, state.pseudo);
+			answerCORES(state.pseudo);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for COREQ");
@@ -158,7 +167,7 @@ class ServerSession {
 	private void processMSGarg1(StateMSG state) {
 		bbRead.flip();
 		state.sizeMessage = bbRead.getInt();
-		Logger.network(LogType.READ,"SIZE MESSAGE : " + state.sizeMessage);
+		Logger.network(LogType.READ, "SIZE MESSAGE : " + state.sizeMessage);
 
 		bbRead = ByteBuffer.allocate(state.sizeMessage);
 		arg++;
@@ -167,24 +176,24 @@ class ServerSession {
 	private void processMSGarg2(StateMSG state) {
 		bbRead.flip();
 		state.message = ServerCommunication.readStringUTF8(bbRead);
-		Logger.network(LogType.READ,"MESSAGE : " + state.message);
+		Logger.network(LogType.READ, "MESSAGE : " + state.message);
 
 		bbRead = ByteBuffer.allocate(Integer.BYTES);
 		arg = -1;
 		protocol = null;
 	}
 
-	private void answerMSGBC(ServerDataBase db, String message) {
+	private void answerMSGBC(String message) {
 		String pseudo = db.pseudoOf(sc);
-		Logger.network(LogType.WRITE,"PROTOCOL : " + NetworkProtocol.MSGBC);
-		Logger.network(LogType.WRITE,"PSEUDO : " + pseudo);
-		Logger.network(LogType.WRITE,"MESSAGE : " + message);
+		Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSGBC);
+		Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
+		Logger.network(LogType.WRITE, "MESSAGE : " + message);
 
 		ByteBuffer bbWriteAll = ServerCommunication.encodeRequestMSGBC(pseudo, message);
 		db.addBroadcast(bbWriteAll);
 	}
 
-	private void processMSG(ServerDataBase db) {
+	private void processMSG() {
 		if (arg == 0) {
 			processMSGinit();
 			return;
@@ -198,18 +207,37 @@ class ServerSession {
 			return;
 		case 2:
 			processMSGarg2(state);
-			answerMSGBC(db, state.message);
+			answerMSGBC(state.message);
 			return;
 		default:
-			throw new AssertionError("Argument " + arg + " is not valid for COREQ");
+			throw new AssertionError("Argument " + arg + " is not valid for MSG");
 		}
+	}
+
+	private void processDISCOinit() {
+		bbRead = ByteBuffer.allocate(Integer.BYTES);
+		arg = -1;
+		protocol = null;
+	}
+
+	private void answerDISCODISP() {
+		bbRead = ByteBuffer.allocate(0);
+	}
+
+	private void processDISCO() {
+		if (arg == 0) {
+			processDISCOinit();
+			answerDISCODISP();
+			return;
+		}
+		throw new AssertionError("Argument " + arg + " is not valid for DISCO");
 	}
 
 	/*
 	 * Updates the state of the current session after reading.
 	 */
-	void updateStateRead(ServerDataBase db) {
-		Logger.network(LogType.READ,"BUFFER = " + bbRead);
+	void updateStateRead() {
+		Logger.network(LogType.READ, "BUFFER = " + bbRead);
 		if (bbRead.hasRemaining()) { // Not finished to read
 			return;
 		}
@@ -224,10 +252,13 @@ class ServerSession {
 
 		switch (protocol) {
 		case COREQ:
-			processCOREQ(db);
+			processCOREQ();
 			return;
 		case MSG:
-			processMSG(db);
+			processMSG();
+			return;
+		case DISCO:
+			processDISCO();
 			return;
 		default:
 			throw new UnsupportedOperationException("Not implemented yet");
@@ -238,7 +269,7 @@ class ServerSession {
 	/*
 	 * Updates the state of the current session after writing.
 	 */
-	void updateStateWrite(ServerDataBase db) {
+	void updateStateWrite() {
 		if (bbWrite.position() > 0) { // Not finished to write
 			return;
 		}
@@ -248,6 +279,10 @@ class ServerSession {
 	 * Updates the interest operations after reading or writing.
 	 */
 	boolean updateInterestOps(SelectionKey key) {
+		if(!key.isValid()) {
+			return true;
+		}
+		
 		int ops = 0;
 
 		if (bbWrite.position() > 0) { // There is something to write
@@ -262,4 +297,23 @@ class ServerSession {
 		return ops != 0;
 	}
 
+	void silentlyClose() {
+		Logger.debug("SILENTLY CLOSE OF : " + sc);
+		String pseudo = db.removeClient(sc);
+
+		if (pseudo != null) {
+			Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCODISP);
+			Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
+			ByteBuffer bbWriteAll = ServerCommunication.encodeRequestDISCODISP(pseudo);
+			db.addBroadcast(bbWriteAll);
+			db.updateStateReadAll();
+		}
+
+		try {
+			sc.close();
+		} catch (IOException e) {
+			Logger.exception(e);
+			return;
+		}
+	}
 }

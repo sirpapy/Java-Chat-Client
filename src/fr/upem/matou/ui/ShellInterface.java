@@ -51,4 +51,14 @@ public class ShellInterface implements UserInterface {
 		output.println(string);
 	}
 
+	@Override
+	public void displayNewConnectionEvent(String pseudo) {
+		output.println("<" + pseudo + " joins the chat>");
+	}
+
+	@Override
+	public void displayNewDisconnectionEvent(String pseudo) {
+		output.println("<" + pseudo + " left the chat>");
+	}
+
 }

@@ -34,7 +34,7 @@ class ClientCommunication {
 	}
 
 	/*
-	 * Encodes a COREQ request
+	 * Encodes a COREQ request.
 	 */
 	public static ByteBuffer encodeRequestCOREQ(String pseudo) {
 		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
@@ -51,7 +51,7 @@ class ClientCommunication {
 	}
 
 	/*
-	 * Encodes a MSG request
+	 * Encodes a MSG request.
 	 */
 	public static ByteBuffer encodeRequestMSG(String message) {
 		ByteBuffer encodedMessage = PROTOCOL_CHARSET.encode(message);
@@ -67,8 +67,17 @@ class ClientCommunication {
 		return request;
 	}
 
+	private static ByteBuffer encodeRequestDISCO() {
+		int capacity = Integer.BYTES;
+		ByteBuffer request = ByteBuffer.allocate(capacity);
+
+		request.putInt(NetworkProtocol.DISCO.ordinal());
+
+		return request;
+	}
+
 	/*
-	 * Sends a COREQ request
+	 * Sends a COREQ request.
 	 */
 	public static void sendRequestCOREQ(SocketChannel sc, String pseudo) throws IOException {
 		ByteBuffer bb = encodeRequestCOREQ(pseudo);
@@ -76,15 +85,20 @@ class ClientCommunication {
 	}
 
 	/*
-	 * Sends a MSG request
+	 * Sends a MSG request.
 	 */
 	public static void sendRequestMSG(SocketChannel sc, String message) throws IOException {
 		ByteBuffer bb = encodeRequestMSG(message);
 		sendRequest(sc, bb);
 	}
 
+	public static void sendRequestDISCO(SocketChannel sc) throws IOException {
+		ByteBuffer bb = encodeRequestDISCO();
+		sendRequest(sc, bb);
+	}
+
 	/*
-	 * Receives a protocol type request
+	 * Receives a protocol type request.
 	 */
 	public static Optional<NetworkProtocol> receiveRequestType(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
@@ -97,7 +111,7 @@ class ClientCommunication {
 	}
 
 	/*
-	 * Receives a CORES request
+	 * Receives a CORES request.
 	 */
 	public static Optional<Boolean> receiveRequestCORES(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(1);
@@ -110,7 +124,7 @@ class ClientCommunication {
 	}
 
 	/*
-	 * Receives a MSGBG request
+	 * Receives a MSGBG request.
 	 */
 	public static Optional<Message> receiveRequestMSGBC(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizePseudo = ByteBuffer.allocate(Integer.BYTES);
@@ -141,7 +155,49 @@ class ClientCommunication {
 		bbMessage.flip();
 		String message = PROTOCOL_CHARSET.decode(bbMessage).toString();
 
-		return Optional.of(new Message(pseudo,message));
+		return Optional.of(new Message(pseudo, message));
+	}
+
+	/*
+	 * Receives a CODISP request.
+	 */
+	public static Optional<String> receiveRequestCODISP(SocketChannel sc) throws IOException {
+		ByteBuffer bbSizePseudo = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizePseudo)) {
+			return Optional.empty();
+		}
+		bbSizePseudo.flip();
+		int sizePseudo = bbSizePseudo.getInt();
+
+		ByteBuffer bbPseudo = ByteBuffer.allocate(sizePseudo);
+		if (!readFully(sc, bbPseudo)) {
+			return Optional.empty();
+		}
+		bbPseudo.flip();
+		String pseudo = PROTOCOL_CHARSET.decode(bbPseudo).toString();
+
+		return Optional.of(pseudo);
+	}
+
+	/*
+	 * Receives a DISCODISP request.
+	 */
+	public static Optional<String> receiveRequestDISCODISP(SocketChannel sc) throws IOException {
+		ByteBuffer bbSizePseudo = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizePseudo)) {
+			return Optional.empty();
+		}
+		bbSizePseudo.flip();
+		int sizePseudo = bbSizePseudo.getInt();
+
+		ByteBuffer bbPseudo = ByteBuffer.allocate(sizePseudo);
+		if (!readFully(sc, bbPseudo)) {
+			return Optional.empty();
+		}
+		bbPseudo.flip();
+		String pseudo = PROTOCOL_CHARSET.decode(bbPseudo).toString();
+
+		return Optional.of(pseudo);
 	}
 
 }

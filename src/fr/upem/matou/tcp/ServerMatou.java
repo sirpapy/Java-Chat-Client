@@ -4,7 +4,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -21,7 +20,7 @@ public class ServerMatou implements Closeable {
 
 	private final ServerSocketChannel ssc;
 	private final Selector selector;
-	private final ServerDataBase db = new ServerDataBase();
+	private final ServerDataBase db;
 
 	public ServerMatou(int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(port);
@@ -30,6 +29,7 @@ public class ServerMatou implements Closeable {
 		ssc.configureBlocking(false);
 		selector = Selector.open();
 		ssc.register(selector, SelectionKey.OP_ACCEPT);
+		db = new ServerDataBase(selector.keys());
 	}
 
 	public void launch() throws IOException {
@@ -44,7 +44,7 @@ public class ServerMatou implements Closeable {
 			processSelectedKeys(selectedKeys);
 
 			selectedKeys.clear();
-			
+
 			Logger.selectInfo("");
 		}
 	}
@@ -61,9 +61,10 @@ public class ServerMatou implements Closeable {
 				if (key.isValid() && key.isReadable()) {
 					doRead(key);
 				}
-			} catch (IOException ignored) { // TEMP
-				ignored.printStackTrace();
-				silentlyClose(key);
+			} catch (IOException e) {
+				Logger.exception(e);
+				ServerSession session = (ServerSession) key.attachment();
+				session.silentlyClose();
 			}
 		}
 	}
@@ -76,7 +77,7 @@ public class ServerMatou implements Closeable {
 		}
 		acceptedChannel.configureBlocking(false);
 		SelectionKey registeredKey = acceptedChannel.register(selector, SelectionKey.OP_READ);
-		ServerSession session = new ServerSession(acceptedChannel);
+		ServerSession session = new ServerSession(db,acceptedChannel);
 		registeredKey.attach(session);
 	}
 
@@ -86,20 +87,21 @@ public class ServerMatou implements Closeable {
 		ByteBuffer bb = session.getReadBuffer();
 
 		if (channel.read(bb) == -1) {
-			silentlyClose(channel);
+			session.silentlyClose();
 			return;
 		}
 
-		session.updateStateRead(db);
-		db.updateStateReadAll(selector.keys());
+		session.updateStateRead();
+		db.updateStateReadAll();
 
 		boolean active = session.updateInterestOps(key);
-		if(!active) {
+		if (!active) {
 			Logger.debug("INACTIVE AFTER READ");
-			silentlyClose(channel);
+			session.silentlyClose();
 		}
 	}
 
+	@SuppressWarnings("static-method") // TEMP
 	private void doWrite(SelectionKey key) throws IOException {
 		SocketChannel channel = (SocketChannel) key.channel();
 		ServerSession session = (ServerSession) key.attachment();
@@ -109,26 +111,12 @@ public class ServerMatou implements Closeable {
 		channel.write(bb);
 		bb.compact();
 
-		session.updateStateWrite(db);
+		session.updateStateWrite();
 
 		boolean active = session.updateInterestOps(key);
-		if(!active) {
+		if (!active) {
 			Logger.debug("INACTIVE AFTER WRITE");
-			silentlyClose(channel);
-		}
-	}
-
-	private static void silentlyClose(SelectionKey key) {
-		SelectableChannel channel = key.channel();
-		silentlyClose(channel);
-	}
-	
-	private static void silentlyClose(SelectableChannel channel) {
-		Logger.debug("SILENTLY CLOSE OF : " + channel);
-		try {
-			channel.close();
-		} catch (@SuppressWarnings("unused") IOException ignored) {
-			return;
+			session.silentlyClose();
 		}
 	}
 

@@ -55,4 +55,38 @@ class ServerCommunication {
 
 		return request;
 	}
+	
+	/*
+	 * Encodes a CODISP request.
+	 */
+	public static ByteBuffer encodeRequestCODISP(String pseudo) {
+		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
+
+		int sizePseudo = encodedPseudo.remaining();
+
+		int capacity = Integer.BYTES + Integer.BYTES + sizePseudo;
+		ByteBuffer request = ByteBuffer.allocate(capacity);
+
+		request.putInt(NetworkProtocol.CODISP.ordinal());
+		request.putInt(sizePseudo).put(encodedPseudo);
+
+		return request;
+	}
+
+	/*
+	 * Encodes a DISCODISP request.
+	 */
+	public static ByteBuffer encodeRequestDISCODISP(String pseudo) {
+		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
+
+		int sizePseudo = encodedPseudo.remaining();
+
+		int capacity = Integer.BYTES + Integer.BYTES + sizePseudo;
+		ByteBuffer request = ByteBuffer.allocate(capacity);
+
+		request.putInt(NetworkProtocol.DISCODISP.ordinal());
+		request.putInt(sizePseudo).put(encodedPseudo);
+
+		return request;
+	}
 }
