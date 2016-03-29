@@ -86,6 +86,11 @@ public class ClientCore implements Closeable {
 		 * Cette méthode doit vérifier le contrat suivant :
 		 * - si le receiverThread bloque depuis strictement plus de TIMEOUT millisecondes
 		 * alors la SocketChannel associée à ce thread est fermée
+		 * 
+		 * Etape 1 : Receiver bloque sur une lecture TCP
+		 * Etape 2 : Cleaner déclenche un chrono
+		 * Etape 3 : Si jamais le compte à rebours du chrono s'arrête AVANT que receiver ait terminée sa lecture : 
+		 * => Cleaner interrompt Receiver
 		 */
 	}
 
