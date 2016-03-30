@@ -187,7 +187,7 @@ class ServerSession {
 	}
 
 	private void answerMSGBC(String message) {
-		if(!ServerDataBase.checkMessageValidity(message)) {
+		if(!NetworkCommunication.checkMessageValidity(message)) {
 			Logger.debug("INVALID MESSAGE : " + message);
 			return;
 		}

@@ -17,9 +17,6 @@ import fr.upem.matou.logger.Logger;
  */
 class ServerDataBase {
 
-	private static final int PSEUDO_MAX_LENGTH = 32;
-	private static final int MESSAGE_MAX_LENGTH = 32;
-
 	private final HashMap<SocketChannel, String> connected = new HashMap<>();
 	private final Set<SocketChannel> keysView = connected.keySet();
 	private final Collection<String> valuesView = connected.values();
@@ -28,23 +25,6 @@ class ServerDataBase {
 
 	public ServerDataBase(Set<SelectionKey> keys) {
 		this.keys = keys;
-	}
-
-	private static boolean isValidPseudoCharacter(int codePoint) {
-		return Character.isLetterOrDigit(codePoint);
-	}
-
-	private static boolean isValidMessageCharacter(int codePoint) {
-		return !Character.isISOControl(codePoint);
-	}
-
-	private static boolean checkPseudoValidity(String pseudo) {
-		return pseudo.length() <= PSEUDO_MAX_LENGTH && pseudo.chars().allMatch(ServerDataBase::isValidPseudoCharacter);
-	}
-
-	static boolean checkMessageValidity(String message) {
-		return message.length() <= MESSAGE_MAX_LENGTH
-				&& message.chars().allMatch(ServerDataBase::isValidMessageCharacter);
 	}
 
 	private boolean checkAvailability(String pseudo) {
@@ -56,7 +36,7 @@ class ServerDataBase {
 	 * Check if : available & no illegal characters
 	 */
 	boolean addNewClient(SocketChannel sc, String pseudo) {
-		if (!(checkAvailability(pseudo) && checkPseudoValidity(pseudo))) {
+		if (!(checkAvailability(pseudo) && NetworkCommunication.checkPseudoValidity(pseudo))) {
 			return false;
 		}
 		connected.put(sc, pseudo);

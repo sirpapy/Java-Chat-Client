@@ -18,7 +18,7 @@ import fr.upem.matou.logger.Logger;
 @SuppressWarnings("resource")
 public class ServerCore implements Closeable {
 
-	private static final long SERVER_DELAY = 1000; // TEMP in millis
+	private static final long SERVER_DELAY = 0; // TEMP in millis
 	
 	private final ServerSocketChannel ssc;
 	private final Selector selector;

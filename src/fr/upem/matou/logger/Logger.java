@@ -62,6 +62,7 @@ public class Logger {
 		}
 	}
 
+	// TODO : Traçage des exceptions avec cette méthode
 	public static void exception(Exception exception) {
 		if (LOG_EXCEPTION) {
 			exception.printStackTrace(STREAM_OUTPUT);
