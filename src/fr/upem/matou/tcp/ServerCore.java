@@ -18,6 +18,8 @@ import fr.upem.matou.logger.Logger;
 @SuppressWarnings("resource")
 public class ServerCore implements Closeable {
 
+	private static final long SERVER_DELAY = 1000; // TEMP in millis
+	
 	private final ServerSocketChannel ssc;
 	private final Selector selector;
 	private final ServerDataBase db;
@@ -106,6 +108,11 @@ public class ServerCore implements Closeable {
 		ServerSession session = (ServerSession) key.attachment();
 		ByteBuffer bb = session.getWriteBuffer();
 
+		try {
+			Thread.sleep(SERVER_DELAY);
+		} catch (@SuppressWarnings("unused") InterruptedException ignored) {
+			// TEMP
+		}
 		bb.flip();
 		channel.write(bb);
 		bb.compact();
