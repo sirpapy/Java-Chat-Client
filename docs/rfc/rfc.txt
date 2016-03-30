@@ -1,4 +1,4 @@
-Kevin Mauge : kmauge@etud.u-pem.fr
+Kevin MAUGE : kmauge@etud.u-pem.fr
 Pape NDIAYE : pndiaye@etud.u-pem.fr
 
 
@@ -25,7 +25,7 @@ Requirements:
 
 
 
-Specifications :
+Specifications:
 	* The numbers are in Big Endian format
 	* String are encoded into UTF-8 charset
 	* The transport protocol used is TCP (with limit size specified)
@@ -33,7 +33,7 @@ Specifications :
 	* The max size of a message is 512 bytes
 	* The size of a chunk of file is 512 bytes
 
-Acronym formats : 
+Acronym formats: 
 	* C-S : Client to Server
 	* S-C : Server to Client
 	* S-A : Server to All Client
@@ -41,10 +41,16 @@ Acronym formats :
 
 
 
-Interactions :
+
+
+
+
+
+
+Interactions:
 	Request for public connection
 		[C-S] Request connection to Server
-		The client requests a connection to the server with a specified pseudo
+		The client requests a connection to the server with a 					specified pseudo
 		+------+------------+--------+
 		| int  |    int     | String |
 		+------+------------+--------+
@@ -52,7 +58,7 @@ Interactions :
 		+------+------------+--------+
 
 		[S-C] Validation of the connection
-		The serveur answers with a boolean which will indicate whether the pseudo is valid or not. If the pseudo is valid the connection is established.
+		The serveur answers with a boolean which will indicate whether 			the pseudo is valid or not. If the pseudo is valid the 					connection is established.
 		+------+-------------+
 		| int  |    byte     |
 		+------+-------------+
@@ -77,16 +83,22 @@ Interactions :
 		+------+-------------+---------+
 
 		[S-A] Retransmission of the message
-		The server forwards the public message to all connected clients.
+		The server forwards the public message to all connected 				clients.
 		+------+------------+--------+-------------+---------+
 		| int  |    int     | String |     int     | String  |
 		+------+------------+--------+-------------+---------+
 		| Type | SizePseudo | Pseudo | SizeMessage | Message |
 		+------+------------+--------+-------------+---------+
 
+	
+
+
+	
+
+
 	Requesting private connection
-		[C-S] Requesting connection between the source(Src) and the destination(Dst)
-		The client Src notifies the server that he wants to be connected with the client Dst.
+		[C-S] Requesting connection between the source(Src) and the 				destination(Dst)
+		The client Src notifies the server that he wants to be 					connected with the client Dst.
 		+------+---------------+-----------+
 		| int  |      int      |  String   |
 		+------+---------------+-----------+
@@ -94,7 +106,7 @@ Interactions :
 		+------+---------------+-----------+
 
 		[S-C] Requesting acceptation of the connection from Dst
-		The server notifies the client Dst that he received a connection request form client Src.
+		The server notifies the client Dst that he received a 					connection request from client Src.
 		+------+---------------+-----------+
 		| int  |      int      |  String   |
 		+------+---------------+-----------+
@@ -102,7 +114,7 @@ Interactions :
 		+------+---------------+-----------+
 
 		[C-S] Confirm the connection request to Src
-		The client Dst notifies the server whether he accepted or refused the client Src's private's connection request.
+		The client Dst notifies the server whether he accepts or 				refuses the private connection request of client Src.
 		+------+---------------+-----------+--------+
 		| int  |      int      |  String   |  byte  |
 		+------+---------------+-----------+--------+
@@ -117,16 +129,16 @@ Interactions :
 		| Type | SizePseudoDst | PseudoDst | Accept |
 		+------+---------------+-----------+--------+
 
-		[S-C] Connection between the source(Src) and the destination(Dst)
-		The server sends the private connection data for the private connection of client Dst to client Src.
+		[S-C] Connection between the source(Src) and the 						destination(Dst)
+		The server sends the private connection data for the private 				connection of client Dst to client Src.
 		+------+---------------+-----------+-------------------+
 		| int  |      int      |  String   | InetSocketAddress |
 		+------+---------------+-----------+-------------------+
 		| Type | SizePseudoDst | PseudoDst | AddressDst        |
 		+------+---------------+-----------+-------------------+
 		
-		[S-C] Connection between the source(Src) and the destination(Dst)
-		The server sends the private connection data for the private connection of client Src to client Dst.
+		[S-C] Connection between the source(Src) and the 						destination(Dst)
+		The server sends the private connection data for the private 				connection of client Src to client Dst.
 		+------+---------------+-----------+-------------------+---------+
 		| int  |      int      |  String   | InetSocketAddress |   int   |
 		+------+---------------+-----------+-------------------+---------+
@@ -135,7 +147,7 @@ Interactions :
 
 	Sending private message
 		[C-C] Sending private message between Src and Dst
-		The client Src send a message to client Dst.
+		The client Src sends a message to client Dst.
 		+------+-------------+---------+
 		| int  |     int     | String  |
 		+------+-------------+---------+
@@ -144,7 +156,7 @@ Interactions :
 
 	Sending file in private
 		[C-C] Sending file between Src and Dst		
-		The client Src sends a file to client Dst. The file is segmented into chunk with a fixed size (Only the last part will eventually be smaller).
+		The client Src sends a file to client Dst. The file is segmented 			into chunk with a fixed size (only the last part will eventually be 		smaller).
 		+------+------------+------------+-------+
 		| int  |    long    |    bytes   | bytes |
 		+------+------------+------------+-------+
@@ -153,7 +165,7 @@ Interactions :
 
 	Private sign out
 		[C-C] Sign out
-		The client notifies his interlocutor that he wants to terminate the private connection.
+		The client notifies his interlocutor that he wants to terminate the 		private connection.
 		+------+
 		| int  |
 		+------+
@@ -162,7 +174,7 @@ Interactions :
 
 	Public sign out
 		[C-S] Sign out
-		The client notifies the server that he wants to terminate the connection.
+		The client notifies the server that he wants to terminate the 			connection.
 		+------+
 		| int  |
 		+------+
@@ -170,7 +182,7 @@ Interactions :
 		+------+
 
 		[S-A] Sign out notification
-		The server notifies all clients that a client has left the chat room.
+		The server notifies all clients that a client has left the chat 			room.
 		+------+------------+--------+
 		| int  |    int     | String |
 		+------+------------+--------+
