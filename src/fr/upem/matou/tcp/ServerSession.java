@@ -63,6 +63,12 @@ class ServerSession {
 	void appendWriteBuffer(ByteBuffer bb) {
 		bbWrite = ByteBuffers.merge(bbWrite, bb);
 	}
+	
+	private void resetState() {
+		bbRead = ByteBuffer.allocate(Integer.BYTES);
+		arg = -1;
+		protocol = null;
+	}
 
 	/*
 	 * Retrives the protocol request type from the read buffer and updates current state.
@@ -108,9 +114,7 @@ class ServerSession {
 		state.pseudo = ServerCommunication.readStringUTF8(bbRead);
 		Logger.network(LogType.READ, "PSEUDO : " + state.pseudo);
 
-		bbRead = ByteBuffer.allocate(Integer.BYTES);
-		arg = -1;
-		protocol = null;
+		resetState();
 	}
 
 	/*
@@ -169,6 +173,7 @@ class ServerSession {
 		state.sizeMessage = bbRead.getInt();
 		Logger.network(LogType.READ, "SIZE MESSAGE : " + state.sizeMessage);
 
+		// FIXME : Si le message est vide, l'allocation de 0 entrainera la fermeture du client.
 		bbRead = ByteBuffer.allocate(state.sizeMessage);
 		arg++;
 	}
@@ -178,12 +183,14 @@ class ServerSession {
 		state.message = ServerCommunication.readStringUTF8(bbRead);
 		Logger.network(LogType.READ, "MESSAGE : " + state.message);
 
-		bbRead = ByteBuffer.allocate(Integer.BYTES);
-		arg = -1;
-		protocol = null;
+		resetState();
 	}
 
 	private void answerMSGBC(String message) {
+		if(!ServerDataBase.checkMessageValidity(message)) {
+			Logger.debug("INVALID MESSAGE : " + message);
+			return;
+		}
 		String pseudo = db.pseudoOf(sc);
 		Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSGBC);
 		Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
@@ -215,9 +222,7 @@ class ServerSession {
 	}
 
 	private void processDISCOinit() {
-		bbRead = ByteBuffer.allocate(Integer.BYTES);
-		arg = -1;
-		protocol = null;
+		resetState();
 	}
 
 	private void answerDISCODISP() {
@@ -273,6 +278,7 @@ class ServerSession {
 		if (bbWrite.position() > 0) { // Not finished to write
 			return;
 		}
+		// TEMP
 	}
 
 	/*
