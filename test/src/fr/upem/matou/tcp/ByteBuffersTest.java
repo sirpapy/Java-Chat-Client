@@ -11,26 +11,25 @@ import fr.upem.matou.buffer.ByteBuffers;
 @SuppressWarnings("static-method")
 public class ByteBuffersTest {
 
-	
 	@Test
 	public void testDeepEqualsReflexive() {
 		ByteBuffer bb = ByteBuffer.allocate(10);
 		bb.putInt(5).putInt(7);
-		
+
 		assertTrue(ByteBuffers.deepEquals(bb, bb));
 	}
-	
+
 	@Test
 	public void testDeepEqualsSymetric() {
 		ByteBuffer bb1 = ByteBuffer.allocate(10);
 		bb1.putInt(5).putInt(7);
 		ByteBuffer bb2 = ByteBuffer.allocate(10);
 		bb2.putInt(5).putInt(7);
-		
+
 		assertTrue(ByteBuffers.deepEquals(bb1, bb2));
 		assertTrue(ByteBuffers.deepEquals(bb2, bb1));
 	}
-	
+
 	@Test
 	public void testDeepEqualsTransitive() {
 		ByteBuffer bb1 = ByteBuffer.allocate(10);
@@ -39,65 +38,65 @@ public class ByteBuffersTest {
 		bb2.putInt(5).putInt(7);
 		ByteBuffer bb3 = ByteBuffer.allocate(10);
 		bb3.putInt(5).putInt(7);
-		
+
 		assertTrue(ByteBuffers.deepEquals(bb1, bb2));
 		assertTrue(ByteBuffers.deepEquals(bb2, bb3));
 		assertTrue(ByteBuffers.deepEquals(bb1, bb3));
 	}
-	
+
 	@Test
 	public void testDeepEqualsConsistent() {
 		ByteBuffer bb1 = ByteBuffer.allocate(10);
 		bb1.putInt(5).putInt(7);
 		ByteBuffer bb2 = ByteBuffer.allocate(10);
 		bb2.putInt(7).putInt(5);
-		
+
 		assertTrue(ByteBuffers.deepEquals(bb1, bb1));
 		assertTrue(ByteBuffers.deepEquals(bb1, bb1));
 		assertFalse(ByteBuffers.deepEquals(bb1, bb2));
 		assertFalse(ByteBuffers.deepEquals(bb1, bb2));
 	}
-	
+
 	@Test
 	public void testDeepEqualsNull() {
 		ByteBuffer bb = ByteBuffer.allocate(10);
 		bb.putInt(5).putInt(7);
 		ByteBuffer bbNull = null;
-		
+
 		assertFalse(ByteBuffers.deepEquals(bb, bbNull));
 		assertFalse(ByteBuffers.deepEquals(bbNull, bb));
 	}
-	
+
 	@Test
 	public void testDeepNonEqualsOrder() {
 		ByteBuffer bb1 = ByteBuffer.allocate(10);
 		bb1.putInt(5).putInt(7);
 		ByteBuffer bb2 = ByteBuffer.allocate(10);
 		bb2.putInt(7).putInt(5);
-		
+
 		assertFalse(ByteBuffers.deepEquals(bb1, bb2));
 	}
-	
+
 	@Test
 	public void testDeepNonEqualsCapacity() {
 		ByteBuffer bb1 = ByteBuffer.allocate(10);
 		bb1.putInt(5).putInt(7);
 		ByteBuffer bb2 = ByteBuffer.allocate(20);
 		bb2.putInt(5).putInt(7);
-		
+
 		assertFalse(ByteBuffers.deepEquals(bb1, bb2));
 	}
-	
+
 	@Test
 	public void testDeepNonEqualsLimit() {
 		ByteBuffer bb1 = ByteBuffer.allocate(20);
 		bb1.putInt(5).putInt(7).putInt(10);
 		ByteBuffer bb2 = ByteBuffer.allocate(20);
 		bb2.putInt(5).putInt(7);
-		
+
 		assertFalse(ByteBuffers.deepEquals(bb1, bb2));
 	}
-	
+
 	@Test
 	public void testCopy() {
 		ByteBuffer src = ByteBuffer.allocate(10);
@@ -134,7 +133,7 @@ public class ByteBuffersTest {
 
 		System.out.println("Target : " + target + expectedTarget);
 		System.out.println("Append : " + source + expectedSource);
-		
+
 		assertTrue(ByteBuffers.deepEquals(expectedTarget, target));
 		assertTrue(ByteBuffers.deepEquals(expectedSource, source));
 	}
@@ -165,7 +164,7 @@ public class ByteBuffersTest {
 		assertTrue(ByteBuffers.deepEquals(expectedBB2, bb2));
 		assertTrue(ByteBuffers.deepEquals(expectedMerged, merged));
 	}
-	
+
 	@Test
 	public void testMerge2() {
 		ByteBuffer bb1 = ByteBuffer.allocate(10);
@@ -192,13 +191,21 @@ public class ByteBuffersTest {
 		assertTrue(ByteBuffers.deepEquals(expectedBB2, bb2));
 		assertTrue(ByteBuffers.deepEquals(expectedMerged, merged));
 	}
-	
+
 	@Test
 	public void testToByteString() {
 		ByteBuffer bb = ByteBuffer.allocate(20);
-		bb.put((byte)1).put((byte)2).put((byte)3).put((byte)5);
-		
+		bb.put((byte) 1).put((byte) 2).put((byte) 3).put((byte) 5);
+
 		assertEquals("{1,2,3,5}", ByteBuffers.toByteString(bb));
+	}
+
+	@Test
+	public void testToBinaryString() {
+		ByteBuffer bb = ByteBuffer.allocate(20);
+		bb.put((byte) 1).put((byte) 2).put((byte) 3).put((byte) 5);
+
+		assertEquals("{00000001 00000010 00000011 00000101}", ByteBuffers.toBinaryString(bb));
 	}
 
 }

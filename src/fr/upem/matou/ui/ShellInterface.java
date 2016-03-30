@@ -9,9 +9,10 @@ import java.util.Scanner;
  * This class provides a user interface from a shell.
  */
 public class ShellInterface implements UserInterface {
-
+	private static final String INPUT_CHARSET = "UTF-8";
+	
 	private final InputStream input = System.in;
-	private final Scanner scanner = new Scanner(input);
+	private final Scanner scanner = new Scanner(input,INPUT_CHARSET);
 	private final PrintStream output = System.out;
 
 	private Optional<String> readLine() {

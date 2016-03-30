@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 public class FileTransfer {
 
-	private static final int CHUNK_SIZE = 4096;
+	private static final int CHUNK_SIZE = 4096; // in bytes
 
 	private static void copyFileChunked(Path inputPath, Path outputPath)
 			throws IOException {

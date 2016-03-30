@@ -87,6 +87,29 @@ public class ByteBuffers {
 	}
 
 	/**
+	 * Returns a string binary representation of bytes contained in the buffer.
+	 * The buffer state is not modified.
+	 * 
+	 * @param bb
+	 *            The buffer (in write mode)
+	 * @return The string representation of bytes in this buffer.
+	 */
+	public static String toBinaryString(ByteBuffer bb) {
+		bb.flip();
+		ArrayList<Byte> elements = new ArrayList<>();
+		while (bb.hasRemaining()) {
+			elements.add(bb.get());
+		}
+		bb.position(0);
+		bb.compact();
+
+		String string = elements.stream()
+				.map(e -> String.format("%8s", Integer.toBinaryString(e)).replace(' ', '0'))
+				.collect(Collectors.joining(" "));
+		return "{" + string + "}";
+	}
+
+	/**
 	 * Tests whether or not a ByteBuffer is deeply equals to another ByteBuffer.
 	 * Two buffers are equals if and only if :
 	 * - They are not null
