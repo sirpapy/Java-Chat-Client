@@ -1,4 +1,4 @@
-package trash;
+package fr.upem.matou.trash;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;

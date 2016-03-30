@@ -9,6 +9,9 @@ import fr.upem.matou.tcp.ClientCore;
  */
 public class ClientMatou {
 
+	private ClientMatou() {
+	}
+
 	private static void usage() {
 		System.err.println("Usage : host port");
 	}

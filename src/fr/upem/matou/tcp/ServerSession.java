@@ -64,7 +64,7 @@ class ServerSession {
 		bbWrite = ByteBuffers.merge(bbWrite, bb);
 	}
 	
-	private void resetState() {
+	private void resetReadState() {
 		bbRead = ByteBuffer.allocate(Integer.BYTES);
 		arg = -1;
 		protocol = null;
@@ -114,7 +114,7 @@ class ServerSession {
 		state.pseudo = ServerCommunication.readStringUTF8(bbRead);
 		Logger.network(LogType.READ, "PSEUDO : " + state.pseudo);
 
-		resetState();
+		resetReadState();
 	}
 
 	/*
@@ -183,7 +183,7 @@ class ServerSession {
 		state.message = ServerCommunication.readStringUTF8(bbRead);
 		Logger.network(LogType.READ, "MESSAGE : " + state.message);
 
-		resetState();
+		resetReadState();
 	}
 
 	private void answerMSGBC(String message) {
@@ -222,7 +222,7 @@ class ServerSession {
 	}
 
 	private void processDISCOinit() {
-		resetState();
+		resetReadState();
 	}
 
 	private void answerDISCODISP() {
