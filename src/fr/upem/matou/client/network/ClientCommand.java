@@ -1,4 +1,4 @@
-package fr.upem.matou.tcp;
+package fr.upem.matou.client.network;
 
 import java.nio.ByteBuffer;
 

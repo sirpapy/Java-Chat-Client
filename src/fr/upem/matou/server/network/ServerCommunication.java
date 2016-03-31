@@ -1,14 +1,18 @@
-package fr.upem.matou.tcp;
-
-import static fr.upem.matou.tcp.NetworkCommunication.PROTOCOL_CHARSET;
+package fr.upem.matou.server.network;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+
+import fr.upem.matou.shared.network.NetworkCommunication;
+import fr.upem.matou.shared.network.NetworkProtocol;
 
 /*
  * This class consists only of static methods.
  * These methods are used by the server to ensure that communications meet the protocol.
  */
 class ServerCommunication {
+
+	private static final Charset PROTOCOL_CHARSET = NetworkCommunication.getProtocolCharset();
 
 	private ServerCommunication() {
 	}
@@ -55,7 +59,7 @@ class ServerCommunication {
 
 		return request;
 	}
-	
+
 	/*
 	 * Encodes a CODISP request.
 	 */

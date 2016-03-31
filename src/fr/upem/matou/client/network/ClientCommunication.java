@@ -1,12 +1,13 @@
-package fr.upem.matou.tcp;
-
-import static fr.upem.matou.tcp.NetworkCommunication.PROTOCOL_CHARSET;
+package fr.upem.matou.client.network;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.Optional;
 
+import fr.upem.matou.shared.network.NetworkCommunication;
+import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.ui.Message;
 
 /*
@@ -14,6 +15,8 @@ import fr.upem.matou.ui.Message;
  * These methods are used by the client to ensure that communications meet the protocol.
  */
 class ClientCommunication {
+
+	private static final Charset PROTOCOL_CHARSET = NetworkCommunication.getProtocolCharset();
 
 	private ClientCommunication() {
 	}

@@ -1,10 +1,10 @@
-package fr.upem.matou.main;
+package fr.upem.matou.client;
 
 // TODO : Package "server"
 
 import java.io.IOException;
 
-import fr.upem.matou.tcp.ClientCore;
+import fr.upem.matou.client.network.ClientCore;
 
 /**
  * Main class of the client Matou.

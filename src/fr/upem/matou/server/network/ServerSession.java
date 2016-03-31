@@ -1,4 +1,4 @@
-package fr.upem.matou.tcp;
+package fr.upem.matou.server.network;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -9,6 +9,8 @@ import java.util.Optional;
 import fr.upem.matou.buffer.ByteBuffers;
 import fr.upem.matou.logger.Logger;
 import fr.upem.matou.logger.Logger.LogType;
+import fr.upem.matou.shared.network.NetworkCommunication;
+import fr.upem.matou.shared.network.NetworkProtocol;
 
 /*
  * This class represents the state of a client connected to the chat server.

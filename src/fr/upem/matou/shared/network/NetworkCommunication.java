@@ -1,12 +1,12 @@
-package fr.upem.matou.tcp;
+package fr.upem.matou.shared.network;
 
 import java.nio.charset.Charset;
 
 /*
  * This class gathers the common factors between ClientCommunication and ServerCommunication.
  */
-class NetworkCommunication {
-	static final Charset PROTOCOL_CHARSET = Charset.forName("UTF-8");
+public class NetworkCommunication {
+	private static final Charset PROTOCOL_CHARSET = Charset.forName("UTF-8");
 	private static final int PSEUDO_MAX_LENGTH = 32;
 	private static final int MESSAGE_MAX_LENGTH = 512;
 
@@ -22,14 +22,18 @@ class NetworkCommunication {
 	}
 
 	// TODO : Double check
-	static boolean checkPseudoValidity(String pseudo) {
+	public static boolean checkPseudoValidity(String pseudo) {
 		return pseudo.length() <= PSEUDO_MAX_LENGTH
 				&& pseudo.chars().allMatch(NetworkCommunication::isValidPseudoCharacter);
 	}
 
 	// TODO : Double check
-	static boolean checkMessageValidity(String message) {
+	public static boolean checkMessageValidity(String message) {
 		return message.length() <= MESSAGE_MAX_LENGTH
 				&& message.chars().allMatch(NetworkCommunication::isValidMessageCharacter);
+	}
+
+	public static Charset getProtocolCharset() {
+		return PROTOCOL_CHARSET;
 	}
 }

@@ -1,4 +1,4 @@
-package fr.upem.matou.tcp;
+package fr.upem.matou.shared.network;
 
 // TODO : Package "Shared"
 
@@ -7,7 +7,7 @@ import java.util.Optional;
 /*
  * This class defines the communication protocol.
  */
-enum NetworkProtocol {
+public enum NetworkProtocol {
 	COREQ("CLIENT_PUBLIC_CONNECTION_REQUEST"),
 	CORES("SERVER_PUBLIC_CONNECTION_RESPONSE"),
 	CODISP("SERVER_PUBLIC_CONNECTION_NOTIFICATION"),

@@ -1,12 +1,10 @@
-package fr.upem.matou.tcp;
+package fr.upem.matou.buffer;
 
 import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
 
 import org.junit.Test;
-
-import fr.upem.matou.buffer.ByteBuffers;
 
 @SuppressWarnings("static-method")
 public class ByteBuffersTest {

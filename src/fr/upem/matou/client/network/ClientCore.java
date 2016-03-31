@@ -1,4 +1,4 @@
-package fr.upem.matou.tcp;
+package fr.upem.matou.client.network;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import fr.upem.matou.logger.Logger;
 import fr.upem.matou.logger.Logger.LogType;
+import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.ui.Message;
 import fr.upem.matou.ui.ShellInterface;
 import fr.upem.matou.ui.UserInterface;

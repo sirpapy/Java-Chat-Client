@@ -1,4 +1,4 @@
-package fr.upem.matou.tcp;
+package fr.upem.matou.server.network;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -10,6 +10,7 @@ import java.util.Set;
 
 import fr.upem.matou.buffer.ByteBuffers;
 import fr.upem.matou.logger.Logger;
+import fr.upem.matou.shared.network.NetworkCommunication;
 
 /*
  * This class represents the state of the chat server.

@@ -1,11 +1,9 @@
 package fr.upem.matou.tcp;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
-import fr.upem.matou.main.ClientMatou;
-import fr.upem.matou.main.ServerMatou;
+import fr.upem.matou.client.ClientMatou;
+import fr.upem.matou.server.ServerMatou;
 
 @SuppressWarnings("static-method")
 public class NetworkTest {

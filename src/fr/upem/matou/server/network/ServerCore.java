@@ -1,4 +1,4 @@
-package fr.upem.matou.tcp;
+package fr.upem.matou.server.network;
 
 import java.io.Closeable;
 import java.io.IOException;
