@@ -1,5 +1,7 @@
 package fr.upem.matou.main;
 
+// TODO : Package "server"
+
 import java.io.IOException;
 
 import fr.upem.matou.tcp.ServerCore;
@@ -11,7 +13,7 @@ public class ServerMatou {
 
 	private ServerMatou() {
 	}
-	
+
 	private static void usage() {
 		System.err.println("Usage : port");
 	}

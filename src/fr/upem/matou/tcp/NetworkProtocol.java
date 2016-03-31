@@ -1,5 +1,7 @@
 package fr.upem.matou.tcp;
 
+// TODO : Package "Shared"
+
 import java.util.Optional;
 
 /*

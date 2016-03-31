@@ -18,7 +18,7 @@ import fr.upem.matou.ui.UserInterface;
 public class ClientCore implements Closeable {
 
 	private final SocketChannel sc;
-	private final int TIMEOUT = 3000;
+	private final int TIMEOUT = 3500;
 	private boolean isReceiverActivated = false;
 	private static final Object monitor = new Object();
 
