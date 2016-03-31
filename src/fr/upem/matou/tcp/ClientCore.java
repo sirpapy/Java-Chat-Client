@@ -17,10 +17,11 @@ import fr.upem.matou.ui.UserInterface;
  */
 public class ClientCore implements Closeable {
 
-	private final SocketChannel sc;
-	private final int TIMEOUT = 3500;
-	private boolean isReceiverActivated = false;
+	private static final int TIMEOUT = 3500;
+
 	private final Object monitor = new Object();
+	private final SocketChannel sc;
+	private boolean isReceiverActivated = false;
 
 	public ClientCore(String hostname, int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(hostname, port);
@@ -122,9 +123,8 @@ public class ClientCore implements Closeable {
 			long begin = System.currentTimeMillis();
 			while (testeur) {
 				delay = System.currentTimeMillis() - begin;
-				Logger.debug("Time from the beginning "+delay); //a desactiver
 				if ((delay) > TIMEOUT) {
-					Logger.debug("CLEANER : delay " + delay + " > " + TIMEOUT);
+					Logger.debug("CLEANER ACTIVATION : delay " + delay + " > " + TIMEOUT);
 					setChrono(false);
 					try {
 						this.sc.close();
