@@ -48,7 +48,6 @@ public class ClientCore implements Closeable {
 		NetworkProtocol protocol = optionalRequestType.get();
 		Logger.network(LogType.READ, "PROTOCOL : " + protocol);
 
-		Logger.debug("BEGIN RECEIVEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
 		synchronized (monitor) {
 			this.isReceiverActivated = true;
 		}
@@ -94,25 +93,20 @@ public class ClientCore implements Closeable {
 		synchronized (monitor) {
 			isReceiverActivated = false;
 		}
-		System.out.println("FINNNNNNNNNNNNN Serveur lancé : "
-				+ this.isReceiverActivated);
 
 	}
 
 	private void cleaner() throws InterruptedException {
 		while (true) {
 			long delay = 0;
-			//Logger.debug("mlkjmkj " + isReceiverActivated);
 			boolean testeur;
 			synchronized(monitor){
 				testeur = this.isReceiverActivated;
 			}
 			if (testeur) {
-				System.out.println("kkk");
 				long begin = System.currentTimeMillis();
 				
 				while (testeur) {
-					Logger.debug("-----------------------------------------------");
 					synchronized (monitor) {
 						delay = System.currentTimeMillis() - begin;
 						// Thread.sleep(1000);
@@ -123,10 +117,8 @@ public class ClientCore implements Closeable {
 								this.sc.close();
 							} catch (IOException e) {
 							}
-							// this.isReceiverActivated = false;
 						}
-						Logger.debug("ISONE EST EGALE " + isReceiverActivated
-								+ " MAINTENANT");
+
 					}
 					synchronized(monitor){
 						testeur = this.isReceiverActivated;
