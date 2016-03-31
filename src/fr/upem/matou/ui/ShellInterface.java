@@ -48,12 +48,6 @@ public class ShellInterface implements UserInterface {
 			string = "<" + pseudo + ">";
 		}
 		string = string + " " + content;
-
-		try {
-			Thread.sleep(4500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		
 		output.println(string);
 	}

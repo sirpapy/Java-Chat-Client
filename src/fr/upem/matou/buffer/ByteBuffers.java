@@ -108,6 +108,10 @@ public class ByteBuffers {
 				.collect(Collectors.joining(" "));
 		return "{" + string + "}";
 	}
+	
+	public static String toBinaryString(byte b) {
+		return String.format("%8s", Integer.toBinaryString(b)).replace(' ', '0');
+	}
 
 	/**
 	 * Tests whether or not a ByteBuffer is deeply equals to another ByteBuffer.
