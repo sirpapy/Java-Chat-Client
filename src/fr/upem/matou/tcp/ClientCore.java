@@ -18,7 +18,7 @@ import fr.upem.matou.ui.UserInterface;
 public class ClientCore implements Closeable {
 
 	private final SocketChannel sc;
-	private final int TIMEOUT = 3000;
+	private final int TIMEOUT = 1300;
 	private boolean isReceiverActivated = false;
 	private static final Object monitor = new Object();
 
@@ -48,14 +48,19 @@ public class ClientCore implements Closeable {
 		NetworkProtocol protocol = optionalRequestType.get();
 		Logger.network(LogType.READ, "PROTOCOL : " + protocol);
 
-		synchronized (monitor) {
-			this.isReceiverActivated = true;
-		}
-		System.out.println("Serveur lancé : " + this.isReceiverActivated);
 		switch (protocol) {
 		case MSGBC:
+			System.out.println("Serveur lancé : " + this.isReceiverActivated);
+			synchronized (monitor) {
+				this.isReceiverActivated = true;
+			}
+	
 			Optional<Message> optionalRequestMSGBC = ClientCommunication
 					.receiveRequestMSGBC(sc);
+			synchronized (monitor) {
+				isReceiverActivated = false;
+			}
+
 			if (!optionalRequestMSGBC.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
@@ -65,67 +70,79 @@ public class ClientCore implements Closeable {
 			Logger.network(LogType.READ,
 					"MESSAGE : " + receivedMessage.getContent());
 			ui.displayMessage(receivedMessage);
+
 			break;
-		case CODISP:
+		case CODISP:			synchronized (monitor) {
+				this.isReceiverActivated = true;
+			}
 			Optional<String> optionalRequestCODISP = ClientCommunication
 					.receiveRequestCODISP(sc);
+			synchronized (monitor) {
+				isReceiverActivated = false;
+			}
+
 			if (!optionalRequestCODISP.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			String receivedConnected = optionalRequestCODISP.get();
 			Logger.network(LogType.READ, "PSEUDO : " + receivedConnected);
 			ui.displayNewConnectionEvent(receivedConnected);
+
 			break;
 		case DISCODISP:
+			synchronized (monitor) {
+				this.isReceiverActivated = true;
+			}
 			Optional<String> optionalRequestDISCODISP = ClientCommunication
 					.receiveRequestDISCODISP(sc);
+			synchronized (monitor) {
+				isReceiverActivated = false;
+			}
+;
 			if (!optionalRequestDISCODISP.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			String receivedDisconnected = optionalRequestDISCODISP.get();
 			Logger.network(LogType.READ, "PSEUDO : " + receivedDisconnected);
 			ui.displayNewDisconnectionEvent(receivedDisconnected);
+
 			break;
 		default:
 			throw new AssertionError("Unexpected protocol request : "
 					+ protocol);
 		}
-		synchronized (monitor) {
-			isReceiverActivated = false;
-		}
 
 	}
 
 	private void cleaner() throws InterruptedException {
-		while (true) {
-			long delay = 0;
-			boolean testeur;
-			synchronized (monitor) {
-				testeur = this.isReceiverActivated;
-			}
-			if (testeur) {
-				long begin = System.currentTimeMillis();
-
-				while (testeur) {
-					synchronized (monitor) {
-						delay = System.currentTimeMillis() - begin;
-						// Thread.sleep(1000);
-
-						if ((delay) >= TIMEOUT) {
-							Logger.debug(delay + " : LE TEMPS EST FINI! FERME TA GUEULE, CORDIALEMENT LE PRESIDENT!");
-							try {
-								this.sc.close();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-
-					}
-					synchronized (monitor) {
-						testeur = this.isReceiverActivated;
-					}
-
+		long delay = 0;
+		boolean testeur;
+		synchronized (monitor) {
+			testeur = this.isReceiverActivated;
+		}
+		if (testeur) {
+			Thread.sleep(100);
+			long begin = System.currentTimeMillis();
+			while (testeur) {
+				synchronized (monitor) {
+					delay = System.currentTimeMillis() - begin;
 				}
+				if ((delay) >= TIMEOUT) {
+					try {
+						this.sc.close();
+						synchronized (monitor) {
+							this.isReceiverActivated = false;
+						}
+						break;
+					} catch (IOException e) {
+					}
+					// this.isReceiverActivated = false;
+				}
+
+				synchronized (monitor) {
+					testeur = this.isReceiverActivated;
+				}
+
 			}
 
 		}
