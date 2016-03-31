@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import fr.upem.matou.logger.Logger;
 import fr.upem.matou.logger.Logger.LogType;
+import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.ui.Message;
 import fr.upem.matou.ui.ShellInterface;
@@ -18,7 +19,7 @@ import fr.upem.matou.ui.UserInterface;
  */
 public class ClientCore implements Closeable {
 
-	private static final int TIMEOUT = 3500;
+	private static final int TIMEOUT = 3000;
 
 	private final Object monitor = new Object();
 	private final SocketChannel sc;
@@ -47,6 +48,10 @@ public class ClientCore implements Closeable {
 			return true;
 		}
 		String inputMessage = optionalInput.get();
+		if (!NetworkCommunication.checkMessageValidity(inputMessage)) {
+			ui.warnInvalidMessage(inputMessage);
+			return false;
+		}
 		Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSG);
 		Logger.network(LogType.WRITE, "MESSAGE : " + inputMessage);
 		ClientCommunication.sendRequestMSG(sc, inputMessage);
@@ -140,18 +145,6 @@ public class ClientCore implements Closeable {
 			Thread.sleep(TIMEOUT);
 		}
 
-		/*
-		 * TODO (Pape) :
-		 * 
-		 * Cette méthode doit vérifier le contrat suivant : - si le
-		 * receiverThread bloque depuis strictement plus de TIMEOUT
-		 * millisecondes alors la SocketChannel associée à ce thread est fermée
-		 * 
-		 * Etape 1 : Receiver bloque sur une lecture TCP Etape 2 : Cleaner
-		 * déclenche un chrono Etape 3 : Si jamais le compte à rebours du chrono
-		 * s'arrête AVANT que receiver ait terminée sa lecture : => Cleaner
-		 * interrompt Receiver
-		 */
 	}
 
 	private void threadSender(UserInterface ui) {
@@ -189,12 +182,18 @@ public class ClientCore implements Closeable {
 	}
 
 	private void processPseudo(UserInterface ui) throws IOException {
+		// TODO : méthodes d'envoi/réception normalisé par "état" (senderPseudo / ReceiverPseudo)
+
 		while (true) {
 			Optional<String> optionalInput = ui.readPseudo();
 			if (!optionalInput.isPresent()) {
 				throw new IOException("User exited");
 			}
 			String pseudo = optionalInput.get();
+			if(!NetworkCommunication.checkPseudoValidity(pseudo)) {
+				ui.warnInvalidPseudo(pseudo);
+				continue;
+			}
 			Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
 			Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
 			ClientCommunication.sendRequestCOREQ(sc, pseudo);

@@ -62,4 +62,14 @@ public class ShellInterface implements UserInterface {
 		output.println("<" + pseudo + " left the chat>");
 	}
 
+	@Override
+	public void warnInvalidPseudo(String pseudo) {
+		output.println("Le pseudo saisi est invalide"); // TODO : Pourquoi ?
+	}
+
+	@Override
+	public void warnInvalidMessage(String message) {
+		output.println("Le message saisi est invalide"); // TODO : Pourquoi ?
+	}
+
 }

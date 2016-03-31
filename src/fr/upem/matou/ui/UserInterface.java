@@ -34,4 +34,8 @@ public interface UserInterface {
 
 	public void displayNewDisconnectionEvent(String pseudo);
 
+	public void warnInvalidPseudo(String pseudo);
+
+	public void warnInvalidMessage(String message);
+
 }

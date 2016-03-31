@@ -1,7 +1,5 @@
 package fr.upem.matou.client;
 
-// TODO : Package "server"
-
 import java.io.IOException;
 
 import fr.upem.matou.client.network.ClientCore;

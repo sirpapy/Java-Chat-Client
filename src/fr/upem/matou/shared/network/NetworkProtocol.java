@@ -1,8 +1,8 @@
 package fr.upem.matou.shared.network;
 
-// TODO : Package "Shared"
-
 import java.util.Optional;
+
+// TODO : Fusion NetworkProtocol et NetworkCommunication
 
 /*
  * This class defines the communication protocol.

@@ -21,16 +21,22 @@ public class NetworkCommunication {
 		return !Character.isISOControl(codePoint);
 	}
 
-	// TODO : Double check
-	public static boolean checkPseudoValidity(String pseudo) {
-		return pseudo.length() <= PSEUDO_MAX_LENGTH
-				&& pseudo.chars().allMatch(NetworkCommunication::isValidPseudoCharacter);
+	private static boolean isValidPseudoLength(String string) {
+		int length = string.length();
+		return length > 0 && length <= PSEUDO_MAX_LENGTH;
 	}
 
-	// TODO : Double check
+	private static boolean isValidMessageLength(String string) {
+		int length = string.length();
+		return length > 0 && length <= MESSAGE_MAX_LENGTH;
+	}
+
+	public static boolean checkPseudoValidity(String pseudo) {
+		return isValidPseudoLength(pseudo) && pseudo.chars().allMatch(NetworkCommunication::isValidPseudoCharacter);
+	}
+
 	public static boolean checkMessageValidity(String message) {
-		return message.length() <= MESSAGE_MAX_LENGTH
-				&& message.chars().allMatch(NetworkCommunication::isValidMessageCharacter);
+		return isValidMessageLength(message) && message.chars().allMatch(NetworkCommunication::isValidMessageCharacter);
 	}
 
 	public static Charset getProtocolCharset() {

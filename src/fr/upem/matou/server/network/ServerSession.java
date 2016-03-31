@@ -12,6 +12,8 @@ import fr.upem.matou.logger.Logger.LogType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 
+// TEMP : Retirer les UnsupportedOperationException !
+
 /*
  * This class represents the state of a client connected to the chat server.
  */
