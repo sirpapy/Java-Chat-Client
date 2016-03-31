@@ -2,7 +2,7 @@ package fr.upem.matou.main;
 
 import java.io.IOException;
 
-import fr.upem.matou.tcp.ClientCoreClean;
+import fr.upem.matou.tcp.ClientCore;
 
 /**
  * Main class of the client Matou.
@@ -31,7 +31,7 @@ public class ClientMatou {
 		String host = args[0];
 		int port = Integer.parseInt(args[1]);
 
-		try (ClientCoreClean client = new ClientCoreClean(host, port)) {
+		try (ClientCore client = new ClientCore(host, port)) {
 			client.startChat();
 		}
 	}
