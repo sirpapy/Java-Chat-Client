@@ -20,7 +20,7 @@ public class ClientCore implements Closeable {
 	private final SocketChannel sc;
 	private final int TIMEOUT = 3500;
 	private boolean isReceiverActivated = false;
-	private static final Object monitor = new Object();
+	private final Object monitor = new Object();
 
 	public ClientCore(String hostname, int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(hostname, port);
@@ -121,8 +121,8 @@ public class ClientCore implements Closeable {
 		if (testeur) {
 			long begin = System.currentTimeMillis();
 			while (testeur) {
-				Thread.sleep(TIMEOUT);
 				delay = System.currentTimeMillis() - begin;
+				Logger.debug("Time from the beginning "+delay); //a desactiver
 				if ((delay) > TIMEOUT) {
 					Logger.debug("CLEANER : delay " + delay + " > " + TIMEOUT);
 					setChrono(false);
