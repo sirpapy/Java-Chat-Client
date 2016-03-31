@@ -18,7 +18,7 @@ import fr.upem.matou.ui.UserInterface;
 public class ClientCore implements Closeable {
 
 	private final SocketChannel sc;
-	private final int TIMEOUT = 3000;
+	private final int TIMEOUT = 1000;
 	private boolean isReceiverActivated = false;
 	private static final Object monitor = new Object();
 
@@ -62,7 +62,6 @@ public class ClientCore implements Closeable {
 
 		switch (protocol) {
 		case MSGBC:
-			System.out.println("Serveur lancé : " + this.isReceiverActivated);
 			setChrono(true);
 
 			Optional<Message> optionalRequestMSGBC = ClientCommunication
@@ -120,12 +119,10 @@ public class ClientCore implements Closeable {
 		testeur = getChrono();
 
 		if (testeur) {
-			Thread.sleep(100);
 			long begin = System.currentTimeMillis();
 			while (testeur) {
-				synchronized (monitor) { // Tu synchronises quoi ici ?
+				Thread.sleep(100);
 					delay = System.currentTimeMillis() - begin;
-				}
 				if ((delay) >= TIMEOUT) {
 					try {
 						this.sc.close();
@@ -133,13 +130,14 @@ public class ClientCore implements Closeable {
 						break;
 					} catch (IOException e) {
 					}
-					// this.isReceiverActivated = false;
 				}
 
 				testeur = getChrono();
 
 			}
 
+		}else{
+			Thread.sleep(100);
 		}
 
 		/*
