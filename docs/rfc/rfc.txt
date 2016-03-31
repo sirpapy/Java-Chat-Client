@@ -10,8 +10,8 @@ Description:
 The purpose of Matou project is to realize a discussion and file exchanger service.
 
 The clients are connected to a primary server. Each connected client is identified by a unique pseudo. The server must guarantee that two client will not have the same pseudo. After etablishing the connection, the client can:
-	* Send message to all connected clients
-	* Send privates messages or files to a particular client
+	* Send message to all connected clients.
+	* Send privates messages or files to a particular client.
 
  
 
@@ -26,12 +26,14 @@ Requirements:
 
 
 Specifications:
-	* The numbers are in Big Endian format
-	* String are encoded into UTF-8 charset
-	* The transport protocol used is TCP (with limit size specified)
-	* The max size of an encoded pseudo is 32 bytes wihtout some special caracters (\n, \r ...)
-	* The max size of a message is 512 bytes
-	* The size of a chunk of file is 512 bytes
+	* Numbers are in Big Endian format.
+	* String are encoded into UTF-8 charset.
+	* The transport protocol used is TCP (with limit size specified).
+	* The maximum string length of a pseudo is 32 characters.
+	* The maximum string length of a message is 512 characters.
+	* A pseudo can only contain alphanumeric characters.
+	* A message cannot contain control characters (\n, \r, \t, ...).
+	* The size of a chunk of file is 4096 bytes.
 
 Acronym formats: 
 	* C-S : Client to Server
