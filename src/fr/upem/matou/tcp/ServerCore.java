@@ -19,7 +19,7 @@ import fr.upem.matou.logger.Logger;
 public class ServerCore implements Closeable {
 
 	private static final long SERVER_DELAY = 0; // TEMP in millis
-	
+
 	private final ServerSocketChannel ssc;
 	private final Selector selector;
 	private final ServerDataBase db;
@@ -79,7 +79,7 @@ public class ServerCore implements Closeable {
 		}
 		acceptedChannel.configureBlocking(false);
 		SelectionKey registeredKey = acceptedChannel.register(selector, SelectionKey.OP_READ);
-		ServerSession session = new ServerSession(db,acceptedChannel);
+		ServerSession session = new ServerSession(db, acceptedChannel);
 		registeredKey.attach(session);
 	}
 
@@ -108,13 +108,20 @@ public class ServerCore implements Closeable {
 		ServerSession session = (ServerSession) key.attachment();
 		ByteBuffer bb = session.getWriteBuffer();
 
-		try {
-			Thread.sleep(SERVER_DELAY);
-		} catch (@SuppressWarnings("unused") InterruptedException ignored) {
-			// TEMP
-		}
 		bb.flip();
-		channel.write(bb);
+		for (int i = 1; bb.hasRemaining(); i++) {
+			ByteBuffer writter = ByteBuffer.allocate(1);
+			byte oneByte = bb.get();
+			writter.put(oneByte);
+			writter.flip();
+			channel.write(writter);
+			Logger.debug("Byte " + i + " sent (~" + ((i-1) * SERVER_DELAY) + "ms)");
+			try {
+				Thread.sleep(SERVER_DELAY);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		bb.compact();
 
 		session.updateStateWrite();
