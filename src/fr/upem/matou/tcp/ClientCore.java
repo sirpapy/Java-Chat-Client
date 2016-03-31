@@ -18,13 +18,25 @@ import fr.upem.matou.ui.UserInterface;
 public class ClientCore implements Closeable {
 
 	private final SocketChannel sc;
-	private final int TIMEOUT = 1300;
+	private final int TIMEOUT = 3000;
 	private boolean isReceiverActivated = false;
 	private static final Object monitor = new Object();
 
 	public ClientCore(String hostname, int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(hostname, port);
 		sc = SocketChannel.open(address);
+	}
+
+	private void setChrono(boolean isActivated) {
+		synchronized (monitor) {
+			isReceiverActivated = isActivated;
+		}
+	}
+
+	private boolean getChrono() {
+		synchronized (monitor) {
+			return isReceiverActivated;
+		}
 	}
 
 	private boolean sender(UserInterface ui) throws IOException {
@@ -51,15 +63,11 @@ public class ClientCore implements Closeable {
 		switch (protocol) {
 		case MSGBC:
 			System.out.println("Serveur lancé : " + this.isReceiverActivated);
-			synchronized (monitor) {
-				this.isReceiverActivated = true;
-			}
-	
+			setChrono(true);
+
 			Optional<Message> optionalRequestMSGBC = ClientCommunication
 					.receiveRequestMSGBC(sc);
-			synchronized (monitor) {
-				isReceiverActivated = false;
-			}
+			setChrono(false);
 
 			if (!optionalRequestMSGBC.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
@@ -72,14 +80,11 @@ public class ClientCore implements Closeable {
 			ui.displayMessage(receivedMessage);
 
 			break;
-		case CODISP:			synchronized (monitor) {
-				this.isReceiverActivated = true;
-			}
+		case CODISP:
+			setChrono(true);
 			Optional<String> optionalRequestCODISP = ClientCommunication
 					.receiveRequestCODISP(sc);
-			synchronized (monitor) {
-				isReceiverActivated = false;
-			}
+			setChrono(false);
 
 			if (!optionalRequestCODISP.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
@@ -90,15 +95,10 @@ public class ClientCore implements Closeable {
 
 			break;
 		case DISCODISP:
-			synchronized (monitor) {
-				this.isReceiverActivated = true;
-			}
+			setChrono(true);
 			Optional<String> optionalRequestDISCODISP = ClientCommunication
 					.receiveRequestDISCODISP(sc);
-			synchronized (monitor) {
-				isReceiverActivated = false;
-			}
-;
+			setChrono(false);
 			if (!optionalRequestDISCODISP.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
@@ -117,31 +117,26 @@ public class ClientCore implements Closeable {
 	private void cleaner() throws InterruptedException {
 		long delay = 0;
 		boolean testeur;
-		synchronized (monitor) {
-			testeur = this.isReceiverActivated;
-		}
+		testeur = getChrono();
+
 		if (testeur) {
 			Thread.sleep(100);
 			long begin = System.currentTimeMillis();
 			while (testeur) {
-				synchronized (monitor) {
+				synchronized (monitor) { // Tu synchronises quoi ici ?
 					delay = System.currentTimeMillis() - begin;
 				}
 				if ((delay) >= TIMEOUT) {
 					try {
 						this.sc.close();
-						synchronized (monitor) {
-							this.isReceiverActivated = false;
-						}
+						setChrono(false);
 						break;
 					} catch (IOException e) {
 					}
 					// this.isReceiverActivated = false;
 				}
 
-				synchronized (monitor) {
-					testeur = this.isReceiverActivated;
-				}
+				testeur = getChrono();
 
 			}
 
