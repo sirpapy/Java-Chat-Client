@@ -42,7 +42,50 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private boolean sender(UserInterface ui) throws IOException {
+	private void pseudoSender(UserInterface ui) throws IOException {
+		while (true) {
+			Optional<String> optionalInput = ui.readPseudo();
+			if (!optionalInput.isPresent()) {
+				throw new IOException("User exited");
+			}
+			String pseudo = optionalInput.get();
+			if (!NetworkCommunication.checkPseudoValidity(pseudo)) {
+				ui.warnInvalidPseudo(pseudo);
+				continue;
+			}
+			Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
+			Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
+			ClientCommunication.sendRequestCOREQ(sc, pseudo);
+			return;
+		}
+	}
+
+	private boolean pseudoReceiver() throws IOException {
+		Optional<NetworkProtocol> optionalRequestType = ClientCommunication
+				.receiveRequestType(sc);
+		if (!optionalRequestType.isPresent()) {
+			throw new IOException("Protocol violation");
+		}
+
+		NetworkProtocol protocol = optionalRequestType.get();
+		Logger.network(LogType.READ, "PROTOCOL : " + protocol);
+		switch (protocol) {
+		case CORES:
+			Optional<Boolean> optionalRequestCORES = ClientCommunication
+					.receiveRequestCORES(sc);
+			if (!optionalRequestCORES.isPresent()) {
+				throw new IOException("Protocol violation : " + protocol);
+			}
+			boolean acceptation = optionalRequestCORES.get();
+			Logger.network(LogType.READ, "ACCEPTATION : " + acceptation);
+			return acceptation;
+		default:
+			throw new AssertionError("Unexpected protocol request : "
+					+ protocol);
+		}
+	}
+
+	private boolean messageSender(UserInterface ui) throws IOException {
 		Optional<String> optionalInput = ui.readMessage();
 		if (!optionalInput.isPresent()) {
 			return true;
@@ -58,7 +101,7 @@ public class ClientCore implements Closeable {
 		return false;
 	}
 
-	private void receiver(UserInterface ui) throws IOException {
+	private void messageReceiver(UserInterface ui) throws IOException {
 		Optional<NetworkProtocol> optionalRequestType = ClientCommunication
 				.receiveRequestType(sc);
 		if (!optionalRequestType.isPresent()) {
@@ -147,11 +190,11 @@ public class ClientCore implements Closeable {
 
 	}
 
-	private void threadSender(UserInterface ui) {
+	private void threadMessageSender(UserInterface ui) {
 		boolean exit = false;
 		while (!Thread.interrupted() && exit == false) {
 			try {
-				exit = sender(ui);
+				exit = messageSender(ui);
 			} catch (IOException e) {
 				e.printStackTrace();
 				return;
@@ -159,10 +202,10 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void threadReceiver(UserInterface ui) {
+	private void threadMessageReceiver(UserInterface ui) {
 		while (!Thread.interrupted()) {
 			try {
-				receiver(ui);
+				messageReceiver(ui);
 			} catch (IOException e) {
 				e.printStackTrace();
 				return;
@@ -182,54 +225,17 @@ public class ClientCore implements Closeable {
 	}
 
 	private void processPseudo(UserInterface ui) throws IOException {
-		// TODO : méthodes d'envoi/réception normalisé par "état" (senderPseudo / ReceiverPseudo)
-
-		while (true) {
-			Optional<String> optionalInput = ui.readPseudo();
-			if (!optionalInput.isPresent()) {
-				throw new IOException("User exited");
-			}
-			String pseudo = optionalInput.get();
-			if(!NetworkCommunication.checkPseudoValidity(pseudo)) {
-				ui.warnInvalidPseudo(pseudo);
-				continue;
-			}
-			Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
-			Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
-			ClientCommunication.sendRequestCOREQ(sc, pseudo);
-
-			Optional<NetworkProtocol> optionalRequestType = ClientCommunication
-					.receiveRequestType(sc);
-			if (!optionalRequestType.isPresent()) {
-				throw new IOException("Protocol violation");
-			}
-
-			NetworkProtocol protocol = optionalRequestType.get();
-			Logger.network(LogType.READ, "PROTOCOL : " + protocol);
-			switch (protocol) {
-			case CORES:
-				Optional<Boolean> optionalRequestCORES = ClientCommunication
-						.receiveRequestCORES(sc);
-				if (!optionalRequestCORES.isPresent()) {
-					throw new IOException("Protocol violation : " + protocol);
-				}
-				boolean acceptation = optionalRequestCORES.get();
-				Logger.network(LogType.READ, "ACCEPTATION : " + acceptation);
-				if (acceptation == true) {
-					return;
-				}
-				break;
-			default:
-				throw new AssertionError("Unexpected protocol request : "
-						+ protocol);
-			}
+		boolean isAccepted = false;
+		while (!isAccepted) {
+			pseudoSender(ui);
+			isAccepted = pseudoReceiver();
 		}
 	}
 
 	private void processMessages(UserInterface ui) throws InterruptedException,
 			IOException {
-		Thread sender = new Thread(() -> threadSender(ui));
-		Thread receiver = new Thread(() -> threadReceiver(ui));
+		Thread sender = new Thread(() -> threadMessageSender(ui));
+		Thread receiver = new Thread(() -> threadMessageReceiver(ui));
 		Thread cleaner = new Thread(() -> threadCleaner());
 
 		sender.start();
