@@ -18,7 +18,7 @@ import fr.upem.matou.ui.UserInterface;
 public class ClientCore implements Closeable {
 
 	private final SocketChannel sc;
-	private final int TIMEOUT = 1000;
+	private final int TIMEOUT = 3000;
 	private boolean isReceiverActivated = false;
 	private static final Object monitor = new Object();
 
@@ -121,23 +121,22 @@ public class ClientCore implements Closeable {
 		if (testeur) {
 			long begin = System.currentTimeMillis();
 			while (testeur) {
-				Thread.sleep(100);
-					delay = System.currentTimeMillis() - begin;
-				if ((delay) >= TIMEOUT) {
+				Thread.sleep(TIMEOUT);
+				delay = System.currentTimeMillis() - begin;
+				if ((delay) > TIMEOUT) {
+					Logger.debug("CLEANER : delay " + delay + " > " + TIMEOUT);
+					setChrono(false);
 					try {
 						this.sc.close();
-						setChrono(false);
 						break;
 					} catch (IOException e) {
 					}
 				}
-
 				testeur = getChrono();
-
 			}
 
-		}else{
-			Thread.sleep(100);
+		} else {
+			Thread.sleep(TIMEOUT);
 		}
 
 		/*
