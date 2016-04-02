@@ -46,54 +46,58 @@ class ServerCommunication {
 	/*
 	 * Encodes a MSGBC request.
 	 */
-	static ByteBuffer encodeRequestMSGBC(String pseudo, String message) {
+	static boolean addRequestMSGBC(ByteBuffer bbWrite, String pseudo, String message) {
 		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
 		ByteBuffer encodedMessage = PROTOCOL_CHARSET.encode(message);
 
 		int sizePseudo = encodedPseudo.remaining();
 		int sizeMessage = encodedMessage.remaining();
 
-		int capacity = Integer.BYTES + Integer.BYTES + sizePseudo + Integer.BYTES + sizeMessage;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
+		int length = Integer.BYTES + Integer.BYTES + sizePseudo + Integer.BYTES + sizeMessage;
+		if (bbWrite.remaining() < length) {
+			return false;
+		}
 
-		request.putInt(NetworkProtocol.MSGBC.ordinal());
-		request.putInt(sizePseudo).put(encodedPseudo);
-		request.putInt(sizeMessage).put(encodedMessage);
+		bbWrite.putInt(NetworkProtocol.MSGBC.ordinal());
+		bbWrite.putInt(sizePseudo).put(encodedPseudo);
+		bbWrite.putInt(sizeMessage).put(encodedMessage);
 
-		return request;
+		return true;
 	}
 
 	/*
 	 * Encodes a CODISP request.
 	 */
-	static ByteBuffer encodeRequestCODISP(String pseudo) {
+	static boolean addRequestCODISP(ByteBuffer bbWrite, String pseudo) {
 		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
 
 		int sizePseudo = encodedPseudo.remaining();
 
-		int capacity = Integer.BYTES + Integer.BYTES + sizePseudo;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
+		int length = Integer.BYTES + Integer.BYTES + sizePseudo;
+		if (bbWrite.remaining() < length) {
+			return false;
+		}
+		bbWrite.putInt(NetworkProtocol.CODISP.ordinal());
+		bbWrite.putInt(sizePseudo).put(encodedPseudo);
 
-		request.putInt(NetworkProtocol.CODISP.ordinal());
-		request.putInt(sizePseudo).put(encodedPseudo);
-
-		return request;
+		return true;
 	}
 
 	/*
 	 * Encodes a DISCODISP request.
 	 */
-	static ByteBuffer encodeRequestDISCODISP(String pseudo) {
+	static boolean addRequestDISCODISP(ByteBuffer bbWrite, String pseudo) {
 		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
 
 		int sizePseudo = encodedPseudo.remaining();
 
-		int capacity = Integer.BYTES + Integer.BYTES + sizePseudo;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
+		int length = Integer.BYTES + Integer.BYTES + sizePseudo;
+		if (bbWrite.remaining() < length) {
+			return false;
+		}
+		bbWrite.putInt(NetworkProtocol.DISCODISP.ordinal());
+		bbWrite.putInt(sizePseudo).put(encodedPseudo);
 
-		request.putInt(NetworkProtocol.DISCODISP.ordinal());
-		request.putInt(sizePseudo).put(encodedPseudo);
-
-		return request;
+		return true;
 	}
 }

@@ -17,12 +17,14 @@ import fr.upem.matou.shared.network.NetworkCommunication;
  * This class is not thread-safe and should not be used by several threads.
  */
 class ServerDataBase {
+	private static final int BUFFER_SIZE_BROADCAST = 1024;
 
 	private final HashMap<SocketChannel, String> connected = new HashMap<>();
 	private final Set<SocketChannel> keysView = connected.keySet();
 	private final Collection<String> valuesView = connected.values();
 	private final ArrayDeque<ByteBuffer> broadcast = new ArrayDeque<>();
 	private final Set<SelectionKey> keys;
+	private final ByteBuffer bbBroadcast = ByteBuffer.allocateDirect(BUFFER_SIZE_BROADCAST);
 
 	public ServerDataBase(Set<SelectionKey> keys) {
 		this.keys = keys;
@@ -32,6 +34,11 @@ class ServerDataBase {
 		return !valuesView.contains(pseudo);
 	}
 
+	ByteBuffer getClearBroadcastBuffer() {
+		bbBroadcast.clear();
+		return bbBroadcast;
+	}
+	
 	/*
 	 * Add a new client.
 	 * Check if : available & no illegal characters

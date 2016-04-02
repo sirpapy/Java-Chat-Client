@@ -78,7 +78,7 @@ class ServerSession {
 	void appendWriteBuffer(ByteBuffer bb) {
 		boolean succeeded = ByteBuffers.append(bbWrite, bb);
 		if (!succeeded) {
-			Logger.warning("MESSAGE LOST | WRITE BUFFER CANNOT HOLD IT");
+			Logger.warning("REQUEST LOST | WRITE BUFFER CANNOT HOLD IT");
 		}
 	}
 
@@ -147,7 +147,9 @@ class ServerSession {
 		Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES);
 		Logger.network(LogType.WRITE, "ACCEPTATION : " + acceptation);
 
-		ServerCommunication.addRequestCORES(bbWrite, acceptation);
+		if(!ServerCommunication.addRequestCORES(bbWrite, acceptation)) {
+			Logger.warning("CORES lost | Write Buffer cannot hold it");
+		}
 
 		if (acceptation) {
 			setAuthent();
@@ -155,7 +157,11 @@ class ServerSession {
 			Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.CODISP);
 			Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
 
-			ByteBuffer bbWriteAll = ServerCommunication.encodeRequestCODISP(pseudo);
+			ByteBuffer bbWriteAll = db.getClearBroadcastBuffer();
+			if (!ServerCommunication.addRequestCODISP(bbWriteAll, pseudo)) {
+				Logger.warning("CODISP lost | Broadcast Buffer cannot hold it");
+				return;
+			}
 			db.addBroadcast(bbWriteAll);
 		}
 	}
@@ -222,7 +228,11 @@ class ServerSession {
 		Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
 		Logger.network(LogType.WRITE, "MESSAGE : " + message);
 
-		ByteBuffer bbWriteAll = ServerCommunication.encodeRequestMSGBC(pseudo, message);
+		ByteBuffer bbWriteAll = db.getClearBroadcastBuffer();
+		if (!ServerCommunication.addRequestMSGBC(bbWriteAll, pseudo, message)) {
+			Logger.warning("MSGBC lost | Broadcast Buffer cannot hold it");
+			return;
+		}
 		db.addBroadcast(bbWriteAll);
 	}
 
@@ -336,9 +346,13 @@ class ServerSession {
 		if (pseudo != null) {
 			Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCODISP);
 			Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
-			ByteBuffer bbWriteAll = ServerCommunication.encodeRequestDISCODISP(pseudo);
-			db.addBroadcast(bbWriteAll);
-			db.updateStateReadAll();
+			ByteBuffer bbWriteAll = db.getClearBroadcastBuffer();
+			if (!ServerCommunication.addRequestDISCODISP(bbWriteAll, pseudo)) {
+				Logger.warning("DISCODISP lost | Broadcast Buffer cannot hold it");
+			} else {
+				db.addBroadcast(bbWriteAll);
+				db.updateStateReadAll();
+			}
 		}
 
 		try {

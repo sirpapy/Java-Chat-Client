@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
+import fr.upem.matou.logger.Logger;
+
 /*
  * This class gathers the common factors between ClientCommunication and ServerCommunication.
  */
@@ -47,6 +49,7 @@ public class NetworkCommunication {
 	
 	public static Optional<ByteBuffer> encodePseudo(String pseudo) {
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(pseudo);
+		Logger.debug("ENCODED PSEUDO SIZE : " + encoded.remaining());
 		if(encoded.remaining() > PSEUDO_MAX_SIZE) {
 			return Optional.empty();
 		}
@@ -55,7 +58,7 @@ public class NetworkCommunication {
 	
 	public static Optional<ByteBuffer> encodeMessage(String message) {
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(message);
-		System.out.println("ENCODED REMAINIGN : " + encoded.remaining());
+		Logger.debug("ENCODED MESSAGE SIZE : " + encoded.remaining());
 		if(encoded.remaining() > MESSAGE_MAX_SIZE) {
 			return Optional.empty();
 		}

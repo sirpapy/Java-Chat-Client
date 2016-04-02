@@ -5,4 +5,5 @@ package fr.upem.matou.tasks;
 public class Tasks {
 	// TODO : Visibilité minimale
 	// TODO : Tests unitaires
+	// TODO : Logger sur les exceptions -> Logger.warning/Logger.error
 }
