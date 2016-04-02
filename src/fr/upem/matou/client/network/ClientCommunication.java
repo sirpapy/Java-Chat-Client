@@ -70,7 +70,7 @@ class ClientCommunication {
 		return request;
 	}
 
-	private static ByteBuffer encodeRequestDISCO() {
+	public static ByteBuffer encodeRequestDISCO() {
 		int capacity = Integer.BYTES;
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 

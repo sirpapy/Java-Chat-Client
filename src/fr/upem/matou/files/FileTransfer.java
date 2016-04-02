@@ -39,6 +39,8 @@ public class FileTransfer {
 
 		return Arrays.equals(inputBytes, outputBytes);
 	}
+	
+	// TODO : Network Sender/Receiver
 
 	public static void main(String[] args) throws IOException {
 		Path inputPath = Paths.get(args[0]);

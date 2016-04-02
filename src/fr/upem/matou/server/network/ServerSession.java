@@ -23,8 +23,8 @@ class ServerSession {
 	private boolean authent = false;
 	private NetworkProtocol protocol = null;
 	private int arg = -1;
-	private ByteBuffer bbRead = ByteBuffer.allocate(Integer.BYTES);
-	private ByteBuffer bbWrite = ByteBuffer.allocate(0);
+	private ByteBuffer bbRead = ByteBuffer.allocate(Integer.BYTES); // FIXME : Allocation !!!
+	private ByteBuffer bbWrite = ByteBuffer.allocate(0); // FIXME : Allocation !!!
 	private ClientState clientState = null;
 
 	static interface ClientState {
