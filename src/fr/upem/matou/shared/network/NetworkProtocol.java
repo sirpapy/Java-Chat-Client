@@ -1,5 +1,8 @@
 package fr.upem.matou.shared.network;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 // TODO : Fusion NetworkProtocol et NetworkCommunication
@@ -8,13 +11,15 @@ import java.util.Optional;
  * This class defines the communication protocol.
  */
 public enum NetworkProtocol {
-	COREQ("CLIENT_PUBLIC_CONNECTION_REQUEST"),
-	CORES("SERVER_PUBLIC_CONNECTION_RESPONSE"),
-	CODISP("SERVER_PUBLIC_CONNECTION_NOTIFICATION"),
-	MSG("CLIENT_PUBLIC_MESSAGE"),
-	MSGBC("SERVER_PUBLIC_MESSAGE_BROADCAST"),
-	DISCO("CLIENT_PUBLIC_DISCONNECTION"),
-	DISCODISP("SERVER_PUBLIC_DISCONNECTION_NOTIFICATION"),
+	
+	
+	COREQ(ExchangeDirection.INCOMING, "PUBLIC_CONNECTION_REQUEST", 4, 32),
+	CORES(ExchangeDirection.OUTGOING, "PUBLIC_CONNECTION_RESPONSE", 4, 1),
+	CODISP(ExchangeDirection.OUTGOING, "PUBLIC_CONNECTION_NOTIFICATION", 4, 32),
+	MSG(ExchangeDirection.INCOMING, "PUBLIC_MESSAGE", 4, 512),
+	MSGBC(ExchangeDirection.OUTGOING, "PUBLIC_MESSAGE_BROADCAST", 4, 32, 4, 512),
+	DISCO(ExchangeDirection.INCOMING, "PUBLIC_DISCONNECTION", 4),
+	DISCODISP(ExchangeDirection.OUTGOING, "PUBLIC_DISCONNECTION_NOTIFICATION", 4, 32),
 	// PVCOREQ("CLIENT_PRIVATE_CONNECTION_REQUEST"),
 	// PVCOTR("SERVER_PRIVATE_CONNECTION_TRANSFER"),
 	// PVCOACC("CLIENT_PRIVATE_CONNECTION_CONFIRM"),
@@ -25,15 +30,51 @@ public enum NetworkProtocol {
 	// PVDISCO("CLIENT_PRIVATE_DISCONNECTION"),
 	;
 
-	private final String description;
+	static enum ExchangeDirection {
+		INCOMING, OUTGOING;
+	}
 
-	private NetworkProtocol(String description) {
+	private final ExchangeDirection direction;
+	private final String description;
+	private final List<Integer> argumentSizes;
+	private final int maxRequestSize;
+
+	private NetworkProtocol(ExchangeDirection direction, String description, Integer... sizes) {
+		this.direction = direction;
 		this.description = description;
+		ArrayList<Integer> args = new ArrayList<>();
+		args.add(Integer.BYTES);
+		for (int size : sizes) {
+			args.add(size);
+		}
+		argumentSizes = Collections.unmodifiableList(args);
+		maxRequestSize = argumentSizes.stream().mapToInt(Integer::intValue).sum();
+	}
+
+	int getMaxRequestSize() {
+		return maxRequestSize;
+	}
+
+	int getArgumentSize(int arg) {
+		return argumentSizes.get(arg);
 	}
 
 	@Override
 	public String toString() {
-		return "[" + ordinal() + " - " + name() + " - " + description + "]";
+		String dir = "";
+		
+		switch(direction) {
+		case INCOMING:
+			dir = "CLIENT";
+			break;
+		case OUTGOING:
+			dir = "SERVER";
+			break;
+		default:
+			break;		
+		}
+		
+		return "[" + ordinal() + " - " + name() + " - " + dir + " " + description + "]";
 	}
 
 	/*
