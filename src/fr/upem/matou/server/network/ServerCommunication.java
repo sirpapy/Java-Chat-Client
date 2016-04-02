@@ -18,33 +18,35 @@ class ServerCommunication {
 	}
 
 	// bb should be flipped
-	public static String readStringUTF8(ByteBuffer bb) {
+	static String readStringUTF8(ByteBuffer bb) {
 		// TODO : flip + readInt
 		return PROTOCOL_CHARSET.decode(bb).toString();
 	}
 
 	/*
-	 * Encodes a CORES request.
+	 * Adds a CORES request to the buffer.
 	 */
-	public static ByteBuffer encodeRequestCORES(boolean acceptation) {
-		int capacity = Integer.BYTES + Byte.BYTES;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
-
-		request.putInt(NetworkProtocol.CORES.ordinal());
-
-		if (acceptation) {
-			request.put((byte) 1);
-		} else {
-			request.put((byte) 0);
+	static boolean addRequestCORES(ByteBuffer bbWrite, boolean acceptation) {
+		int length = Integer.BYTES + Byte.BYTES;
+		if (bbWrite.remaining() < length) {
+			return false;
 		}
 
-		return request;
+		bbWrite.putInt(NetworkProtocol.CORES.ordinal());
+
+		if (acceptation) {
+			bbWrite.put((byte) 1);
+		} else {
+			bbWrite.put((byte) 0);
+		}
+
+		return true;
 	}
 
 	/*
 	 * Encodes a MSGBC request.
 	 */
-	public static ByteBuffer encodeRequestMSGBC(String pseudo, String message) {
+	static ByteBuffer encodeRequestMSGBC(String pseudo, String message) {
 		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
 		ByteBuffer encodedMessage = PROTOCOL_CHARSET.encode(message);
 
@@ -64,7 +66,7 @@ class ServerCommunication {
 	/*
 	 * Encodes a CODISP request.
 	 */
-	public static ByteBuffer encodeRequestCODISP(String pseudo) {
+	static ByteBuffer encodeRequestCODISP(String pseudo) {
 		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
 
 		int sizePseudo = encodedPseudo.remaining();
@@ -81,7 +83,7 @@ class ServerCommunication {
 	/*
 	 * Encodes a DISCODISP request.
 	 */
-	public static ByteBuffer encodeRequestDISCODISP(String pseudo) {
+	static ByteBuffer encodeRequestDISCODISP(String pseudo) {
 		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
 
 		int sizePseudo = encodedPseudo.remaining();

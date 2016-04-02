@@ -39,9 +39,7 @@ class ClientCommunication {
 	/*
 	 * Encodes a COREQ request.
 	 */
-	public static ByteBuffer encodeRequestCOREQ(String pseudo) {
-		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
-
+	private static ByteBuffer encodeRequestCOREQ(ByteBuffer encodedPseudo) {
 		int length = encodedPseudo.remaining();
 
 		int capacity = Integer.BYTES + Integer.BYTES + length;
@@ -56,9 +54,7 @@ class ClientCommunication {
 	/*
 	 * Encodes a MSG request.
 	 */
-	public static ByteBuffer encodeRequestMSG(String message) {
-		ByteBuffer encodedMessage = PROTOCOL_CHARSET.encode(message);
-
+	private static ByteBuffer encodeRequestMSG(ByteBuffer encodedMessage) {
 		int length = encodedMessage.remaining();
 
 		int capacity = Integer.BYTES + Integer.BYTES + length;
@@ -70,7 +66,7 @@ class ClientCommunication {
 		return request;
 	}
 
-	public static ByteBuffer encodeRequestDISCO() {
+	private static ByteBuffer encodeRequestDISCO() {
 		int capacity = Integer.BYTES;
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 
@@ -82,17 +78,27 @@ class ClientCommunication {
 	/*
 	 * Sends a COREQ request.
 	 */
-	public static void sendRequestCOREQ(SocketChannel sc, String pseudo) throws IOException {
-		ByteBuffer bb = encodeRequestCOREQ(pseudo);
+	public static boolean sendRequestCOREQ(SocketChannel sc, String pseudo) throws IOException {
+		Optional<ByteBuffer> optional = NetworkCommunication.encodePseudo(pseudo);
+		if (!optional.isPresent()) {
+			return false;
+		}
+		ByteBuffer bb = encodeRequestCOREQ(optional.get());
 		sendRequest(sc, bb);
+		return true;
 	}
 
 	/*
 	 * Sends a MSG request.
 	 */
-	public static void sendRequestMSG(SocketChannel sc, String message) throws IOException {
-		ByteBuffer bb = encodeRequestMSG(message);
+	public static boolean sendRequestMSG(SocketChannel sc, String message) throws IOException {
+		Optional<ByteBuffer> optional = NetworkCommunication.encodeMessage(message);
+		if (!optional.isPresent()) {
+			return false;
+		}
+		ByteBuffer bb = encodeRequestMSG(optional.get());
 		sendRequest(sc, bb);
+		return true;
 	}
 
 	public static void sendRequestDISCO(SocketChannel sc) throws IOException {

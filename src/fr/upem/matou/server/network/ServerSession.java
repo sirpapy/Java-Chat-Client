@@ -18,13 +18,18 @@ import fr.upem.matou.shared.network.NetworkProtocol;
  * This class represents the state of a client connected to the chat server.
  */
 class ServerSession {
+	private static final int BUFFER_SIZE_INPUT = 1024;
+	private static final int BUFFER_SIZE_OUTPUT = 1024;
+	private static final int PSEUDO_MAX_SIZE = NetworkCommunication.getPseudoMaxSize();
+	private static final int MESSAGE_MAX_SIZE = NetworkCommunication.getMessageMaxSize();
+
 	private final ServerDataBase db;
 	private final SocketChannel sc;
 	private boolean authent = false;
 	private NetworkProtocol protocol = null;
 	private int arg = -1;
-	private ByteBuffer bbRead = ByteBuffer.allocate(Integer.BYTES); // FIXME : Allocation !!!
-	private ByteBuffer bbWrite = ByteBuffer.allocate(0); // FIXME : Allocation !!!
+	private final ByteBuffer bbRead = ByteBuffer.allocateDirect(BUFFER_SIZE_INPUT); // FIXME : Allocation !!!
+	private final ByteBuffer bbWrite = ByteBuffer.allocateDirect(BUFFER_SIZE_OUTPUT); // FIXME : Allocation !!!
 	private ClientState clientState = null;
 
 	static interface ClientState {
@@ -46,6 +51,7 @@ class ServerSession {
 	ServerSession(ServerDataBase db, SocketChannel sc) {
 		this.db = db;
 		this.sc = sc;
+		clearAndLimit(bbRead, Integer.BYTES);
 	}
 
 	boolean isAuthent() {
@@ -64,12 +70,20 @@ class ServerSession {
 		return bbWrite;
 	}
 
-	void appendWriteBuffer(ByteBuffer bb) {
-		bbWrite = ByteBuffers.merge(bbWrite, bb);
+	private final static void clearAndLimit(ByteBuffer bb, int size) {
+		bb.clear();
+		bb.limit(size);
 	}
-	
+
+	void appendWriteBuffer(ByteBuffer bb) {
+		boolean succeeded = ByteBuffers.append(bbWrite, bb);
+		if (!succeeded) {
+			Logger.warning("MESSAGE LOST | WRITE BUFFER CANNOT HOLD IT");
+		}
+	}
+
 	private void resetReadState() {
-		bbRead = ByteBuffer.allocate(Integer.BYTES);
+		clearAndLimit(bbRead, Integer.BYTES);
 		arg = -1;
 		protocol = null;
 	}
@@ -93,7 +107,7 @@ class ServerSession {
 	 * Initializes the COREQ state.
 	 */
 	private void processCOREQinit() {
-		bbRead = ByteBuffer.allocate(Integer.BYTES);
+		clearAndLimit(bbRead, Integer.BYTES);
 		clientState = new StateCOREQ();
 		arg++;
 	}
@@ -105,8 +119,12 @@ class ServerSession {
 		bbRead.flip();
 		state.sizePseudo = bbRead.getInt();
 		Logger.network(LogType.READ, "SIZE PSEUDO : " + state.sizePseudo);
+		if (state.sizePseudo > PSEUDO_MAX_SIZE) {
+			Logger.debug("Invalid size pseudo");
+			resetReadState();
+		}
 
-		bbRead = ByteBuffer.allocate(state.sizePseudo);
+		clearAndLimit(bbRead, state.sizePseudo);
 		arg++;
 	}
 
@@ -129,7 +147,7 @@ class ServerSession {
 		Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES);
 		Logger.network(LogType.WRITE, "ACCEPTATION : " + acceptation);
 
-		bbWrite = ServerCommunication.encodeRequestCORES(acceptation);
+		ServerCommunication.addRequestCORES(bbWrite, acceptation);
 
 		if (acceptation) {
 			setAuthent();
@@ -167,7 +185,7 @@ class ServerSession {
 	}
 
 	private void processMSGinit() {
-		bbRead = ByteBuffer.allocate(Integer.BYTES);
+		clearAndLimit(bbRead, Integer.BYTES);
 		clientState = new StateMSG();
 		arg++;
 	}
@@ -176,9 +194,13 @@ class ServerSession {
 		bbRead.flip();
 		state.sizeMessage = bbRead.getInt();
 		Logger.network(LogType.READ, "SIZE MESSAGE : " + state.sizeMessage);
+		if (state.sizeMessage > MESSAGE_MAX_SIZE) {
+			Logger.debug("Invalid size message");
+			resetReadState();
+		}
 
 		// FIXME : Si le message est vide, l'allocation de 0 entrainera la fermeture du client.
-		bbRead = ByteBuffer.allocate(state.sizeMessage);
+		clearAndLimit(bbRead, state.sizeMessage);
 		arg++;
 	}
 
@@ -191,7 +213,7 @@ class ServerSession {
 	}
 
 	private void answerMSGBC(String message) {
-		if(!NetworkCommunication.checkMessageValidity(message)) {
+		if (!NetworkCommunication.checkMessageValidity(message)) {
 			Logger.debug("INVALID MESSAGE : " + message);
 			return;
 		}
@@ -230,7 +252,7 @@ class ServerSession {
 	}
 
 	private void answerDISCODISP() {
-		bbRead = ByteBuffer.allocate(0);
+		clearAndLimit(bbRead, 0);
 	}
 
 	private void processDISCO() {
@@ -289,10 +311,10 @@ class ServerSession {
 	 * Updates the interest operations after reading or writing.
 	 */
 	boolean updateInterestOps(SelectionKey key) {
-		if(!key.isValid()) {
+		if (!key.isValid()) {
 			return true;
 		}
-		
+
 		int ops = 0;
 
 		if (bbWrite.position() > 0) { // There is something to write

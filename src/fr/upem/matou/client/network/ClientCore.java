@@ -55,7 +55,10 @@ public class ClientCore implements Closeable {
 			}
 			Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
 			Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
-			ClientCommunication.sendRequestCOREQ(sc, pseudo);
+			if (!ClientCommunication.sendRequestCOREQ(sc, pseudo)) {
+				ui.warnInvalidPseudo(pseudo);
+				continue;
+			}
 			return;
 		}
 	}
@@ -97,7 +100,10 @@ public class ClientCore implements Closeable {
 		}
 		Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSG);
 		Logger.network(LogType.WRITE, "MESSAGE : " + inputMessage);
-		ClientCommunication.sendRequestMSG(sc, inputMessage);
+		if (!ClientCommunication.sendRequestMSG(sc, inputMessage)) {
+			ui.warnInvalidMessage(inputMessage);
+			return false;
+		}
 		return false;
 	}
 
@@ -179,6 +185,7 @@ public class ClientCore implements Closeable {
 						this.sc.close();
 						break;
 					} catch (IOException e) {
+						Logger.exception(e);
 					}
 				}
 				testeur = getChrono();

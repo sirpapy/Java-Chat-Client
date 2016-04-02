@@ -33,20 +33,30 @@ public class ByteBuffers {
 	/**
 	 * Appends a buffer to another buffer.
 	 * The source buffer is not modified.
-	 * The target buffer will be in write mode after this operation. The target buffer must have sufficient capacity.
+	 * The target buffer will be in write mode after this operation.
+	 * If the target buffer does not have enough space to hold the source buffer, then neither buffers are modified
+	 * false is returned.
 	 * 
 	 * @param target
 	 *            The target buffer (in write mode)
 	 * @param source
 	 *            The source buffer (in write mode)
+	 * @return true if the operation succeeded, false otherwise (because of insufficient space in target buffer).
 	 */
-	public static void append(ByteBuffer target, ByteBuffer source) {
+	public static boolean append(ByteBuffer target, ByteBuffer source) {
 		source.flip();
-		target.put(source);
-		source.position(0);
-		source.compact();
+		try {
+			if (source.remaining() > target.remaining()) {
+				return false;
+			}
+			target.put(source);
+			source.position(0);
+		} finally {
+			source.compact();
+		}
+		return true;
 	}
-
+		
 	/**
 	 * Merges two buffers in one.
 	 * The two buffers are not modified.
@@ -108,7 +118,7 @@ public class ByteBuffers {
 				.collect(Collectors.joining(" "));
 		return "{" + string + "}";
 	}
-	
+
 	public static String toBinaryString(byte b) {
 		return String.format("%8s", Integer.toBinaryString(b)).replace(' ', '0');
 	}

@@ -10,7 +10,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 
-import fr.upem.matou.buffer.ByteBuffers;
 import fr.upem.matou.logger.Logger;
 
 /*
@@ -110,14 +109,15 @@ public class ServerCore implements Closeable {
 		ByteBuffer bb = session.getWriteBuffer();
 
 		bb.flip();
+		Logger.debug("WRITING BUFFER : " + bb);
 		for (int i = 1; bb.hasRemaining(); i++) { // TEMP
 			ByteBuffer writter = ByteBuffer.allocate(1);
 			byte oneByte = bb.get();
 			writter.put(oneByte);
 			writter.flip();
 			channel.write(writter); // XXX : Risque d'attente active !!!
-			Logger.debug("Byte #" + i + " sent : " + ByteBuffers.toBinaryString(oneByte)
-					+ " (~" + ((i - 1) * SERVER_DELAY) + "ms)");
+//			Logger.debug("Byte #" + i + " sent : " + ByteBuffers.toBinaryString(oneByte)
+//					+ " (~" + ((i - 1) * SERVER_DELAY) + "ms)");
 			try {
 				Thread.sleep(SERVER_DELAY);
 			} catch (InterruptedException e) {
