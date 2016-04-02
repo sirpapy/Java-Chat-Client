@@ -115,9 +115,13 @@ public class ServerCore implements Closeable {
 			byte oneByte = bb.get();
 			writter.put(oneByte);
 			writter.flip();
-			channel.write(writter); // XXX : Risque d'attente active !!!
-//			Logger.debug("Byte #" + i + " sent : " + ByteBuffers.toBinaryString(oneByte)
-//					+ " (~" + ((i - 1) * SERVER_DELAY) + "ms)");
+			int written = channel.write(writter); // XXX : Risque d'attente active !!!
+			if (written == 0) {
+				Logger.debug("/!\\ WRITING NOT FINISHED /!\\");
+				break;
+			}
+			// Logger.debug("Byte #" + i + " sent : " + ByteBuffers.toBinaryString(oneByte)
+			// + " (~" + ((i - 1) * SERVER_DELAY) + "ms)");
 			try {
 				Thread.sleep(SERVER_DELAY);
 			} catch (InterruptedException e) {
