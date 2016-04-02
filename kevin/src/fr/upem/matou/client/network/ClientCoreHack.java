@@ -286,10 +286,11 @@ public class ClientCoreHack implements Closeable {
 		}
 
 	}
-	
+
 	public void startChat_FullMessage() throws IOException {
 		ClientCommunication.sendRequestCOREQ(sc, "øøøøøøøøøøøøøøøø");
-		ClientCommunication.sendRequestMSG(sc, "𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀");
+		ClientCommunication.sendRequestMSG(sc,
+				"𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀");
 		for (int i = 0; i < 3; i++) {
 			Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
 			if (!optionalProtocol.isPresent()) {
@@ -333,13 +334,68 @@ public class ClientCoreHack implements Closeable {
 		}
 	}
 
+	public void startChat_FloodMessage() throws IOException {
+		ClientCommunication.sendRequestCOREQ(sc, "øøøøøøøøøøøøøøøø");
+		int flood = 32;
+		for (int i = 0; i < flood; i++) {
+			ClientCommunication.sendRequestMSG(sc,
+					"𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀");
+		}
+
+		int stop = 2 + flood;
+		for (int i = 0; i < stop; i++) {
+			System.out.println("REQ #" + (i+1));
+			Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
+			if (!optionalProtocol.isPresent()) {
+				System.out.println("No protocol");
+				return;
+			}
+			NetworkProtocol protocol = optionalProtocol.get();
+
+			switch (protocol) {
+			case CORES:
+				Optional<Boolean> optionalAcceptation = ClientCommunication.receiveRequestCORES(sc);
+				if (!optionalAcceptation.isPresent()) {
+					System.out.println("No message");
+					return;
+				}
+				boolean acceptation = optionalAcceptation.get();
+				System.out.println("Acceptation = " + acceptation);
+				break;
+			case CODISP:
+				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCODISP(sc);
+				if (!optionalPseudo.isPresent()) {
+					System.out.println("No message");
+					return;
+				}
+				String pseudo = optionalPseudo.get();
+				System.out.println("New connection : " + pseudo);
+				break;
+			case MSGBC:
+				Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
+				if (!optionalMessage.isPresent()) {
+					System.out.println("No message");
+					return;
+				}
+				Message message = optionalMessage.get();
+				System.out.println(message);
+				break;
+			default:
+				System.out.println("Invalid protocol : " + protocol);
+				return;
+			}
+		}
+		
+		System.out.println("SUCCESS");
+	}
+
 	@Override
 	public void close() throws IOException {
 		sc.close();
 	}
 
 	public void startChat() throws IOException {
-		startChat_FullMessage();
+		startChat_FloodMessage();
 	}
 
 }

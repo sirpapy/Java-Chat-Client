@@ -11,13 +11,14 @@ import java.util.Set;
 import fr.upem.matou.buffer.ByteBuffers;
 import fr.upem.matou.logger.Logger;
 import fr.upem.matou.shared.network.NetworkCommunication;
+import fr.upem.matou.shared.network.NetworkProtocol;
 
 /*
  * This class represents the state of the chat server.
  * This class is not thread-safe and should not be used by several threads.
  */
 class ServerDataBase {
-	private static final int BUFFER_SIZE_BROADCAST = 1024;
+	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxOutgoingRequestSize();
 
 	private final HashMap<SocketChannel, String> connected = new HashMap<>();
 	private final Set<SocketChannel> keysView = connected.keySet();

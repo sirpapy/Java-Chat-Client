@@ -1,6 +1,10 @@
 package fr.upem.matou.shared.network;
 
+import static fr.upem.matou.shared.network.NetworkCommunication.*;
+import static fr.upem.matou.shared.network.NetworkProtocol.ExchangeDirection.*;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -11,15 +15,14 @@ import java.util.Optional;
  * This class defines the communication protocol.
  */
 public enum NetworkProtocol {
-	
-	
-	COREQ(ExchangeDirection.INCOMING, "PUBLIC_CONNECTION_REQUEST", 4, 32),
-	CORES(ExchangeDirection.OUTGOING, "PUBLIC_CONNECTION_RESPONSE", 4, 1),
-	CODISP(ExchangeDirection.OUTGOING, "PUBLIC_CONNECTION_NOTIFICATION", 4, 32),
-	MSG(ExchangeDirection.INCOMING, "PUBLIC_MESSAGE", 4, 512),
-	MSGBC(ExchangeDirection.OUTGOING, "PUBLIC_MESSAGE_BROADCAST", 4, 32, 4, 512),
-	DISCO(ExchangeDirection.INCOMING, "PUBLIC_DISCONNECTION", 4),
-	DISCODISP(ExchangeDirection.OUTGOING, "PUBLIC_DISCONNECTION_NOTIFICATION", 4, 32),
+
+	COREQ(INCOMING, "PUBLIC_CONNECTION_REQUEST", LENGTH_SIZE, PSEUDO_MAX_SIZE),
+	CORES(OUTGOING, "PUBLIC_CONNECTION_RESPONSE", LENGTH_SIZE, Byte.BYTES),
+	CODISP(OUTGOING, "PUBLIC_CONNECTION_NOTIFICATION", LENGTH_SIZE, PSEUDO_MAX_SIZE),
+	MSG(INCOMING, "PUBLIC_MESSAGE", LENGTH_SIZE, MESSAGE_MAX_SIZE),
+	MSGBC(OUTGOING, "PUBLIC_MESSAGE_BROADCAST", LENGTH_SIZE, PSEUDO_MAX_SIZE, LENGTH_SIZE, MESSAGE_MAX_SIZE),
+	DISCO(INCOMING, "PUBLIC_DISCONNECTION", LENGTH_SIZE),
+	DISCODISP(OUTGOING, "PUBLIC_DISCONNECTION_NOTIFICATION", LENGTH_SIZE, PSEUDO_MAX_SIZE),
 	// PVCOREQ("CLIENT_PRIVATE_CONNECTION_REQUEST"),
 	// PVCOTR("SERVER_PRIVATE_CONNECTION_TRANSFER"),
 	// PVCOACC("CLIENT_PRIVATE_CONNECTION_CONFIRM"),
@@ -51,19 +54,19 @@ public enum NetworkProtocol {
 		maxRequestSize = argumentSizes.stream().mapToInt(Integer::intValue).sum();
 	}
 
-	int getMaxRequestSize() {
+	public int getMaxRequestSize() {
 		return maxRequestSize;
 	}
 
-	int getArgumentSize(int arg) {
+	public int getArgumentSize(int arg) {
 		return argumentSizes.get(arg);
 	}
 
 	@Override
 	public String toString() {
 		String dir = "";
-		
-		switch(direction) {
+
+		switch (direction) {
 		case INCOMING:
 			dir = "CLIENT";
 			break;
@@ -71,9 +74,9 @@ public enum NetworkProtocol {
 			dir = "SERVER";
 			break;
 		default:
-			break;		
+			break;
 		}
-		
+
 		return "[" + ordinal() + " - " + name() + " - " + dir + " " + description + "]";
 	}
 
@@ -89,4 +92,17 @@ public enum NetworkProtocol {
 		return Optional.of(protocol);
 	}
 
+	private static int getMaxRequestSize(ExchangeDirection direction) {
+		NetworkProtocol[] values = values();
+		return Arrays.stream(values).filter(e -> e.direction == direction).mapToInt(e -> e.maxRequestSize).max()
+				.getAsInt();
+	}
+
+	public static int getMaxIncomingRequestSize() {
+		return getMaxRequestSize(INCOMING);
+	}
+
+	public static int getMaxOutgoingRequestSize() {
+		return getMaxRequestSize(OUTGOING);
+	}
 }

@@ -18,8 +18,8 @@ import fr.upem.matou.shared.network.NetworkProtocol;
  * This class represents the state of a client connected to the chat server.
  */
 class ServerSession {
-	private static final int BUFFER_SIZE_INPUT = 1024;
-	private static final int BUFFER_SIZE_OUTPUT = 1024;
+	private static final int BUFFER_SIZE_INPUT = NetworkProtocol.getMaxIncomingRequestSize();
+	private static final int BUFFER_SIZE_OUTPUT = NetworkProtocol.getMaxOutgoingRequestSize();
 	private static final int PSEUDO_MAX_SIZE = NetworkCommunication.getPseudoMaxSize();
 	private static final int MESSAGE_MAX_SIZE = NetworkCommunication.getMessageMaxSize();
 

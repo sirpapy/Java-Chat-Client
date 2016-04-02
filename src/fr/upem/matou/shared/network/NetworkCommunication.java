@@ -11,8 +11,10 @@ import fr.upem.matou.logger.Logger;
  */
 public class NetworkCommunication {
 	private static final Charset PROTOCOL_CHARSET = Charset.forName("UTF-8");
-	private static final int PSEUDO_MAX_SIZE = 32;
-	private static final int MESSAGE_MAX_SIZE = 512;
+	
+	static final int LENGTH_SIZE = Integer.BYTES;
+	static final int PSEUDO_MAX_SIZE = 32;
+	static final int MESSAGE_MAX_SIZE = 512;
 
 	private NetworkCommunication() {
 	}
