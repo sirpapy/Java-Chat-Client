@@ -115,7 +115,7 @@ public class ServerCore implements Closeable {
 			byte oneByte = bb.get();
 			writter.put(oneByte);
 			writter.flip();
-			int written = channel.write(writter); // XXX : Risque d'attente active !!!
+			int written = channel.write(writter);
 			if (written == 0) {
 				Logger.debug("/!\\ WRITING NOT FINISHED /!\\");
 				break;

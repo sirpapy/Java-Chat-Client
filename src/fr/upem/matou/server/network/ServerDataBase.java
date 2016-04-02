@@ -3,12 +3,10 @@ package fr.upem.matou.server.network;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 
-import fr.upem.matou.buffer.ByteBuffers;
 import fr.upem.matou.logger.Logger;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
@@ -23,7 +21,6 @@ class ServerDataBase {
 	private final HashMap<SocketChannel, String> connected = new HashMap<>();
 	private final Set<SocketChannel> keysView = connected.keySet();
 	private final Collection<String> valuesView = connected.values();
-	private final ArrayDeque<ByteBuffer> broadcast = new ArrayDeque<>();
 	private final Set<SelectionKey> keys;
 	private final ByteBuffer bbBroadcast = ByteBuffer.allocateDirect(BUFFER_SIZE_BROADCAST);
 
@@ -35,8 +32,7 @@ class ServerDataBase {
 		return !valuesView.contains(pseudo);
 	}
 
-	ByteBuffer getClearBroadcastBuffer() {
-		bbBroadcast.clear();
+	ByteBuffer getBroadcastBuffer() {
 		return bbBroadcast;
 	}
 	
@@ -59,14 +55,9 @@ class ServerDataBase {
 		return connected.get(sc);
 	}
 
-	void addBroadcast(ByteBuffer bbWriteAll) {
-		broadcast.add(bbWriteAll);
-	}
-
 	void updateStateReadAll() {
-		ByteBuffer bbBroadcast = broadcast.pollFirst();
 		Logger.debug("BROADCAST : " + bbBroadcast);
-		if (bbBroadcast == null) {
+		if(bbBroadcast.position() == 0) {
 			return;
 		}
 
@@ -91,12 +82,13 @@ class ServerDataBase {
 
 			Logger.debug("\tOK");
 
-			ByteBuffer bb = ByteBuffers.copy(bbBroadcast);
-			session.appendWriteBuffer(bb);
+			session.appendWriteBuffer(bbBroadcast);
 
 			int ops = key.interestOps();
 			key.interestOps(ops | SelectionKey.OP_WRITE);
 		}
+		
+		bbBroadcast.clear();
 	}
 
 	void updateStateWriteAll() {

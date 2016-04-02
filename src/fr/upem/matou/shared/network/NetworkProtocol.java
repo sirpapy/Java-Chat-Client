@@ -9,8 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-// TODO : Fusion NetworkProtocol et NetworkCommunication
-
 /*
  * This class defines the communication protocol.
  */

@@ -163,12 +163,11 @@ class ServerSession {
 			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CODISP);
 			Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
 
-			ByteBuffer bbWriteAll = db.getClearBroadcastBuffer();
+			ByteBuffer bbWriteAll = db.getBroadcastBuffer();
 			if (!ServerCommunication.addRequestCODISP(bbWriteAll, pseudo)) {
 				Logger.warning("CODISP lost | Broadcast Buffer cannot hold it");
 				return;
 			}
-			db.addBroadcast(bbWriteAll);
 		}
 	}
 
@@ -212,7 +211,6 @@ class ServerSession {
 			return;
 		}
 
-		// FIXME : Si le message est vide, l'allocation de 0 entrainera la fermeture du client.
 		clearAndLimit(bbRead, state.sizeMessage);
 		arg++;
 	}
@@ -235,12 +233,11 @@ class ServerSession {
 		Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
 		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + message);
 
-		ByteBuffer bbWriteAll = db.getClearBroadcastBuffer();
+		ByteBuffer bbWriteAll = db.getBroadcastBuffer();
 		if (!ServerCommunication.addRequestMSGBC(bbWriteAll, pseudo, message)) {
 			Logger.warning("MSGBC lost | Broadcast Buffer cannot hold it");
 			return;
 		}
-		db.addBroadcast(bbWriteAll);
 	}
 
 	private void processMSG() {
@@ -354,11 +351,10 @@ class ServerSession {
 		if (pseudo != null) {
 			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCODISP);
 			Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
-			ByteBuffer bbWriteAll = db.getClearBroadcastBuffer();
+			ByteBuffer bbWriteAll = db.getBroadcastBuffer();
 			if (!ServerCommunication.addRequestDISCODISP(bbWriteAll, pseudo)) {
 				Logger.warning("DISCODISP lost | Broadcast Buffer cannot hold it");
 			} else {
-				db.addBroadcast(bbWriteAll);
 				db.updateStateReadAll();
 			}
 		}

@@ -19,7 +19,6 @@ class ServerCommunication {
 
 	// bb should be flipped
 	static String readStringUTF8(ByteBuffer bb) {
-		// TODO : flip + readInt
 		return PROTOCOL_CHARSET.decode(bb).toString();
 	}
 
