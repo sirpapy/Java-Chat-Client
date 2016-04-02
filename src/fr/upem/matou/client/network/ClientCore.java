@@ -7,7 +7,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Optional;
 
 import fr.upem.matou.logger.Logger;
-import fr.upem.matou.logger.Logger.LogType;
+import fr.upem.matou.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.ui.Message;
@@ -53,8 +53,8 @@ public class ClientCore implements Closeable {
 				ui.warnInvalidPseudo(pseudo);
 				continue;
 			}
-			Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
-			Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
+			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
+			Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
 			if (!ClientCommunication.sendRequestCOREQ(sc, pseudo)) {
 				ui.warnInvalidPseudo(pseudo);
 				continue;
@@ -71,7 +71,7 @@ public class ClientCore implements Closeable {
 		}
 
 		NetworkProtocol protocol = optionalRequestType.get();
-		Logger.network(LogType.READ, "PROTOCOL : " + protocol);
+		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 		switch (protocol) {
 		case CORES:
 			Optional<Boolean> optionalRequestCORES = ClientCommunication
@@ -80,7 +80,7 @@ public class ClientCore implements Closeable {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			boolean acceptation = optionalRequestCORES.get();
-			Logger.network(LogType.READ, "ACCEPTATION : " + acceptation);
+			Logger.network(NetworkLogType.READ, "ACCEPTATION : " + acceptation);
 			return acceptation;
 		default:
 			throw new AssertionError("Unexpected protocol request : "
@@ -98,8 +98,8 @@ public class ClientCore implements Closeable {
 			ui.warnInvalidMessage(inputMessage);
 			return false;
 		}
-		Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSG);
-		Logger.network(LogType.WRITE, "MESSAGE : " + inputMessage);
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSG);
+		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + inputMessage);
 		if (!ClientCommunication.sendRequestMSG(sc, inputMessage)) {
 			ui.warnInvalidMessage(inputMessage);
 			return false;
@@ -114,7 +114,7 @@ public class ClientCore implements Closeable {
 			throw new IOException("Protocol violation");
 		}
 		NetworkProtocol protocol = optionalRequestType.get();
-		Logger.network(LogType.READ, "PROTOCOL : " + protocol);
+		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 
 		switch (protocol) {
 		case MSGBC:
@@ -128,9 +128,9 @@ public class ClientCore implements Closeable {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			Message receivedMessage = optionalRequestMSGBC.get();
-			Logger.network(LogType.READ,
+			Logger.network(NetworkLogType.READ,
 					"PSEUDO : " + receivedMessage.getPseudo());
-			Logger.network(LogType.READ,
+			Logger.network(NetworkLogType.READ,
 					"MESSAGE : " + receivedMessage.getContent());
 			ui.displayMessage(receivedMessage);
 
@@ -145,7 +145,7 @@ public class ClientCore implements Closeable {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			String receivedConnected = optionalRequestCODISP.get();
-			Logger.network(LogType.READ, "PSEUDO : " + receivedConnected);
+			Logger.network(NetworkLogType.READ, "PSEUDO : " + receivedConnected);
 			ui.displayNewConnectionEvent(receivedConnected);
 
 			break;
@@ -158,7 +158,7 @@ public class ClientCore implements Closeable {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			String receivedDisconnected = optionalRequestDISCODISP.get();
-			Logger.network(LogType.READ, "PSEUDO : " + receivedDisconnected);
+			Logger.network(NetworkLogType.READ, "PSEUDO : " + receivedDisconnected);
 			ui.displayNewDisconnectionEvent(receivedDisconnected);
 
 			break;
@@ -257,7 +257,7 @@ public class ClientCore implements Closeable {
 	}
 
 	private void warnDisconnection() throws IOException {
-		Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCO);
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCO);
 		ClientCommunication.sendRequestDISCO(sc);
 	}
 

@@ -68,4 +68,19 @@ public class Colorator {
 		}
 		return ANSI_WHITE + string + ANSI_RESET;
 	}
+
+	public static void printColors() {
+		System.out.println(Colorator.colorBlack("BLACK"));
+		System.out.println(Colorator.colorBlue("BLUE"));
+		System.out.println(Colorator.colorCyan("CYAN"));
+		System.out.println(Colorator.colorGreen("GREEN"));
+		System.out.println(Colorator.colorPurple("PURPLE"));
+		System.out.println(Colorator.colorRed("RED"));
+		System.out.println(Colorator.colorWhite("WHITE"));
+		System.out.println(Colorator.colorYellow("YELLOW"));
+	}
+	
+	public static void main(String[] args) {
+		printColors();
+	}
 }

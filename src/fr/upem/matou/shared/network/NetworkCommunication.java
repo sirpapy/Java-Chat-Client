@@ -11,7 +11,7 @@ import fr.upem.matou.logger.Logger;
  */
 public class NetworkCommunication {
 	private static final Charset PROTOCOL_CHARSET = Charset.forName("UTF-8");
-	
+
 	static final int LENGTH_SIZE = Integer.BYTES;
 	static final int PSEUDO_MAX_SIZE = 32;
 	static final int MESSAGE_MAX_SIZE = 512;
@@ -34,43 +34,43 @@ public class NetworkCommunication {
 	public static boolean checkMessageValidity(String message) {
 		return message.chars().allMatch(NetworkCommunication::isValidMessageCharacter);
 	}
-	
+
 	public static boolean checkEncodedPseudoValidity(ByteBuffer pseudo) {
 		int size = pseudo.remaining();
-		return size <= PSEUDO_MAX_SIZE;
+		return size <= PSEUDO_MAX_SIZE && size > 0;
 	}
-	
+
 	public static boolean checkEncodedMessageValidity(ByteBuffer message) {
 		int size = message.remaining();
-		return size <= MESSAGE_MAX_SIZE;
+		return size <= MESSAGE_MAX_SIZE && size > 0;
 	}
 
 	public static Charset getProtocolCharset() {
 		return PROTOCOL_CHARSET;
 	}
-	
+
 	public static Optional<ByteBuffer> encodePseudo(String pseudo) {
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(pseudo);
 		Logger.debug("ENCODED PSEUDO SIZE : " + encoded.remaining());
-		if(encoded.remaining() > PSEUDO_MAX_SIZE) {
-			return Optional.empty();
-		}
+//		if (!checkEncodedPseudoValidity(encoded)) {
+//			return Optional.empty();
+//		}
 		return Optional.of(encoded);
 	}
-	
+
 	public static Optional<ByteBuffer> encodeMessage(String message) {
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(message);
 		Logger.debug("ENCODED MESSAGE SIZE : " + encoded.remaining());
-		if(encoded.remaining() > MESSAGE_MAX_SIZE) {
-			return Optional.empty();
-		}
+//		if (!checkEncodedMessageValidity(encoded)) {
+//			return Optional.empty();
+//		}
 		return Optional.of(encoded);
 	}
-	
+
 	public static int getPseudoMaxSize() {
 		return PSEUDO_MAX_SIZE;
 	}
-	
+
 	public static int getMessageMaxSize() {
 		return MESSAGE_MAX_SIZE;
 	}

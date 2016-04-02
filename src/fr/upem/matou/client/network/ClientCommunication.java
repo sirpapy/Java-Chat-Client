@@ -31,7 +31,7 @@ class ClientCommunication {
 		return true;
 	}
 
-	private static void sendRequest(SocketChannel sc, ByteBuffer bb) throws IOException {
+	public static void sendRequest(SocketChannel sc, ByteBuffer bb) throws IOException {
 		bb.flip();
 		sc.write(bb);
 	}
@@ -39,7 +39,7 @@ class ClientCommunication {
 	/*
 	 * Encodes a COREQ request.
 	 */
-	private static ByteBuffer encodeRequestCOREQ(ByteBuffer encodedPseudo) {
+	public static ByteBuffer encodeRequestCOREQ(ByteBuffer encodedPseudo) {
 		int length = encodedPseudo.remaining();
 
 		int capacity = Integer.BYTES + Integer.BYTES + length;
@@ -54,7 +54,7 @@ class ClientCommunication {
 	/*
 	 * Encodes a MSG request.
 	 */
-	private static ByteBuffer encodeRequestMSG(ByteBuffer encodedMessage) {
+	public static ByteBuffer encodeRequestMSG(ByteBuffer encodedMessage) {
 		int length = encodedMessage.remaining();
 
 		int capacity = Integer.BYTES + Integer.BYTES + length;
@@ -66,7 +66,7 @@ class ClientCommunication {
 		return request;
 	}
 
-	private static ByteBuffer encodeRequestDISCO() {
+	public static ByteBuffer encodeRequestDISCO() {
 		int capacity = Integer.BYTES;
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 

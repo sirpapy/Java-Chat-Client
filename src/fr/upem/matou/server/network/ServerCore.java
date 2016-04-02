@@ -66,7 +66,7 @@ public class ServerCore implements Closeable {
 			} catch (IOException e) {
 				Logger.exception(e);
 				ServerSession session = (ServerSession) key.attachment();
-				session.silentlyClose();
+				session.disconnectClient();
 			}
 		}
 	}
@@ -89,7 +89,7 @@ public class ServerCore implements Closeable {
 		ByteBuffer bb = session.getReadBuffer();
 
 		if (channel.read(bb) == -1) {
-			session.silentlyClose();
+			session.disconnectClient();
 			return;
 		}
 
@@ -99,7 +99,7 @@ public class ServerCore implements Closeable {
 		boolean active = session.updateInterestOps(key);
 		if (!active) {
 			Logger.debug("INACTIVE AFTER READ");
-			session.silentlyClose();
+			session.disconnectClient();
 		}
 	}
 
@@ -136,7 +136,7 @@ public class ServerCore implements Closeable {
 		boolean active = session.updateInterestOps(key);
 		if (!active) {
 			Logger.debug("INACTIVE AFTER WRITE");
-			session.silentlyClose();
+			session.disconnectClient();
 		}
 	}
 

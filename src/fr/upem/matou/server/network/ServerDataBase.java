@@ -106,7 +106,7 @@ class ServerDataBase {
 	String removeClient(SocketChannel channel) {
 		String disconnected = connected.remove(channel);
 		if (disconnected == null) {
-			Logger.debug("DISCONNECTION : {UNAUTHENTIFIED CLIENT}");
+			Logger.debug("DISCONNECTION : {UNAUTHENTICATED CLIENT}");
 		} else {
 			Logger.debug("DISCONNECTION : " + disconnected);
 		}

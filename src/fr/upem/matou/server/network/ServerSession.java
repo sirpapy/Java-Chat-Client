@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import fr.upem.matou.buffer.ByteBuffers;
 import fr.upem.matou.logger.Logger;
-import fr.upem.matou.logger.Logger.LogType;
+import fr.upem.matou.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 
@@ -99,7 +99,7 @@ class ServerSession {
 			return;
 		}
 		protocol = optionalProtocol.get();
-		Logger.network(LogType.READ, "PROTOCOL : " + protocol);
+		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 		arg++;
 	}
 
@@ -107,6 +107,11 @@ class ServerSession {
 	 * Initializes the COREQ state.
 	 */
 	private void processCOREQinit() {
+		if (isAuthent()) {
+			Logger.debug("Client already authenticated");
+			disconnectClient();
+			return;
+		}
 		clearAndLimit(bbRead, Integer.BYTES);
 		clientState = new StateCOREQ();
 		arg++;
@@ -118,10 +123,11 @@ class ServerSession {
 	private void processCOREQarg1(StateCOREQ state) {
 		bbRead.flip();
 		state.sizePseudo = bbRead.getInt();
-		Logger.network(LogType.READ, "SIZE PSEUDO : " + state.sizePseudo);
-		if (state.sizePseudo > PSEUDO_MAX_SIZE) {
+		Logger.network(NetworkLogType.READ, "SIZE PSEUDO : " + state.sizePseudo);
+		if (state.sizePseudo > PSEUDO_MAX_SIZE || state.sizePseudo == 0) {
 			Logger.debug("Invalid size pseudo");
-			resetReadState();
+			disconnectClient();
+			return;
 		}
 
 		clearAndLimit(bbRead, state.sizePseudo);
@@ -134,7 +140,7 @@ class ServerSession {
 	private void processCOREQarg2(StateCOREQ state) {
 		bbRead.flip();
 		state.pseudo = ServerCommunication.readStringUTF8(bbRead);
-		Logger.network(LogType.READ, "PSEUDO : " + state.pseudo);
+		Logger.network(NetworkLogType.READ, "PSEUDO : " + state.pseudo);
 
 		resetReadState();
 	}
@@ -144,18 +150,18 @@ class ServerSession {
 	 */
 	private void answerCORES(String pseudo) {
 		boolean acceptation = db.addNewClient(sc, pseudo);
-		Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES);
-		Logger.network(LogType.WRITE, "ACCEPTATION : " + acceptation);
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES);
+		Logger.network(NetworkLogType.WRITE, "ACCEPTATION : " + acceptation);
 
-		if(!ServerCommunication.addRequestCORES(bbWrite, acceptation)) {
+		if (!ServerCommunication.addRequestCORES(bbWrite, acceptation)) {
 			Logger.warning("CORES lost | Write Buffer cannot hold it");
 		}
 
 		if (acceptation) {
 			setAuthent();
 
-			Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.CODISP);
-			Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
+			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CODISP);
+			Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
 
 			ByteBuffer bbWriteAll = db.getClearBroadcastBuffer();
 			if (!ServerCommunication.addRequestCODISP(bbWriteAll, pseudo)) {
@@ -199,10 +205,11 @@ class ServerSession {
 	private void processMSGarg1(StateMSG state) {
 		bbRead.flip();
 		state.sizeMessage = bbRead.getInt();
-		Logger.network(LogType.READ, "SIZE MESSAGE : " + state.sizeMessage);
-		if (state.sizeMessage > MESSAGE_MAX_SIZE) {
+		Logger.network(NetworkLogType.READ, "SIZE MESSAGE : " + state.sizeMessage);
+		if (state.sizeMessage > MESSAGE_MAX_SIZE || state.sizeMessage == 0) {
 			Logger.debug("Invalid size message");
-			resetReadState();
+			disconnectClient();
+			return;
 		}
 
 		// FIXME : Si le message est vide, l'allocation de 0 entrainera la fermeture du client.
@@ -213,7 +220,7 @@ class ServerSession {
 	private void processMSGarg2(StateMSG state) {
 		bbRead.flip();
 		state.message = ServerCommunication.readStringUTF8(bbRead);
-		Logger.network(LogType.READ, "MESSAGE : " + state.message);
+		Logger.network(NetworkLogType.READ, "MESSAGE : " + state.message);
 
 		resetReadState();
 	}
@@ -224,9 +231,9 @@ class ServerSession {
 			return;
 		}
 		String pseudo = db.pseudoOf(sc);
-		Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSGBC);
-		Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
-		Logger.network(LogType.WRITE, "MESSAGE : " + message);
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSGBC);
+		Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
+		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + message);
 
 		ByteBuffer bbWriteAll = db.getClearBroadcastBuffer();
 		if (!ServerCommunication.addRequestMSGBC(bbWriteAll, pseudo, message)) {
@@ -278,16 +285,17 @@ class ServerSession {
 	 * Updates the state of the current session after reading.
 	 */
 	void updateStateRead() {
-		Logger.network(LogType.READ, "BUFFER = " + bbRead);
+		Logger.network(NetworkLogType.READ, "BUFFER = " + bbRead);
 		if (bbRead.hasRemaining()) { // Not finished to read
 			return;
 		}
-
+		
 		if (protocol == null) {
 			processRequestType();
 		}
 
 		if (arg == -1) {
+			Logger.warning("ARG UNSET BUFFER : " + bbRead);
 			return;
 		}
 
@@ -339,13 +347,13 @@ class ServerSession {
 		return ops != 0;
 	}
 
-	void silentlyClose() {
+	void disconnectClient() {
 		Logger.debug("SILENTLY CLOSE OF : " + sc);
 		String pseudo = db.removeClient(sc);
 
 		if (pseudo != null) {
-			Logger.network(LogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCODISP);
-			Logger.network(LogType.WRITE, "PSEUDO : " + pseudo);
+			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCODISP);
+			Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
 			ByteBuffer bbWriteAll = db.getClearBroadcastBuffer();
 			if (!ServerCommunication.addRequestDISCODISP(bbWriteAll, pseudo)) {
 				Logger.warning("DISCODISP lost | Broadcast Buffer cannot hold it");
@@ -355,6 +363,10 @@ class ServerSession {
 			}
 		}
 
+		silentlyClose(sc);
+	}
+
+	private static void silentlyClose(SocketChannel sc) {
 		try {
 			sc.close();
 		} catch (IOException e) {

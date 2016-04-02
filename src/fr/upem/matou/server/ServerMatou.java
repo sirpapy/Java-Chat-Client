@@ -27,6 +27,12 @@ public class ServerMatou {
 			usage();
 			return;
 		}
+
+//		PrintStream out = new PrintStream(Files.newOutputStream(Paths.get("server_out.log"), WRITE, CREATE, APPEND), true);
+//		PrintStream err = new PrintStream(Files.newOutputStream(Paths.get("server_err.log"), WRITE, CREATE, APPEND), true);
+//		Logger.attachOutput(out);
+//		Logger.attachError(err);
+
 		int port = Integer.parseInt(args[0]);
 		try (ServerCore server = new ServerCore(port)) {
 			server.launch();

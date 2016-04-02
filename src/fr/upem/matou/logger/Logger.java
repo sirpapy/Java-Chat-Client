@@ -1,18 +1,22 @@
 package fr.upem.matou.logger;
 
-import static fr.upem.matou.logger.Colorator.*;
+import static fr.upem.matou.logger.Colorator.colorBlue;
+import static fr.upem.matou.logger.Colorator.colorGreen;
+import static fr.upem.matou.logger.Colorator.colorPurple;
+import static fr.upem.matou.logger.Colorator.colorRed;
+import static fr.upem.matou.logger.Colorator.colorYellow;
 
 import java.io.PrintStream;
 
 public class Logger {
 
-	public static enum LogType {
+	public static enum NetworkLogType {
 		READ, WRITE;
 	}
 
-	private static final PrintStream STREAM_OUTPUT = System.out;
-	private static final PrintStream STREAM_ERROR = System.err;
-
+	private static PrintStream STREAM_OUT = System.out;
+	private static PrintStream STREAM_ERR = System.err;
+	
 	private static final boolean LOG_DEBUG = true;
 	private static final boolean LOG_NETWORK = true;
 	private static final boolean LOG_SELECT = true;
@@ -22,14 +26,22 @@ public class Logger {
 
 	private Logger() {
 	}
+	
+	public static void attachOutput(PrintStream out) {
+		STREAM_OUT = out;
+	}
+	
+	public static void attachError(PrintStream err) {
+		STREAM_ERR = err;
+	}
 
 	public static void debug(String message) {
 		if (LOG_DEBUG) {
-			STREAM_ERROR.println(colorPurple(message));
+			STREAM_ERR.println(colorPurple(message));
 		}
 	}
 
-	public static void network(LogType type, String message) {
+	public static void network(NetworkLogType type, String message) {
 		if (LOG_NETWORK) {
 			String string = "";
 			switch (type) {
@@ -43,32 +55,32 @@ public class Logger {
 				break;
 			}
 			string = string + " " + message;
-			STREAM_OUTPUT.println(colorGreen(message));
+			STREAM_OUT.println(colorGreen(string));
 		}
 	}
 
 	public static void selectInfo(String message) {
 		if (LOG_SELECT) {
-			STREAM_OUTPUT.println(colorBlue(message));
+			STREAM_OUT.println(colorBlue(message));
 		}
 	}
 
 	public static void warning(String message) {
 		if (LOG_WARNING) {
-			STREAM_ERROR.println(colorYellow(message));
+			STREAM_ERR.println(colorYellow(message));
 		}
 	}
 
 	public static void error(String message) {
 		if (LOG_ERROR) {
-			STREAM_ERROR.println(colorRed(message));
+			STREAM_ERR.println(colorRed(message));
 		}
 	}
 
 	// TODO : Traçage des exceptions avec cette méthode
 	public static void exception(Exception exception) {
 		if (LOG_EXCEPTION) {
-			exception.printStackTrace(STREAM_ERROR);
+			exception.printStackTrace(STREAM_ERR);
 		}
 	}
 }
