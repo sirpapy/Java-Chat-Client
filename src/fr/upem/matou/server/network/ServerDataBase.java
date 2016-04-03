@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Set;
 
 import fr.upem.matou.logger.Logger;
-import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 
 /*
@@ -19,8 +18,8 @@ class ServerDataBase {
 	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxOutgoingRequestSize();
 
 	private final HashMap<SocketChannel, String> connected = new HashMap<>();
-	private final Set<SocketChannel> keysView = connected.keySet();
-	private final Collection<String> valuesView = connected.values();
+	private final Set<SocketChannel> connectedKeysView = connected.keySet();
+	private final Collection<String> connectedValuesView = connected.values();
 	private final Set<SelectionKey> keys;
 	private final ByteBuffer bbBroadcast = ByteBuffer.allocateDirect(BUFFER_SIZE_BROADCAST);
 
@@ -29,7 +28,7 @@ class ServerDataBase {
 	}
 
 	private boolean checkAvailability(String pseudo) {
-		return !valuesView.contains(pseudo);
+		return !connectedValuesView.contains(pseudo);
 	}
 
 	ByteBuffer getBroadcastBuffer() {

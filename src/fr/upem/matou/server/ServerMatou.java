@@ -2,6 +2,7 @@ package fr.upem.matou.server;
 
 import java.io.IOException;
 
+import fr.upem.matou.logger.Logger;
 import fr.upem.matou.server.network.ServerCore;
 
 /**
@@ -22,7 +23,7 @@ public class ServerMatou {
 	 * @param args
 	 *            Command line arguments
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		if (args.length != 1) {
 			usage();
 			return;
@@ -36,6 +37,9 @@ public class ServerMatou {
 		int port = Integer.parseInt(args[0]);
 		try (ServerCore server = new ServerCore(port)) {
 			server.launch();
+		} catch (IOException e) {
+			Logger.error("CRITICAL ERROR | " + e.toString());
+			Logger.exception(e);
 		}
 	}
 }
