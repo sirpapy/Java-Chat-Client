@@ -112,7 +112,7 @@ class ClientCommunication {
 	public static Optional<NetworkProtocol> receiveRequestType(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bb)) {
-			return Optional.empty();
+			throw new IOException("Connection closed");
 		}
 		bb.flip();
 		int ordinal = bb.getInt();
@@ -125,7 +125,7 @@ class ClientCommunication {
 	public static Optional<Boolean> receiveRequestCORES(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(1);
 		if (!readFully(sc, bb)) {
-			return Optional.empty();
+			throw new IOException("Connection closed");
 		}
 		bb.flip();
 		byte acceptation = bb.get();
@@ -138,28 +138,28 @@ class ClientCommunication {
 	public static Optional<Message> receiveRequestMSGBC(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizePseudo = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizePseudo)) {
-			return Optional.empty();
+			throw new IOException("Connection closed");
 		}
 		bbSizePseudo.flip();
 		int sizePseudo = bbSizePseudo.getInt();
 
 		ByteBuffer bbPseudo = ByteBuffer.allocate(sizePseudo);
 		if (!readFully(sc, bbPseudo)) {
-			return Optional.empty();
+			throw new IOException("Connection closed");
 		}
 		bbPseudo.flip();
 		String pseudo = PROTOCOL_CHARSET.decode(bbPseudo).toString();
 
 		ByteBuffer bbSizeMessage = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeMessage)) {
-			return Optional.empty();
+			throw new IOException("Connection closed");
 		}
 		bbSizeMessage.flip();
 		int sizeMessage = bbSizeMessage.getInt();
 
 		ByteBuffer bbMessage = ByteBuffer.allocate(sizeMessage);
 		if (!readFully(sc, bbMessage)) {
-			return Optional.empty();
+			throw new IOException("Connection closed");
 		}
 		bbMessage.flip();
 		String message = PROTOCOL_CHARSET.decode(bbMessage).toString();
@@ -173,14 +173,14 @@ class ClientCommunication {
 	public static Optional<String> receiveRequestCODISP(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizePseudo = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizePseudo)) {
-			return Optional.empty();
+			throw new IOException("Connection closed");
 		}
 		bbSizePseudo.flip();
 		int sizePseudo = bbSizePseudo.getInt();
 
 		ByteBuffer bbPseudo = ByteBuffer.allocate(sizePseudo);
 		if (!readFully(sc, bbPseudo)) {
-			return Optional.empty();
+			throw new IOException("Connection closed");
 		}
 		bbPseudo.flip();
 		String pseudo = PROTOCOL_CHARSET.decode(bbPseudo).toString();
@@ -194,14 +194,14 @@ class ClientCommunication {
 	public static Optional<String> receiveRequestDISCODISP(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizePseudo = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizePseudo)) {
-			return Optional.empty();
+			throw new IOException("Connection closed");
 		}
 		bbSizePseudo.flip();
 		int sizePseudo = bbSizePseudo.getInt();
 
 		ByteBuffer bbPseudo = ByteBuffer.allocate(sizePseudo);
 		if (!readFully(sc, bbPseudo)) {
-			return Optional.empty();
+			throw new IOException("Connection closed");
 		}
 		bbPseudo.flip();
 		String pseudo = PROTOCOL_CHARSET.decode(bbPseudo).toString();
