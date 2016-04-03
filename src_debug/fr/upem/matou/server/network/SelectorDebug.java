@@ -58,7 +58,7 @@ class SelectorDebug {
 		for (SelectionKey key : keys) {
 			SelectableChannel channel = key.channel();
 			if (channel instanceof ServerSocketChannel) {
-				Logger.selectInfo("\tKey for ServerSocketChannel : " + interestOpsToString(key));
+				Logger.selectInfo("\tKey for Server : " + interestOpsToString(key));
 			} else {
 				SocketChannel sc = (SocketChannel) channel;
 				Logger.selectInfo("\tKey for Client " + remoteAddressToString(sc) + " : " + interestOpsToString(key));
@@ -69,17 +69,17 @@ class SelectorDebug {
 	@SuppressWarnings("resource")
 	static void printSelectedKeys(Set<SelectionKey> selectedKeys) {
 		if (selectedKeys.isEmpty()) {
-			Logger.selectInfo("There were not selected keys.");
+			Logger.selectReadyInfo("There were no selected keys.");
 			return;
 		}
-		Logger.selectInfo("The selected keys are :");
+		Logger.selectReadyInfo("The selected keys are :");
 		for (SelectionKey key : selectedKeys) {
 			SelectableChannel channel = key.channel();
 			if (channel instanceof ServerSocketChannel) {
-				Logger.selectInfo("\tServerSocketChannel can perform : " + possibleActionsToString(key));
+				Logger.selectReadyInfo("\tServer can perform : " + possibleActionsToString(key));
 			} else {
 				SocketChannel sc = (SocketChannel) channel;
-				Logger.selectInfo("\tClient " + remoteAddressToString(sc) + " can perform : " + possibleActionsToString(key));
+				Logger.selectReadyInfo("\tClient " + remoteAddressToString(sc) + " can perform : " + possibleActionsToString(key));
 			}
 
 		}

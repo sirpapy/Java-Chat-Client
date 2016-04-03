@@ -41,7 +41,7 @@ class ServerDataBase {
 	 * Check if : available & no illegal characters
 	 */
 	boolean addNewClient(SocketChannel sc, String pseudo) {
-		if (!(checkAvailability(pseudo) && NetworkCommunication.checkPseudoValidity(pseudo))) {
+		if (!(checkAvailability(pseudo))) {
 			return false;
 		}
 		connected.put(sc, pseudo);

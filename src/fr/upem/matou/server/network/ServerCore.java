@@ -48,6 +48,7 @@ public class ServerCore implements Closeable {
 			selectedKeys.clear();
 
 			Logger.selectInfo("");
+
 		}
 	}
 
@@ -64,7 +65,8 @@ public class ServerCore implements Closeable {
 					doRead(key);
 				}
 			} catch (IOException e) {
-				Logger.exception(e);
+				SocketChannel sc = (SocketChannel) key.channel();
+				Logger.warning(sc.getRemoteAddress() + " | " + e.toString());
 				ServerSession session = (ServerSession) key.attachment();
 				session.disconnectClient();
 			}
@@ -96,11 +98,17 @@ public class ServerCore implements Closeable {
 		session.updateStateRead();
 		db.updateStateReadAll();
 
-		boolean active = session.updateInterestOps(key);
-		if (!active) {
-			Logger.debug("INACTIVE AFTER READ");
-			session.disconnectClient();
+		if (!key.isValid()) {
+			Logger.debug("Key not valid anymore");
+			return;
 		}
+		
+		int ops = session.computeInterestOps();
+		if (ops == 0) {
+			throw new AssertionError("Key is inactive after read");
+		}
+		key.interestOps(ops);
+
 	}
 
 	private void doWrite(SelectionKey key) throws IOException {
@@ -133,11 +141,16 @@ public class ServerCore implements Closeable {
 		session.updateStateWrite();
 		db.updateStateWriteAll();
 
-		boolean active = session.updateInterestOps(key);
-		if (!active) {
-			Logger.debug("INACTIVE AFTER WRITE");
-			session.disconnectClient();
+		if (!key.isValid()) {
+			Logger.debug("Key not valid anymore");
+			return;
 		}
+		
+		int ops = session.computeInterestOps();
+		if (ops == 0) {
+			throw new AssertionError("Key is inactive after write");
+		}
+		key.interestOps(ops);
 	}
 
 	@Override

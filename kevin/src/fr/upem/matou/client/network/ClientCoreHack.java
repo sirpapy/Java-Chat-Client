@@ -78,7 +78,7 @@ public class ClientCoreHack implements Closeable {
 		sendRequest(sc, bb);
 	}
 
-	// TEMP
+	// OK
 	public void startChat_ServerReservedRequest() throws IOException {
 		sendRequestMSGBC(sc, "foo", "abra kadabra");
 		Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
@@ -500,7 +500,7 @@ public class ClientCoreHack implements Closeable {
 	}
 
 	public void startChat() throws IOException {
-		startChat_MultipleCOREQ();
+		startChat_FloodMessage();
 	}
 
 }

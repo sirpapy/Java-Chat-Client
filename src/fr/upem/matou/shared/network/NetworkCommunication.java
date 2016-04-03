@@ -52,18 +52,18 @@ public class NetworkCommunication {
 	public static Optional<ByteBuffer> encodePseudo(String pseudo) {
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(pseudo);
 		Logger.debug("ENCODED PSEUDO SIZE : " + encoded.remaining());
-//		if (!checkEncodedPseudoValidity(encoded)) {
-//			return Optional.empty();
-//		}
+		if (!checkEncodedPseudoValidity(encoded)) {
+			return Optional.empty();
+		}
 		return Optional.of(encoded);
 	}
 
 	public static Optional<ByteBuffer> encodeMessage(String message) {
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(message);
 		Logger.debug("ENCODED MESSAGE SIZE : " + encoded.remaining());
-//		if (!checkEncodedMessageValidity(encoded)) {
-//			return Optional.empty();
-//		}
+		if (!checkEncodedMessageValidity(encoded)) {
+			return Optional.empty();
+		}
 		return Optional.of(encoded);
 	}
 

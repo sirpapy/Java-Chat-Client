@@ -149,6 +149,12 @@ class ServerSession {
 	 * Answers by a CORES request and fills the write buffer.
 	 */
 	private void answerCORES(String pseudo) {
+		if(!NetworkCommunication.checkPseudoValidity(pseudo)) {
+			Logger.debug("INVALID PSEUDO : " + pseudo);
+			disconnectClient();
+			return;
+		}
+		
 		boolean acceptation = db.addNewClient(sc, pseudo);
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES);
 		Logger.network(NetworkLogType.WRITE, "ACCEPTATION : " + acceptation);
@@ -226,6 +232,7 @@ class ServerSession {
 	private void answerMSGBC(String message) {
 		if (!NetworkCommunication.checkMessageValidity(message)) {
 			Logger.debug("INVALID MESSAGE : " + message);
+			disconnectClient();
 			return;
 		}
 		String pseudo = db.pseudoOf(sc);
@@ -262,17 +269,12 @@ class ServerSession {
 	}
 
 	private void processDISCOinit() {
-		resetReadState();
-	}
-
-	private void answerDISCODISP() {
-		clearAndLimit(bbRead, 0);
+		disconnectClient();
 	}
 
 	private void processDISCO() {
 		if (arg == 0) {
 			processDISCOinit();
-			answerDISCODISP();
 			return;
 		}
 		throw new AssertionError("Argument " + arg + " is not valid for DISCO");
@@ -286,7 +288,7 @@ class ServerSession {
 		if (bbRead.hasRemaining()) { // Not finished to read
 			return;
 		}
-		
+
 		if (protocol == null) {
 			processRequestType();
 		}
@@ -307,7 +309,9 @@ class ServerSession {
 			processDISCO();
 			return;
 		default:
-			throw new UnsupportedOperationException("Not implemented yet");
+			Logger.error("Operation not implemented yet : " + protocol); // TEMP
+			disconnectClient();
+			return;
 		}
 
 	}
@@ -325,11 +329,10 @@ class ServerSession {
 	/*
 	 * Updates the interest operations after reading or writing.
 	 */
-	boolean updateInterestOps(SelectionKey key) {
-		if (!key.isValid()) {
-			return true;
-		}
-
+	int computeInterestOps() {
+//		if (!key.isValid()) {
+//			return true;
+//		}
 		int ops = 0;
 
 		if (bbWrite.position() > 0) { // There is something to write
@@ -340,8 +343,7 @@ class ServerSession {
 			ops |= SelectionKey.OP_READ;
 		}
 
-		key.interestOps(ops);
-		return ops != 0;
+		return ops;
 	}
 
 	void disconnectClient() {

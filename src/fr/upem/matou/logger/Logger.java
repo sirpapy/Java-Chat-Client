@@ -1,10 +1,6 @@
 package fr.upem.matou.logger;
 
-import static fr.upem.matou.logger.Colorator.colorBlue;
-import static fr.upem.matou.logger.Colorator.colorGreen;
-import static fr.upem.matou.logger.Colorator.colorPurple;
-import static fr.upem.matou.logger.Colorator.colorRed;
-import static fr.upem.matou.logger.Colorator.colorYellow;
+import static fr.upem.matou.logger.Colorator.*;
 
 import java.io.PrintStream;
 
@@ -16,7 +12,7 @@ public class Logger {
 
 	private static PrintStream STREAM_OUT = System.out;
 	private static PrintStream STREAM_ERR = System.err;
-	
+
 	private static final boolean LOG_DEBUG = true;
 	private static final boolean LOG_NETWORK = true;
 	private static final boolean LOG_SELECT = true;
@@ -26,11 +22,11 @@ public class Logger {
 
 	private Logger() {
 	}
-	
+
 	public static void attachOutput(PrintStream out) {
 		STREAM_OUT = out;
 	}
-	
+
 	public static void attachError(PrintStream err) {
 		STREAM_ERR = err;
 	}
@@ -62,6 +58,12 @@ public class Logger {
 	public static void selectInfo(String message) {
 		if (LOG_SELECT) {
 			STREAM_OUT.println(colorBlue(message));
+		}
+	}
+
+	public static void selectReadyInfo(String message) {
+		if (LOG_SELECT) {
+			STREAM_OUT.println(colorCyan(message));
 		}
 	}
 
