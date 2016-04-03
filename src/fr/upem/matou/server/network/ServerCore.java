@@ -10,6 +10,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 
+import fr.upem.matou.buffer.ByteBuffers;
 import fr.upem.matou.logger.Logger;
 
 /*
@@ -18,7 +19,8 @@ import fr.upem.matou.logger.Logger;
 @SuppressWarnings("resource")
 public class ServerCore implements Closeable {
 
-	private static final long SERVER_DELAY = 0; // TEMP in millis
+	private static final boolean DELAY_ENABLED = false;
+	private static final long SERVER_DELAY = 100; // TEMP in millis
 
 	private final ServerSocketChannel ssc;
 	private final Selector selector;
@@ -102,7 +104,7 @@ public class ServerCore implements Closeable {
 			Logger.debug("Key not valid anymore");
 			return;
 		}
-		
+
 		int ops = session.computeInterestOps();
 		if (ops == 0) {
 			throw new AssertionError("Key is inactive after read");
@@ -118,23 +120,27 @@ public class ServerCore implements Closeable {
 
 		bb.flip();
 		Logger.debug("WRITING BUFFER : " + bb);
-		for (int i = 1; bb.hasRemaining(); i++) { // TEMP
-			ByteBuffer writter = ByteBuffer.allocate(1);
-			byte oneByte = bb.get();
-			writter.put(oneByte);
-			writter.flip();
-			int written = channel.write(writter);
-			if (written == 0) {
-				Logger.debug("/!\\ WRITING NOT FINISHED /!\\");
-				break;
+		if (DELAY_ENABLED) {
+			for (int i = 1; bb.hasRemaining(); i++) { // TEMP
+				ByteBuffer writter = ByteBuffer.allocate(1);
+				byte oneByte = bb.get();
+				writter.put(oneByte);
+				writter.flip();
+				int written = channel.write(writter);
+				if (written == 0) {
+					Logger.debug("/!\\ WRITING NOT FINISHED /!\\");
+					break;
+				}
+				Logger.debug("Byte #" + i + " sent : " + ByteBuffers.toBinaryString(oneByte)
+						+ " (~" + ((i - 1) * SERVER_DELAY) + "ms)");
+				try {
+					Thread.sleep(SERVER_DELAY);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
-			// Logger.debug("Byte #" + i + " sent : " + ByteBuffers.toBinaryString(oneByte)
-			// + " (~" + ((i - 1) * SERVER_DELAY) + "ms)");
-			try {
-				Thread.sleep(SERVER_DELAY);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		} else {
+			channel.write(bb);
 		}
 		bb.compact();
 
@@ -145,7 +151,7 @@ public class ServerCore implements Closeable {
 			Logger.debug("Key not valid anymore");
 			return;
 		}
-		
+
 		int ops = session.computeInterestOps();
 		if (ops == 0) {
 			throw new AssertionError("Key is inactive after write");
