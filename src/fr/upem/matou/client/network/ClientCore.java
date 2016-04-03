@@ -19,7 +19,7 @@ import fr.upem.matou.ui.UserInterface;
  */
 public class ClientCore implements Closeable {
 
-	private static final int TIMEOUT = 3000;
+	private static final int TIMEOUT = 3000; // in millis
 
 	private final Object monitor = new Object();
 	private final SocketChannel sc;
@@ -46,7 +46,7 @@ public class ClientCore implements Closeable {
 		while (true) {
 			Optional<String> optionalInput = ui.readPseudo();
 			if (!optionalInput.isPresent()) {
-				throw new IOException("User exited");
+				throw new IOException("User exited"); // TODO : Ne plus renvoyer d'exception
 			}
 			String pseudo = optionalInput.get();
 			if (!NetworkCommunication.checkPseudoValidity(pseudo)) {
@@ -64,8 +64,7 @@ public class ClientCore implements Closeable {
 	}
 
 	private boolean pseudoReceiver() throws IOException {
-		Optional<NetworkProtocol> optionalRequestType = ClientCommunication
-				.receiveRequestType(sc);
+		Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
 		if (!optionalRequestType.isPresent()) {
 			throw new IOException("Protocol violation");
 		}
@@ -74,8 +73,7 @@ public class ClientCore implements Closeable {
 		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 		switch (protocol) {
 		case CORES:
-			Optional<Boolean> optionalRequestCORES = ClientCommunication
-					.receiveRequestCORES(sc);
+			Optional<Boolean> optionalRequestCORES = ClientCommunication.receiveRequestCORES(sc);
 			if (!optionalRequestCORES.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
@@ -83,8 +81,7 @@ public class ClientCore implements Closeable {
 			Logger.network(NetworkLogType.READ, "ACCEPTATION : " + acceptation);
 			return acceptation;
 		default:
-			throw new AssertionError("Unexpected protocol request : "
-					+ protocol);
+			throw new AssertionError("Unexpected protocol request : " + protocol);
 		}
 	}
 
@@ -108,8 +105,7 @@ public class ClientCore implements Closeable {
 	}
 
 	private void messageReceiver(UserInterface ui) throws IOException {
-		Optional<NetworkProtocol> optionalRequestType = ClientCommunication
-				.receiveRequestType(sc);
+		Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
 		if (!optionalRequestType.isPresent()) {
 			throw new IOException("Protocol violation");
 		}
@@ -120,25 +116,21 @@ public class ClientCore implements Closeable {
 		case MSGBC:
 			setChrono(true);
 
-			Optional<Message> optionalRequestMSGBC = ClientCommunication
-					.receiveRequestMSGBC(sc);
+			Optional<Message> optionalRequestMSGBC = ClientCommunication.receiveRequestMSGBC(sc);
 			setChrono(false);
 
 			if (!optionalRequestMSGBC.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			Message receivedMessage = optionalRequestMSGBC.get();
-			Logger.network(NetworkLogType.READ,
-					"PSEUDO : " + receivedMessage.getPseudo());
-			Logger.network(NetworkLogType.READ,
-					"MESSAGE : " + receivedMessage.getContent());
+			Logger.network(NetworkLogType.READ, "PSEUDO : " + receivedMessage.getPseudo());
+			Logger.network(NetworkLogType.READ, "MESSAGE : " + receivedMessage.getContent());
 			ui.displayMessage(receivedMessage);
 
 			break;
 		case CODISP:
 			setChrono(true);
-			Optional<String> optionalRequestCODISP = ClientCommunication
-					.receiveRequestCODISP(sc);
+			Optional<String> optionalRequestCODISP = ClientCommunication.receiveRequestCODISP(sc);
 			setChrono(false);
 
 			if (!optionalRequestCODISP.isPresent()) {
@@ -151,8 +143,7 @@ public class ClientCore implements Closeable {
 			break;
 		case DISCODISP:
 			setChrono(true);
-			Optional<String> optionalRequestDISCODISP = ClientCommunication
-					.receiveRequestDISCODISP(sc);
+			Optional<String> optionalRequestDISCODISP = ClientCommunication.receiveRequestDISCODISP(sc);
 			setChrono(false);
 			if (!optionalRequestDISCODISP.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
@@ -163,8 +154,7 @@ public class ClientCore implements Closeable {
 
 			break;
 		default:
-			throw new AssertionError("Unexpected protocol request : "
-					+ protocol);
+			throw new UnsupportedOperationException("Unsupported protocol request : " + protocol); // TEMP
 		}
 
 	}
@@ -203,7 +193,8 @@ public class ClientCore implements Closeable {
 			try {
 				exit = messageSender(ui);
 			} catch (IOException e) {
-				e.printStackTrace();
+				Logger.warning("WARNING | " + e.toString());
+				Logger.exception(e);
 				return;
 			}
 		}
@@ -214,7 +205,8 @@ public class ClientCore implements Closeable {
 			try {
 				messageReceiver(ui);
 			} catch (IOException e) {
-				e.printStackTrace();
+				Logger.warning("WARNING | " + e.toString());
+				Logger.exception(e);
 				return;
 			}
 		}
@@ -225,7 +217,7 @@ public class ClientCore implements Closeable {
 			try {
 				cleaner();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Logger.warning("INTERRUPTION | " + e.toString());
 				return;
 			}
 		}
@@ -239,8 +231,7 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void processMessages(UserInterface ui) throws InterruptedException,
-			IOException {
+	private void processMessages(UserInterface ui) throws InterruptedException, IOException {
 		Thread sender = new Thread(() -> threadMessageSender(ui));
 		Thread receiver = new Thread(() -> threadMessageReceiver(ui));
 		Thread cleaner = new Thread(() -> threadCleaner());
