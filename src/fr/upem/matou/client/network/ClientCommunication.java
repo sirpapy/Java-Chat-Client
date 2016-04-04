@@ -92,10 +92,15 @@ class ClientCommunication {
 	 * Sends a MSG request.
 	 */
 	public static boolean sendRequestMSG(SocketChannel sc, String message) throws IOException {
+		if(!NetworkCommunication.checkMessageValidity(message)) {
+			return false;
+		}
+		
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeMessage(message);
 		if (!optional.isPresent()) {
 			return false;
 		}
+		
 		ByteBuffer bb = encodeRequestMSG(optional.get());
 		sendRequest(sc, bb);
 		return true;

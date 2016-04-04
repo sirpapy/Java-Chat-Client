@@ -23,6 +23,7 @@ public class ClientCore implements Closeable {
 
 	private final Object monitor = new Object();
 	private final SocketChannel sc;
+	private final ClientDataBase db = new ClientDataBase();
 	private boolean isReceiverActivated = false;
 
 	public ClientCore(String hostname, int port) throws IOException {
@@ -91,13 +92,9 @@ public class ClientCore implements Closeable {
 			return true;
 		}
 		String inputMessage = optionalInput.get();
-		if (!NetworkCommunication.checkMessageValidity(inputMessage)) {
-			ui.warnInvalidMessage(inputMessage);
-			return false;
-		}
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSG);
-		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + inputMessage);
-		if (!ClientCommunication.sendRequestMSG(sc, inputMessage)) {
+
+		ClientRequest request = ClientRequest.parseLine(inputMessage);
+		if (!request.sendRequest(sc)) {
 			ui.warnInvalidMessage(inputMessage);
 			return false;
 		}

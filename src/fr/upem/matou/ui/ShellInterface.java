@@ -64,12 +64,12 @@ public class ShellInterface implements UserInterface {
 
 	@Override
 	public void warnInvalidPseudo(String pseudo) {
-		output.println("Le pseudo saisi est invalide");
+		output.println("This pseudo is not valid");
 	}
 
 	@Override
 	public void warnInvalidMessage(String message) {
-		output.println("Le message saisi est invalide");
+		output.println("This message is not valid");
 	}
 
 }
