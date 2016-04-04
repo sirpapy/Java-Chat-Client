@@ -28,12 +28,13 @@ Requirements:
 Specifications:
 	* Numbers are in Big Endian format.
 	* String are encoded into UTF-8 charset.
-	* The transport protocol used is TCP (with limit size specified).
-	* The maximum string length of a pseudo is 32 characters.
-	* The maximum string length of a message is 512 characters.
+	* The transport protocol used is TCP (with limit size specified in 4 bytes).
+	* The maximum size of an encoded pseudo is 32 bytes.
+	* The maximum size of an encoded message is 512 bytes.
 	* A pseudo can only contain alphanumeric characters.
 	* A message cannot contain control characters (\n, \r, \t, ...).
 	* The size of a chunk of file is 4096 bytes.
+	* Private connections are etablished on 2 ports : the first one for messages and the second one for files.
 
 Acronym formats: 
 	* C-S : Client to Server
@@ -70,7 +71,7 @@ Interactions:
 		[S-A] Notification of the new connection
 		The server notifies all clients that a new one is connected.
 		+------+------------+--------+
-		| int  | int        | String |
+		| int  |    int     | String |
 		+------+------------+--------+
 		| Type | SizePseudo | Pseudo |  
 		+------+------------+--------+
@@ -123,7 +124,7 @@ Interactions:
 		| Type | SizePseudoSrc | PseudoSrc | Accept |
 		+------+---------------+-----------+--------+
 
-		[S-C] Notification of the private 
+		[S-C] Notification of the private connection
 		The server forwards the answer of client Dst to client Src.
 		+------+---------------+-----------+--------+
 		| int  |      int      |  String   |  byte  |
@@ -141,11 +142,11 @@ Interactions:
 		
 		[S-C] Connection between the source(Src) and the destination(Dst)
 		The server sends the private connection data for the private connection of client Src to client Dst.
-		+------+---------------+-----------+-------------------+---------+
-		| int  |      int      |  String   | InetSocketAddress |   int   |
-		+------+---------------+-----------+-------------------+---------+
-		| Type | SizePseudoSrc | PseudoSrc | AddressSrc        | PortSrc |
-		+------+---------------+-----------+-------------------+---------+
+		+------+---------------+-----------+-------------------+----------+----------+
+		| int  |      int      |  String   | InetSocketAddress |   int    |   int    |
+		+------+---------------+-----------+-------------------+----------+----------+
+		| Type | SizePseudoSrc | PseudoSrc | AddressSrc        | PortSrc1 | PortSrc2 |
+		+------+---------------+-----------+-------------------+----------+----------+
 
 	Sending private message
 		[C-C] Sending private message between Src and Dst
