@@ -9,7 +9,10 @@ Name : Matou, a Chat service
 Description: 
 The purpose of Matou project is to realize a discussion and file exchanger service.
 
-The clients are connected to a primary server. Each connected client is identified by a unique pseudo. The server must guarantee that two client will not have the same pseudo. After etablishing the connection, the client can:
+The clients are connected to a primary server. 
+Each connected client is identified by a unique pseudo. 
+The server must guarantee that two client will not have the same pseudo. 
+After etablishing the connection, the client can:
 	* Send message to all connected clients.
 	* Send privates messages or files to a particular client.
 
@@ -18,7 +21,6 @@ The clients are connected to a primary server. Each connected client is identifi
 
 Requirements:
 	* All private communication are made by a direct connection between the two clients. The server will only be sollicited for the purpose of exchanging the address of those two clients.
-	* Client will be managed to send a request for private messaging. And this client can't accept or refuse any private request.
 	* Exchanging file should not block the messaging and vice versa.
 
 
@@ -32,9 +34,10 @@ Specifications:
 	* The maximum size of an encoded pseudo is 32 bytes.
 	* The maximum size of an encoded message is 512 bytes.
 	* A pseudo can only contain alphanumeric characters.
-	* A message cannot contain control characters (\n, \r, \t, ...).
+	* A message cannot contain any control character (\n, \r, \t, ...).
 	* The size of a chunk of file is 4096 bytes.
 	* Private connections are etablished on 2 ports : the first one for messages and the second one for files.
+	* Private connection requests are forwarded by the server as notifications, so the receiver is not forced to answer it.
 
 Acronym formats: 
 	* C-S : Client to Server
@@ -93,12 +96,6 @@ Interactions:
 		| Type | SizePseudo | Pseudo | SizeMessage | Message |
 		+------+------------+--------+-------------+---------+
 
-	
-
-
-	
-
-
 	Requesting private connection
 		[C-S] Requesting connection between the source(Src) and the destination(Dst)
 		The client Src notifies the server that he wants to be connected with the client Dst.
@@ -108,7 +105,7 @@ Interactions:
 		| Type | SizePseudoDst | PseudoDst |
 		+------+---------------+-----------+
 
-		[S-C] Requesting acceptation of the connection from Dst
+		[S-C] Notification of a new private connection request
 		The server notifies the client Dst that he received a connection request from client Src.
 		+------+---------------+-----------+
 		| int  |      int      |  String   |
@@ -116,28 +113,20 @@ Interactions:
 		| Type | SizePseudoSrc | PseudoSrc |
 		+------+---------------+-----------+
 
-		[C-S] Confirm the connection request to Src
-		The client Dst notifies the server whether he accepts or refuses the private connection request of client Src.
-		+------+---------------+-----------+--------+
-		| int  |      int      |  String   |  byte  |
-		+------+---------------+-----------+--------+
-		| Type | SizePseudoSrc | PseudoSrc | Accept |
-		+------+---------------+-----------+--------+
-
-		[S-C] Notification of the private connection
-		The server forwards the answer of client Dst to client Src.
-		+------+---------------+-----------+--------+
-		| int  |      int      |  String   |  byte  |
-		+------+---------------+-----------+--------+
-		| Type | SizePseudoDst | PseudoDst | Accept |
-		+------+---------------+-----------+--------+
+		[C-S] Accept the connection request to Src
+		The client Dst notifies the server that he accepts the private connection request of client Src.
+		+------+---------------+-----------+
+		| int  |      int      |  String   |
+		+------+---------------+-----------+
+		| Type | SizePseudoSrc | PseudoSrc |
+		+------+---------------+-----------+
 
 		[S-C] Connection between the source(Src) and the destination(Dst)
 		The server sends the private connection data for the private connection of client Dst to client Src.
 		+------+---------------+-----------+-------------------+
 		| int  |      int      |  String   | InetSocketAddress |
 		+------+---------------+-----------+-------------------+
-		| Type | SizePseudoDst | PseudoDst | AddressDst        |
+		| Type | SizePseudoDst | PseudoDst |    AddressDst     |
 		+------+---------------+-----------+-------------------+
 		
 		[S-C] Connection between the source(Src) and the destination(Dst)
@@ -145,7 +134,7 @@ Interactions:
 		+------+---------------+-----------+-------------------+----------+----------+
 		| int  |      int      |  String   | InetSocketAddress |   int    |   int    |
 		+------+---------------+-----------+-------------------+----------+----------+
-		| Type | SizePseudoSrc | PseudoSrc | AddressSrc        | PortSrc1 | PortSrc2 |
+		| Type | SizePseudoSrc | PseudoSrc |    AddressSrc     | PortSrc1 | PortSrc2 |
 		+------+---------------+-----------+-------------------+----------+----------+
 
 	Sending private message
@@ -159,12 +148,12 @@ Interactions:
 
 	Sending file in private
 		[C-C] Sending file between Src and Dst		
-		The client Src sends a file to client Dst. The file is segmented into chunk with a fixed size (only the last part will eventually be smaller).
-		+------+------------+------------+-------+
-		| int  |    long    |    bytes   | bytes |
-		+------+------------+------------+-------+
-		| Type |  SizeFile  |  FileChunk |  ...  |
-		+------+------------+------------+-------+
+		The client Src sends a file to client Dst. The file is segmented into chunk with a fixed size (only the last part can be smaller).
+		+------+------------+-------------+-------+
+		| int  |    long    |    bytes    | bytes |
+		+------+------------+-------------+-------+
+		| Type |  SizeFile  |  FileChunk  |  ...  |
+		+------+------------+-------------+-------+
 
 	Private sign out
 		[C-C] Sign out
