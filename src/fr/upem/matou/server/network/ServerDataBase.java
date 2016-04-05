@@ -28,7 +28,7 @@ class ServerDataBase {
 	}
 
 	private boolean checkAvailability(String pseudo) {
-		return !connectedValuesView.contains(pseudo);
+		return !connectedValuesView.contains(pseudo); // FIXME : must be case insensitive
 	}
 
 	ByteBuffer getBroadcastBuffer() {

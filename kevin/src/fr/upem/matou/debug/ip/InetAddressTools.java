@@ -23,5 +23,6 @@ public class InetAddressTools {
 		for(byte b : bytes) {
 			System.out.println("." + b + ".");
 		}
+
 	}
 }

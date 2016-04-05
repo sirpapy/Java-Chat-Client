@@ -23,12 +23,13 @@ public class ClientCore implements Closeable {
 
 	private final Object monitor = new Object();
 	private final SocketChannel sc;
-	private final ClientDataBase db = new ClientDataBase();
+	private final ClientDataBase db;
 	private boolean isReceiverActivated = false;
 
 	public ClientCore(String hostname, int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(hostname, port);
 		sc = SocketChannel.open(address);
+		db = new ClientDataBase(sc);
 	}
 
 	private void setChrono(boolean isActivated) {
@@ -94,7 +95,7 @@ public class ClientCore implements Closeable {
 		String inputMessage = optionalInput.get();
 
 		ClientRequest request = ClientRequest.parseLine(inputMessage);
-		if (!request.sendRequest(sc)) {
+		if (!request.execute(db)) {
 			ui.warnInvalidMessage(inputMessage);
 			return false;
 		}

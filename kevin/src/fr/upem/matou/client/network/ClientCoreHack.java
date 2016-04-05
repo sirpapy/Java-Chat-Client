@@ -24,31 +24,6 @@ public class ClientCoreHack implements Closeable {
 		sc = SocketChannel.open(address);
 	}
 
-	public void startChat_UnconnectedMSG() throws IOException {
-		ClientCommunication.sendRequestMSG(sc, "coucou");
-		Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
-		if (!optionalProtocol.isPresent()) {
-			System.out.println("No protocol");
-			return;
-		}
-		NetworkProtocol protocol = optionalProtocol.get();
-
-		switch (protocol) {
-		case MSGBC:
-			Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
-			if (!optionalMessage.isPresent()) {
-				System.out.println("No message");
-				return;
-			}
-			Message message = optionalMessage.get();
-			System.out.println(message);
-			break;
-		default:
-			System.out.println("Invalid protocol : " + protocol);
-			break;
-		}
-	}
-
 	private static final Charset PROTOCOL_CHARSET = NetworkCommunication.getProtocolCharset();
 
 	public static ByteBuffer encodeRequestMSGBC(String pseudo, String message) {
@@ -494,13 +469,41 @@ public class ClientCoreHack implements Closeable {
 		System.out.println("SUCCESS");
 	}
 
+	// FIXME : NPE
+	public void startChat_UnauthentMessage() throws IOException {
+		ClientCommunication.sendRequestMSG(sc, "Hello world");
+
+		Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
+		if (!optionalProtocol.isPresent()) {
+			System.out.println("No protocol");
+			return;
+		}
+		NetworkProtocol protocol = optionalProtocol.get();
+
+		switch (protocol) {
+		case MSGBC:
+			Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
+			if (!optionalMessage.isPresent()) {
+				System.out.println("No message");
+				return;
+			}
+			Message message = optionalMessage.get();
+			System.out.println(message);
+			break;
+		default:
+			System.out.println("Invalid protocol : " + protocol);
+			return;
+		}
+
+	}
+
 	@Override
 	public void close() throws IOException {
 		sc.close();
 	}
 
 	public void startChat() throws IOException {
-		startChat_FloodMessage();
+		startChat_UnauthentMessage();
 	}
 
 }
