@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
-import fr.upem.matou.logger.Logger;
+import fr.upem.matou.shared.logger.Logger;
 
 /*
  * This class gathers the common factors between ClientCommunication and ServerCommunication.

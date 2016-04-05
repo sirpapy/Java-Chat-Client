@@ -1,4 +1,4 @@
-package fr.upem.matou.buffer;
+package fr.upem.matou.debug.buffer;
 
 import static org.junit.Assert.*;
 

@@ -9,7 +9,7 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Set;
 
-import fr.upem.matou.logger.Logger;
+import fr.upem.matou.shared.logger.Logger;
 
 class SelectorDebug {
 	static String interestOpsToString(SelectionKey key) {

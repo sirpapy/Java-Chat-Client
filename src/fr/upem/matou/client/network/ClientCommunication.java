@@ -6,9 +6,9 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
+import fr.upem.matou.client.ui.Message;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
-import fr.upem.matou.ui.Message;
 
 /*
  * This class consists only of static methods.

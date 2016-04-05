@@ -1,6 +1,6 @@
-package fr.upem.matou.logger;
+package fr.upem.matou.shared.logger;
 
-import static fr.upem.matou.logger.Colorator.*;
+import static fr.upem.matou.shared.logger.Colorator.*;
 
 import java.io.PrintStream;
 

@@ -1,4 +1,4 @@
-package fr.upem.matou.logger;
+package fr.upem.matou.shared.logger;
 
 public class Colorator {
 	private static boolean activated = true;

@@ -1,4 +1,4 @@
-package fr.upem.matou.files;
+package fr.upem.matou.debug.files;
 
 import java.io.IOException;
 import java.io.InputStream;

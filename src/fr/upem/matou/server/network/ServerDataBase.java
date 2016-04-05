@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 
-import fr.upem.matou.logger.Logger;
+import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.network.NetworkProtocol;
 
 /*

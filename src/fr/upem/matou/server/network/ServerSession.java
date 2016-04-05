@@ -6,9 +6,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Optional;
 
-import fr.upem.matou.buffer.ByteBuffers;
-import fr.upem.matou.logger.Logger;
-import fr.upem.matou.logger.Logger.NetworkLogType;
+import fr.upem.matou.debug.buffer.ByteBuffers;
+import fr.upem.matou.shared.logger.Logger;
+import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 

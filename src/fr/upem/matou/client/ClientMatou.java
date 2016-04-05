@@ -3,7 +3,7 @@ package fr.upem.matou.client;
 import java.io.IOException;
 
 import fr.upem.matou.client.network.ClientCore;
-import fr.upem.matou.logger.Logger;
+import fr.upem.matou.shared.logger.Logger;
 
 /**
  * Main class of the client Matou.

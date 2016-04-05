@@ -6,13 +6,13 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Optional;
 
-import fr.upem.matou.logger.Logger;
-import fr.upem.matou.logger.Logger.NetworkLogType;
+import fr.upem.matou.client.ui.Message;
+import fr.upem.matou.client.ui.ShellInterface;
+import fr.upem.matou.client.ui.UserInterface;
+import fr.upem.matou.shared.logger.Logger;
+import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
-import fr.upem.matou.ui.Message;
-import fr.upem.matou.ui.ShellInterface;
-import fr.upem.matou.ui.UserInterface;
 
 /*
  * This class is the core of the client.

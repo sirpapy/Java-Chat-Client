@@ -1,4 +1,4 @@
-package fr.upem.matou.ui;
+package fr.upem.matou.client.ui;
 
 /**
  * This class represents a chat message.

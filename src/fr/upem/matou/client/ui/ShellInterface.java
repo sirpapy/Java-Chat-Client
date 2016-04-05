@@ -1,4 +1,4 @@
-package fr.upem.matou.ui;
+package fr.upem.matou.client.ui;
 
 import java.io.InputStream;
 import java.io.PrintStream;

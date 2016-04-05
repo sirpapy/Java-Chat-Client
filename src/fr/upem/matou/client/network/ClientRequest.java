@@ -7,8 +7,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import fr.upem.matou.logger.Logger;
-import fr.upem.matou.logger.Logger.NetworkLogType;
+import fr.upem.matou.shared.logger.Logger;
+import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkProtocol;
 
 interface ClientRequest {
