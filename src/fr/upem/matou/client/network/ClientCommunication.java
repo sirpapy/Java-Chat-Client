@@ -74,6 +74,21 @@ class ClientCommunication {
 
 		return request;
 	}
+	
+	/*
+	 * Encodes a COREQ request.
+	 */
+	public static ByteBuffer encodeRequestPVCOREQ(ByteBuffer encodedPseudo) {
+		int length = encodedPseudo.remaining();
+
+		int capacity = Integer.BYTES + Integer.BYTES + length;
+		ByteBuffer request = ByteBuffer.allocate(capacity);
+
+		request.putInt(NetworkProtocol.PVCOREQ.ordinal());
+		request.putInt(length).put(encodedPseudo);
+
+		return request;
+	}
 
 	/*
 	 * Sends a COREQ request.
@@ -111,6 +126,17 @@ class ClientCommunication {
 		sendRequest(sc, bb);
 	}
 
+	public static boolean sendRequestPVCOREQ(SocketChannel sc, String pseudo) throws IOException {
+		Optional<ByteBuffer> optional = NetworkCommunication.encodePseudo(pseudo);
+		if (!optional.isPresent()) {
+			return false;
+		}
+		ByteBuffer bb = encodeRequestPVCOREQ(optional.get());
+		sendRequest(sc, bb);
+		return true;
+	}
+
+	
 	/*
 	 * Receives a protocol type request.
 	 */
@@ -214,4 +240,22 @@ class ClientCommunication {
 		return Optional.of(pseudo);
 	}
 
+	public static Optional<String> receiveRequestPVCODISP(SocketChannel sc) throws IOException {
+		ByteBuffer bbSizePseudo = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizePseudo)) {
+			throw new IOException("Connection closed");
+		}
+		bbSizePseudo.flip();
+		int sizePseudo = bbSizePseudo.getInt();
+
+		ByteBuffer bbPseudo = ByteBuffer.allocate(sizePseudo);
+		if (!readFully(sc, bbPseudo)) {
+			throw new IOException("Connection closed");
+		}
+		bbPseudo.flip();
+		String pseudo = PROTOCOL_CHARSET.decode(bbPseudo).toString();
+
+		return Optional.of(pseudo);
+	}
+	
 }

@@ -1,7 +1,7 @@
 package fr.upem.matou.shared.network;
 
 import static fr.upem.matou.shared.network.NetworkCommunication.*;
-import static fr.upem.matou.shared.network.NetworkProtocol.ExchangeDirection.*;
+import static fr.upem.matou.shared.network.NetworkProtocol.Communicator.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,34 +14,35 @@ import java.util.Optional;
  */
 public enum NetworkProtocol {
 
-	COREQ(INCOMING, "PUBLIC_CONNECTION_REQUEST", LENGTH_SIZE, PSEUDO_MAX_SIZE),
-	CORES(OUTGOING, "PUBLIC_CONNECTION_RESPONSE", LENGTH_SIZE, Byte.BYTES),
-	CODISP(OUTGOING, "PUBLIC_CONNECTION_NOTIFICATION", LENGTH_SIZE, PSEUDO_MAX_SIZE),
-	MSG(INCOMING, "PUBLIC_MESSAGE", LENGTH_SIZE, MESSAGE_MAX_SIZE),
-	MSGBC(OUTGOING, "PUBLIC_MESSAGE_BROADCAST", LENGTH_SIZE, PSEUDO_MAX_SIZE, LENGTH_SIZE, MESSAGE_MAX_SIZE),
-	DISCO(INCOMING, "PUBLIC_DISCONNECTION", LENGTH_SIZE),
-	DISCODISP(OUTGOING, "PUBLIC_DISCONNECTION_NOTIFICATION", LENGTH_SIZE, PSEUDO_MAX_SIZE),
-	PVCOREQ(INCOMING, "PRIVATE_CONNECTION_REQUEST", LENGTH_SIZE, PSEUDO_MAX_SIZE),
-	// PVCOTR("SERVER_PRIVATE_CONNECTION_TRANSFER"),
-	// PVCOACC("CLIENT_PRIVATE_CONNECTION_CONFIRM"),
-	// PVCORES("SERVER_PRIVATE_CONNECTION_RESPONSE"),
+	COREQ(CLIENT, SERVER, "PUBLIC_CONNECTION_REQUEST", LENGTH_SIZE, PSEUDO_MAX_SIZE),
+	CORES(SERVER, CLIENT, "PUBLIC_CONNECTION_RESPONSE", LENGTH_SIZE, Byte.BYTES),
+	CODISP(SERVER, CLIENT, "PUBLIC_CONNECTION_NOTIFICATION", LENGTH_SIZE, PSEUDO_MAX_SIZE),
+	MSG(CLIENT, SERVER, "PUBLIC_MESSAGE", LENGTH_SIZE, MESSAGE_MAX_SIZE),
+	MSGBC(SERVER, CLIENT, "PUBLIC_MESSAGE_BROADCAST", LENGTH_SIZE, PSEUDO_MAX_SIZE, LENGTH_SIZE, MESSAGE_MAX_SIZE),
+	DISCO(CLIENT, SERVER, "PUBLIC_DISCONNECTION", LENGTH_SIZE),
+	DISCODISP(SERVER, CLIENT, "PUBLIC_DISCONNECTION_NOTIFICATION", LENGTH_SIZE, PSEUDO_MAX_SIZE),
+	PVCOREQ(CLIENT, SERVER, "PRIVATE_CONNECTION_REQUEST", LENGTH_SIZE, PSEUDO_MAX_SIZE),
+	PVCODISP(SERVER, CLIENT, "PRIVATE_CONNECTION_NOTIFICATION", LENGTH_SIZE, PSEUDO_MAX_SIZE),
+	PVCOACC(CLIENT,SERVER, "PRIVATE_CONNECTION_ACCEPTATION",LENGTH_SIZE, PSEUDO_MAX_SIZE),
 	// PVCOETA("SERVER_PRIVATE_CONNECTION_ETABLISHMENT"),
 	// PVMSG("CLIENT_PRIVATE_MESSAGE"),
 	// PVFILE("CLIENT_PRIVATE_FILE"),
 	// PVDISCO("CLIENT_PRIVATE_DISCONNECTION"),
 	;
 
-	static enum ExchangeDirection {
-		INCOMING, OUTGOING;
+	static enum Communicator {
+		CLIENT, SERVER;
 	}
 
-	private final ExchangeDirection direction;
+	private final Communicator source;
+	private final Communicator target;
 	private final String description;
 	private final List<Integer> argumentSizes;
 	private final int maxRequestSize;
 
-	private NetworkProtocol(ExchangeDirection direction, String description, Integer... sizes) {
-		this.direction = direction;
+	private NetworkProtocol(Communicator source, Communicator target, String description, Integer... sizes) {
+		this.source = source;
+		this.target = target;
 		this.description = description;
 		ArrayList<Integer> args = new ArrayList<>();
 		args.add(Integer.BYTES);
@@ -64,11 +65,11 @@ public enum NetworkProtocol {
 	public String toString() {
 		String dir = "";
 
-		switch (direction) {
-		case INCOMING:
+		switch (source) {
+		case CLIENT:
 			dir = "CLIENT";
 			break;
-		case OUTGOING:
+		case SERVER:
 			dir = "SERVER";
 			break;
 		default:
@@ -90,17 +91,21 @@ public enum NetworkProtocol {
 		return Optional.of(protocol);
 	}
 
-	private static int getMaxRequestSize(ExchangeDirection direction) {
+	private static int getMaxRequestSize(Communicator source, Communicator target) {
 		NetworkProtocol[] values = values();
-		return Arrays.stream(values).filter(e -> e.direction == direction).mapToInt(e -> e.maxRequestSize).max()
-				.getAsInt();
+		return Arrays.stream(values).filter(e -> e.source == source && e.target == target)
+				.mapToInt(e -> e.maxRequestSize).max().getAsInt();
 	}
 
-	public static int getMaxIncomingRequestSize() {
-		return getMaxRequestSize(INCOMING);
+	public static int getMaxClientToServerRequestSize() {
+		int x = getMaxRequestSize(CLIENT, SERVER);
+		System.out.println("MAX CLIENT TO SERVER : " + x);
+		return x;
 	}
 
-	public static int getMaxOutgoingRequestSize() {
-		return getMaxRequestSize(OUTGOING);
+	public static int getMaxServerToClientRequestSize() {
+		int x = getMaxRequestSize(SERVER, CLIENT);
+		System.out.println("MAX SERVER TO CLIENT : " + x);
+		return x;
 	}
 }

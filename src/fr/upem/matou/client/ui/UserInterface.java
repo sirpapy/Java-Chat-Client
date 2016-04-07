@@ -25,9 +25,12 @@ public interface UserInterface {
 	public void displayNewConnectionEvent(String pseudo);
 
 	public void displayNewDisconnectionEvent(String pseudo);
+	
+	public void displayNewPrivateRequestEvent(String pseudo);
 
 	public void warnInvalidPseudo(String pseudo);
 
 	public void warnInvalidMessage(ClientEvent event);
+
 
 }

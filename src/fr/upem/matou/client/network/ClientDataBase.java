@@ -36,10 +36,15 @@ class ClientDataBase {
 	}
 
 	boolean sendMessage(String message) throws IOException {
-		SocketChannel sc = publicChannel;
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSG);
 		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + message);
-		return ClientCommunication.sendRequestMSG(sc, message);
+		return ClientCommunication.sendRequestMSG(publicChannel, message);
+	}
+
+	boolean openPrivateConnection(String pseudo) throws IOException {
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOREQ);
+		Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
+		return ClientCommunication.sendRequestPVCOREQ(publicChannel, pseudo);
 	}
 
 }

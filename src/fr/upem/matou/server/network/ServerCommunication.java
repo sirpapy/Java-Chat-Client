@@ -99,4 +99,19 @@ class ServerCommunication {
 
 		return true;
 	}
+
+	static boolean addRequestPVCODISP(ByteBuffer bbWrite, String pseudo) {
+		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
+
+		int sizePseudo = encodedPseudo.remaining();
+
+		int length = Integer.BYTES + Integer.BYTES + sizePseudo;
+		if (bbWrite.remaining() < length) {
+			return false;
+		}
+		bbWrite.putInt(NetworkProtocol.PVCODISP.ordinal());
+		bbWrite.putInt(sizePseudo).put(encodedPseudo);
+
+		return true;
+	}
 }

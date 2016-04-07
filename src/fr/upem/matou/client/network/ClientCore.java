@@ -110,7 +110,8 @@ public class ClientCore implements Closeable {
 		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 
 		switch (protocol) {
-		case MSGBC:
+
+		case MSGBC: {
 			setChrono(true);
 
 			Optional<Message> optionalRequestMSGBC = ClientCommunication.receiveRequestMSGBC(sc);
@@ -125,7 +126,9 @@ public class ClientCore implements Closeable {
 			ui.displayMessage(receivedMessage);
 
 			break;
-		case CODISP:
+		}
+
+		case CODISP: {
 			setChrono(true);
 			Optional<String> optionalRequestCODISP = ClientCommunication.receiveRequestCODISP(sc);
 			setChrono(false);
@@ -138,7 +141,9 @@ public class ClientCore implements Closeable {
 			ui.displayNewConnectionEvent(receivedConnected);
 
 			break;
-		case DISCODISP:
+		}
+
+		case DISCODISP: {
 			setChrono(true);
 			Optional<String> optionalRequestDISCODISP = ClientCommunication.receiveRequestDISCODISP(sc);
 			setChrono(false);
@@ -150,8 +155,26 @@ public class ClientCore implements Closeable {
 			ui.displayNewDisconnectionEvent(receivedDisconnected);
 
 			break;
+		}
+
+		case PVCODISP: {
+			setChrono(true);
+			Optional<String> optionalRequestPVCODISP = ClientCommunication.receiveRequestPVCODISP(sc);
+			setChrono(false);
+
+			if (!optionalRequestPVCODISP.isPresent()) {
+				throw new IOException("Protocol violation : " + protocol);
+			}
+			String receivedConnectionRequest = optionalRequestPVCODISP.get();
+			Logger.network(NetworkLogType.READ, "PSEUDO : " + receivedConnectionRequest);
+			ui.displayNewPrivateRequestEvent(receivedConnectionRequest);
+
+			break;
+		}
+
 		default:
 			throw new UnsupportedOperationException("Unsupported protocol request : " + protocol); // TEMP
+
 		}
 
 	}

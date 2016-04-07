@@ -78,6 +78,11 @@ public class ShellInterface implements UserInterface {
 	}
 
 	@Override
+	public void displayNewPrivateRequestEvent(String pseudo) {
+		output.println("<" + pseudo + " asks for a private connection>");		
+	}
+	
+	@Override
 	public void warnInvalidPseudo(String pseudo) {
 		output.println("This pseudo is not valid");
 	}
@@ -90,5 +95,6 @@ public class ShellInterface implements UserInterface {
 	private void warnInvalidCommand() {
 		output.println("Invalid command");
 	}
+
 
 }

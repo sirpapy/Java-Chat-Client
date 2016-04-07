@@ -47,8 +47,7 @@ public interface ClientEvent {
 
 		@Override
 		public boolean execute(ClientDataBase db) throws IOException {
-			// TODO
-			throw new UnsupportedOperationException("Unimplemented");
+			return db.openPrivateConnection(pseudo);
 		}
 
 	}

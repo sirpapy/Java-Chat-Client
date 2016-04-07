@@ -11,7 +11,6 @@ import java.nio.channels.SocketChannel;
 import java.util.Set;
 
 import fr.upem.matou.debug.buffer.ByteBuffers;
-import fr.upem.matou.debug.ip.InetAddressTools;
 import fr.upem.matou.shared.logger.Logger;
 
 /*

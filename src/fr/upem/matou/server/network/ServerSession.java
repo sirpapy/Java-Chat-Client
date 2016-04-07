@@ -18,8 +18,8 @@ import fr.upem.matou.shared.network.NetworkProtocol;
  * This class represents the state of a client connected to the chat server.
  */
 class ServerSession {
-	private static final int BUFFER_SIZE_INPUT = NetworkProtocol.getMaxIncomingRequestSize();
-	private static final int BUFFER_SIZE_OUTPUT = NetworkProtocol.getMaxOutgoingRequestSize();
+	private static final int BUFFER_SIZE_INPUT = NetworkProtocol.getMaxClientToServerRequestSize();
+	private static final int BUFFER_SIZE_OUTPUT = NetworkProtocol.getMaxServerToClientRequestSize();
 	private static final int PSEUDO_MAX_SIZE = NetworkCommunication.getPseudoMaxSize();
 	private static final int MESSAGE_MAX_SIZE = NetworkCommunication.getMessageMaxSize();
 
@@ -46,6 +46,12 @@ class ServerSession {
 	static class StateMSG implements ClientState {
 		int sizeMessage;
 		String message;
+	}
+
+	/* State of a PVCOREQ request */
+	static class StatePVCOREQ implements ClientState {
+		int sizePseudo;
+		String pseudo;
 	}
 
 	ServerSession(ServerDataBase db, SocketChannel sc) {
@@ -149,13 +155,13 @@ class ServerSession {
 	 * Answers by a CORES request and fills the write buffer.
 	 */
 	private void answerCORES(String pseudo) {
-		if(!NetworkCommunication.checkPseudoValidity(pseudo)) {
+		if (!NetworkCommunication.checkPseudoValidity(pseudo)) {
 			Logger.debug("INVALID PSEUDO : " + pseudo);
 			disconnectClient();
 			return;
 		}
-		
-		boolean acceptation = db.addNewClient(sc, pseudo);
+
+		boolean acceptation = db.addNewClient(sc, this, pseudo);
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES);
 		Logger.network(NetworkLogType.WRITE, "ACCEPTATION : " + acceptation);
 
@@ -280,6 +286,74 @@ class ServerSession {
 		throw new AssertionError("Argument " + arg + " is not valid for DISCO");
 	}
 
+	private void processPVCOREQinit() {
+		if (!isAuthent()) {
+			Logger.debug("Client not authenticated");
+			disconnectClient();
+			return;
+		}
+		clearAndLimit(bbRead, Integer.BYTES);
+		clientState = new StatePVCOREQ();
+		arg++;
+	}
+
+	private void processPVCOREQarg1(StatePVCOREQ state) {
+		bbRead.flip();
+		state.sizePseudo = bbRead.getInt();
+		Logger.network(NetworkLogType.READ, "SIZE PSEUDO : " + state.sizePseudo);
+		if (state.sizePseudo > PSEUDO_MAX_SIZE || state.sizePseudo == 0) {
+			Logger.debug("Invalid size pseudo");
+			disconnectClient();
+			return;
+		}
+
+		clearAndLimit(bbRead, state.sizePseudo);
+		arg++;
+	}
+
+	private void processPVCOREQarg2(StatePVCOREQ state) {
+		bbRead.flip();
+		state.pseudo = ServerCommunication.readStringUTF8(bbRead);
+		Logger.network(NetworkLogType.READ, "PSEUDO : " + state.pseudo);
+
+		resetReadState();
+	}
+
+	private void answerPVCODISP(String pseudo) {
+		String source = db.pseudoOf(sc);
+		ByteBuffer bbTarget = db.targetWriteBuffer(pseudo);
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCODISP);
+		Logger.network(NetworkLogType.WRITE, "PSEUDO : " + source);
+
+		if (!ServerCommunication.addRequestPVCODISP(bbTarget, source)) {
+			Logger.warning("PVCODISP lost | Write Buffer cannot hold it");
+		}
+	}
+
+	/*
+	 * Process a COREQ request.
+	 */
+	private void processPVCOREQ() {
+		if (arg == 0) {
+			processPVCOREQinit();
+			return;
+		}
+
+		StatePVCOREQ state = (StatePVCOREQ) clientState;
+
+		switch (arg) {
+		case 1:
+			processPVCOREQarg1(state);
+			return;
+		case 2:
+			processPVCOREQarg2(state);
+			answerPVCODISP(state.pseudo);
+			return;
+		default:
+			throw new AssertionError("Argument " + arg + " is not valid for PVCOREQ");
+		}
+	}
+
 	/*
 	 * Updates the state of the current session after reading.
 	 */
@@ -308,6 +382,9 @@ class ServerSession {
 		case DISCO:
 			processDISCO();
 			return;
+		case PVCOREQ:
+			processPVCOREQ();
+			return;
 		default:
 			Logger.error("Operation not implemented yet : " + protocol); // TEMP
 			disconnectClient();
@@ -330,9 +407,9 @@ class ServerSession {
 	 * Updates the interest operations after reading or writing.
 	 */
 	int computeInterestOps() {
-//		if (!key.isValid()) {
-//			return true;
-//		}
+		// if (!key.isValid()) {
+		// return true;
+		// }
 		int ops = 0;
 
 		if (bbWrite.position() > 0) { // There is something to write

@@ -14,10 +14,12 @@ import fr.upem.matou.shared.network.NetworkProtocol;
  * This class represents the state of the chat server.
  * This class is not thread-safe and should not be used by several threads.
  */
+@SuppressWarnings("resource")
 class ServerDataBase {
-	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxOutgoingRequestSize();
+	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxServerToClientRequestSize();
 
 	private final HashMap<SocketChannel, String> connected = new HashMap<>();
+	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
 	private final Set<SocketChannel> connectedKeysView = connected.keySet();
 	private final Collection<String> connectedValuesView = connected.values();
 	private final Set<SelectionKey> keys;
@@ -34,15 +36,16 @@ class ServerDataBase {
 	ByteBuffer getBroadcastBuffer() {
 		return bbBroadcast;
 	}
-	
+
 	/*
 	 * Add a new client.
 	 * Check if : available & no illegal characters
 	 */
-	boolean addNewClient(SocketChannel sc, String pseudo) {
+	boolean addNewClient(SocketChannel sc, ServerSession session, String pseudo) {
 		if (!(checkAvailability(pseudo))) {
 			return false;
 		}
+		sessions.put(sc, session);
 		connected.put(sc, pseudo);
 		return true;
 	}
@@ -51,13 +54,24 @@ class ServerDataBase {
 	 * Returns the pseudo associated with this SocketChannel.
 	 */
 	String pseudoOf(SocketChannel sc) {
-		return connected.get(sc);
+		return connected.get(sc); // TODO : Optional
+	}
+
+	SocketChannel channelOf(String pseudo) {
+		return connected.entrySet().stream()
+				.filter(e -> e.getValue().equals(pseudo)) // FIXME : case sensitive
+				.map(e -> e.getKey()).findFirst() // FIXME : Optional
+				.get();
+	}
+	
+	ByteBuffer getWriteBuffer(SocketChannel sc) {
+		return sessions.get(sc).getWriteBuffer();
 	}
 
 	// TODO : Intégrer à l'ajout du broadcast
 	void updateStateReadAll() {
 		Logger.debug("BROADCAST : " + bbBroadcast);
-		if(bbBroadcast.position() == 0) {
+		if (bbBroadcast.position() == 0) {
 			return;
 		}
 
@@ -87,7 +101,7 @@ class ServerDataBase {
 			int ops = key.interestOps();
 			key.interestOps(ops | SelectionKey.OP_WRITE);
 		}
-		
+
 		bbBroadcast.clear();
 	}
 
@@ -104,6 +118,11 @@ class ServerDataBase {
 		}
 
 		return disconnected;
+	}
+
+	ByteBuffer targetWriteBuffer(String pseudo) {
+		SocketChannel sc = channelOf(pseudo);
+		return getWriteBuffer(sc);
 	}
 
 }
