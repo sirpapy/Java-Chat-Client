@@ -2,25 +2,17 @@ package fr.upem.matou.client.ui;
 
 import java.util.Optional;
 
+import fr.upem.matou.client.network.ClientEvent;
+
 /**
  * This interface provides methods to display information to the user and retrieve information entered by the user.
  * All implementations of this interface should be transparent.
  */
 public interface UserInterface {
 
-	/**
-	 * Reads a username entered by the user.
-	 * 
-	 * @return The pseudo
-	 */
-	public Optional<String> readPseudo();
+	public Optional<String> getPseudo();
 
-	/**
-	 * Reads a message entered by the user.
-	 * 
-	 * @return The message
-	 */
-	public Optional<String> readMessage();
+	public Optional<ClientEvent> getEvent();
 
 	/**
 	 * Displays a message to the user.
@@ -36,6 +28,6 @@ public interface UserInterface {
 
 	public void warnInvalidPseudo(String pseudo);
 
-	public void warnInvalidMessage(String message);
+	public void warnInvalidMessage(ClientEvent event);
 
 }

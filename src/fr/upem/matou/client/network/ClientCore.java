@@ -46,7 +46,7 @@ public class ClientCore implements Closeable {
 
 	private void pseudoSender(UserInterface ui) throws IOException {
 		while (true) {
-			Optional<String> optionalInput = ui.readPseudo();
+			Optional<String> optionalInput = ui.getPseudo();
 			if (!optionalInput.isPresent()) {
 				throw new IOException("User exited"); // TODO : Ne plus renvoyer d'exception
 			}
@@ -88,15 +88,14 @@ public class ClientCore implements Closeable {
 	}
 
 	private boolean messageSender(UserInterface ui) throws IOException {
-		Optional<String> optionalInput = ui.readMessage();
-		if (!optionalInput.isPresent()) {
+		Optional<ClientEvent> optionalEvent = ui.getEvent();
+		if (!optionalEvent.isPresent()) {
 			return true;
 		}
-		String inputMessage = optionalInput.get();
+		ClientEvent event = optionalEvent.get();
 
-		ClientRequest request = ClientRequest.parseLine(inputMessage);
-		if (!request.execute(db)) {
-			ui.warnInvalidMessage(inputMessage);
+		if (!event.execute(db)) {
+			ui.warnInvalidMessage(event);
 			return false;
 		}
 		return false;

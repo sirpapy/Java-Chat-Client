@@ -54,6 +54,7 @@ class ServerDataBase {
 		return connected.get(sc);
 	}
 
+	// TODO : Intégrer à l'ajout du broadcast
 	void updateStateReadAll() {
 		Logger.debug("BROADCAST : " + bbBroadcast);
 		if(bbBroadcast.position() == 0) {

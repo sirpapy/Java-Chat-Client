@@ -5,6 +5,8 @@ import java.io.PrintStream;
 import java.util.Optional;
 import java.util.Scanner;
 
+import fr.upem.matou.client.network.ClientEvent;
+
 /**
  * This class provides a user interface from a shell.
  */
@@ -24,14 +26,27 @@ public class ShellInterface implements UserInterface {
 	}
 
 	@Override
-	public Optional<String> readPseudo() {
+	public Optional<String> getPseudo() {
 		output.print("Pseudo > ");
 		return readLine();
 	}
 
 	@Override
-	public Optional<String> readMessage() {
-		return readLine();
+	public Optional<ClientEvent> getEvent() {
+		while (true) {
+			Optional<String> optional = readLine();
+			if (!optional.isPresent()) {
+				return Optional.empty();
+			}
+
+			String line = optional.get();
+			Optional<ClientEvent> event = ShellCommand.parseLine(line);
+			if (!event.isPresent()) {
+				warnInvalidCommand();
+				continue;
+			}
+			return event;
+		}
 	}
 
 	@Override
@@ -68,8 +83,12 @@ public class ShellInterface implements UserInterface {
 	}
 
 	@Override
-	public void warnInvalidMessage(String message) {
+	public void warnInvalidMessage(ClientEvent event) {
 		output.println("This message is not valid");
+	}
+
+	private void warnInvalidCommand() {
+		output.println("Invalid command");
 	}
 
 }
