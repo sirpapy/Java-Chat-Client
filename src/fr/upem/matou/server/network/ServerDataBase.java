@@ -37,7 +37,7 @@ class ServerDataBase {
 	}
 	
 	private boolean checkAvailability(Username username) {
-		return !names.contains(username); // FIXME : must be case insensitive
+		return !names.contains(username);
 	}
 
 	ByteBuffer getBroadcastBuffer() {
@@ -110,14 +110,14 @@ class ServerDataBase {
 	}
 	
 	Optional<ServerSession> sessionOf(SocketChannel sc) {
-		return Optional.ofNullable(sessions.get(sc)); // FIXME : Optional
+		return Optional.ofNullable(sessions.get(sc));
 	}
 
 	Optional<ServerSession> sessionOf(Username username) {
 		Optional<SocketChannel> sc = connected.entrySet().stream()
-				.filter(e -> e.getValue().equals(username)) // TODO : ignore case
+				.filter(e -> e.getValue().equals(username))
 				.map(e -> e.getKey())
-				.findFirst(); // FIXME : Optional (crash server)
+				.findFirst();
 		if(!sc.isPresent()) {
 			return Optional.empty();
 		}

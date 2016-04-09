@@ -212,6 +212,11 @@ class ServerSession {
 	}
 
 	private void processMSGinit() {
+		if (!isAuthent()) {
+			Logger.debug("Client not authenticated");
+			disconnectClient();
+			return;
+		}
 		clearAndLimit(bbRead, Integer.BYTES);
 		clientState = new StateMSG();
 		arg++;
@@ -279,6 +284,9 @@ class ServerSession {
 	}
 
 	private void processDISCOinit() {
+		if (!isAuthent()) {
+			Logger.debug("Client not authenticated");
+		}
 		disconnectClient();
 	}
 
