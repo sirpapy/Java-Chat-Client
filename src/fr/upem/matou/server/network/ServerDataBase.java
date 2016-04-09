@@ -3,8 +3,10 @@ package fr.upem.matou.server.network;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,6 +24,7 @@ class ServerDataBase {
 
 	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
 	private final HashMap<SocketChannel, Username> connected = new HashMap<>();
+	private final HashMap<Username, HashSet<Username>> privateRequests = new HashMap<>();
 	private final Collection<Username> names = connected.values();
 	private final Set<SelectionKey> keys;
 	private final ByteBuffer bbBroadcast = ByteBuffer.allocateDirect(BUFFER_SIZE_BROADCAST);
@@ -35,7 +38,7 @@ class ServerDataBase {
 		sessions.put(sc, session);
 		return session;
 	}
-	
+
 	private boolean checkAvailability(Username username) {
 		return !names.contains(username);
 	}
@@ -108,7 +111,7 @@ class ServerDataBase {
 	Optional<Username> usernameOf(SocketChannel sc) {
 		return Optional.ofNullable(connected.get(sc));
 	}
-	
+
 	Optional<ServerSession> sessionOf(SocketChannel sc) {
 		return Optional.ofNullable(sessions.get(sc));
 	}
@@ -118,10 +121,28 @@ class ServerDataBase {
 				.filter(e -> e.getValue().equals(username))
 				.map(e -> e.getKey())
 				.findFirst();
-		if(!sc.isPresent()) {
+		if (!sc.isPresent()) {
 			return Optional.empty();
 		}
 		return sessionOf(sc.get());
+	}
+
+	void addNewPrivateRequest(Username source, Username target) {
+		HashSet<Username> set = privateRequests.get(source);
+		if (set == null) { // TODO : init ?
+			set = new HashSet<>();
+			privateRequests.put(source, set);
+		}
+		set.add(target); // TODO : utiliser le boolean pour envoyer ou non la notification
+		Logger.debug("SET : " + set);
+	}
+
+	boolean checkPrivateRequest(Username source, Username target) {
+		HashSet<Username> set = privateRequests.get(target);
+		if(set==null) { // TODO : init ?
+			return false;
+		}
+		return set.contains(source);
 	}
 
 }

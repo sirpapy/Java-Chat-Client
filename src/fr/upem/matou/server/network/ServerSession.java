@@ -56,6 +56,12 @@ class ServerSession {
 		int sizeUsername;
 		String username;
 	}
+	
+	/* State of a PVCOACC request */
+	static class StatePVCOACC implements ClientState {
+		int sizeUsername;
+		String username;
+	}
 
 	ServerSession(ServerDataBase db, SocketChannel sc, SelectionKey key) {
 		this.db = db;
@@ -113,6 +119,30 @@ class ServerSession {
 		arg++;
 	}
 
+	/*
+	 * Process a COREQ request.
+	 */
+	private void processCOREQ() {
+		if (arg == 0) {
+			processCOREQinit();
+			return;
+		}
+
+		StateCOREQ state = (StateCOREQ) clientState;
+
+		switch (arg) {
+		case 1:
+			processCOREQarg1(state);
+			return;
+		case 2:
+			processCOREQarg2(state);
+			answerCORES(state.username);
+			return;
+		default:
+			throw new AssertionError("Argument " + arg + " is not valid for COREQ");
+		}
+	}
+	
 	/*
 	 * Initializes the COREQ state.
 	 */
@@ -188,30 +218,27 @@ class ServerSession {
 		}
 	}
 
-	/*
-	 * Process a COREQ request.
-	 */
-	private void processCOREQ() {
+	private void processMSG() {
 		if (arg == 0) {
-			processCOREQinit();
+			processMSGinit();
 			return;
 		}
 
-		StateCOREQ state = (StateCOREQ) clientState;
+		StateMSG state = (StateMSG) clientState;
 
 		switch (arg) {
 		case 1:
-			processCOREQarg1(state);
+			processMSGarg1(state);
 			return;
 		case 2:
-			processCOREQarg2(state);
-			answerCORES(state.username);
+			processMSGarg2(state);
+			answerMSGBC(state.message);
 			return;
 		default:
-			throw new AssertionError("Argument " + arg + " is not valid for COREQ");
+			throw new AssertionError("Argument " + arg + " is not valid for MSG");
 		}
 	}
-
+	
 	private void processMSGinit() {
 		if (!isAuthent()) {
 			Logger.debug("Client not authenticated");
@@ -263,26 +290,13 @@ class ServerSession {
 		}
 		db.updateStateReadAll();
 	}
-
-	private void processMSG() {
+	
+	private void processDISCO() {
 		if (arg == 0) {
-			processMSGinit();
+			processDISCOinit();
 			return;
 		}
-
-		StateMSG state = (StateMSG) clientState;
-
-		switch (arg) {
-		case 1:
-			processMSGarg1(state);
-			return;
-		case 2:
-			processMSGarg2(state);
-			answerMSGBC(state.message);
-			return;
-		default:
-			throw new AssertionError("Argument " + arg + " is not valid for MSG");
-		}
+		throw new AssertionError("Argument " + arg + " is not valid for DISCO");
 	}
 
 	private void processDISCOinit() {
@@ -291,13 +305,26 @@ class ServerSession {
 		}
 		disconnectClient();
 	}
-
-	private void processDISCO() {
+	
+	private void processPVCOREQ() {
 		if (arg == 0) {
-			processDISCOinit();
+			processPVCOREQinit();
 			return;
 		}
-		throw new AssertionError("Argument " + arg + " is not valid for DISCO");
+
+		StatePVCOREQ state = (StatePVCOREQ) clientState;
+
+		switch (arg) {
+		case 1:
+			processPVCOREQarg1(state);
+			return;
+		case 2:
+			processPVCOREQarg2(state);
+			answerPVCODISP(state.username);
+			return;
+		default:
+			throw new AssertionError("Argument " + arg + " is not valid for PVCOREQ");
+		}
 	}
 
 	private void processPVCOREQinit() {
@@ -333,13 +360,16 @@ class ServerSession {
 		resetReadState();
 	}
 
-	private void answerPVCODISP(String username) {
+	// FIXME : target == source
+	private void answerPVCODISP(String targetName) {
 		Username source = db.usernameOf(sc).get();
-		Optional<ServerSession> optional = db.sessionOf(new Username(username));
+		Username target = new Username(targetName);
+		Optional<ServerSession> optional = db.sessionOf(target);
 		if(!optional.isPresent()) {
-			Logger.debug("Target " + username + " is not connected");
+			Logger.debug("Target " + target + " is not connected");
 			return;
 		}
+		db.addNewPrivateRequest(source,target); // TEMP : Username en argument
 		ServerSession session = optional.get();
 		ByteBuffer bbTarget = session.getWriteBuffer();
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCODISP);
@@ -352,29 +382,71 @@ class ServerSession {
 
 		session.updateKey();
 	}
-
-	/*
-	 * Process a COREQ request.
-	 */
-	private void processPVCOREQ() {
+	
+	private void processPVCOACC() {
 		if (arg == 0) {
-			processPVCOREQinit();
+			processPVCOACCinit();
 			return;
 		}
 
-		StatePVCOREQ state = (StatePVCOREQ) clientState;
+		StatePVCOACC state = (StatePVCOACC) clientState;
 
 		switch (arg) {
 		case 1:
-			processPVCOREQarg1(state);
+			processPVCOACCarg1(state);
 			return;
 		case 2:
-			processPVCOREQarg2(state);
-			answerPVCODISP(state.username);
+			processPVCOACCarg2(state);
+			answerPVCOACC(state.username);
 			return;
 		default:
-			throw new AssertionError("Argument " + arg + " is not valid for PVCOREQ");
+			throw new AssertionError("Argument " + arg + " is not valid for PVCOACC");
 		}
+	}
+	
+	private void processPVCOACCinit() {
+		if (!isAuthent()) {
+			Logger.debug("Client not authenticated");
+			disconnectClient();
+			return;
+		}
+		clearAndLimit(bbRead, Integer.BYTES);
+		clientState = new StatePVCOACC();
+		arg++;		
+	}
+	
+	private void processPVCOACCarg1(StatePVCOACC state) {
+		bbRead.flip();
+		state.sizeUsername = bbRead.getInt();
+		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + state.sizeUsername);
+		if (state.sizeUsername > USERNAME_MAX_SIZE || state.sizeUsername == 0) {
+			Logger.debug("Invalid size username");
+			disconnectClient();
+			return;
+		}
+
+		clearAndLimit(bbRead, state.sizeUsername);
+		arg++;		
+	}
+	
+	private void processPVCOACCarg2(StatePVCOACC state) {
+		bbRead.flip();
+		state.username = ServerCommunication.readStringUTF8(bbRead);
+		Logger.network(NetworkLogType.READ, "USERNAME : " + state.username);
+
+		resetReadState();		
+	}
+	
+	private void answerPVCOACC(String targetName) {
+		Username source = db.usernameOf(sc).get();
+		Username target = new Username(targetName);
+		Optional<ServerSession> optional = db.sessionOf(target);
+		if(!optional.isPresent()) {
+			Logger.debug("Target " + target + " is not connected");
+			return;
+		}
+		boolean valid = db.checkPrivateRequest(source,target); // TEMP : Username en argument
+		Logger.debug("REQUEST ACCEPTATION : " + valid);
 	}
 
 	/*
@@ -407,6 +479,9 @@ class ServerSession {
 			return;
 		case PVCOREQ:
 			processPVCOREQ();
+			return;
+		case PVCOACC:
+			processPVCOACC();
 			return;
 		default:
 			Logger.error("Operation not implemented yet : " + protocol); // TEMP

@@ -86,6 +86,18 @@ class ClientCommunication {
 
 		return request;
 	}
+	
+	public static ByteBuffer encodeRequestPVCOACC(ByteBuffer encodedUsername) {
+		int length = encodedUsername.remaining();
+
+		int capacity = Integer.BYTES + Integer.BYTES + length;
+		ByteBuffer request = ByteBuffer.allocate(capacity);
+
+		request.putInt(NetworkProtocol.PVCOACC.ordinal());
+		request.putInt(length).put(encodedUsername);
+
+		return request;
+	}
 
 	/*
 	 * Sends a COREQ request.
@@ -132,6 +144,17 @@ class ClientCommunication {
 		sendRequest(sc, bb);
 		return true;
 	}
+	
+	public static boolean sendRequestPVCOACC(SocketChannel sc, String username) throws IOException {
+		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
+		if (!optional.isPresent()) {
+			return false;
+		}
+		ByteBuffer bb = encodeRequestPVCOACC(optional.get());
+		sendRequest(sc, bb);
+		return true;
+	}
+	
 
 	
 	/*
@@ -254,5 +277,5 @@ class ClientCommunication {
 
 		return Optional.of(username);
 	}
-	
+
 }

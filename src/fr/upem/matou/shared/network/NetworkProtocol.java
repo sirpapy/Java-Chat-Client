@@ -1,13 +1,18 @@
 package fr.upem.matou.shared.network;
 
-import static fr.upem.matou.shared.network.NetworkCommunication.*;
-import static fr.upem.matou.shared.network.NetworkProtocol.Communicator.*;
+import static fr.upem.matou.shared.network.NetworkCommunication.LENGTH_SIZE;
+import static fr.upem.matou.shared.network.NetworkCommunication.MESSAGE_MAX_SIZE;
+import static fr.upem.matou.shared.network.NetworkCommunication.USERNAME_MAX_SIZE;
+import static fr.upem.matou.shared.network.NetworkProtocol.Communicator.CLIENT;
+import static fr.upem.matou.shared.network.NetworkProtocol.Communicator.SERVER;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import fr.upem.matou.shared.logger.Logger;
 
 /*
  * This class defines the communication protocol.
@@ -99,13 +104,13 @@ public enum NetworkProtocol {
 
 	public static int getMaxClientToServerRequestSize() {
 		int x = getMaxRequestSize(CLIENT, SERVER);
-		System.out.println("MAX CLIENT TO SERVER : " + x);
+		Logger.debug("MAX CLIENT TO SERVER : " + x);
 		return x;
 	}
 
 	public static int getMaxServerToClientRequestSize() {
 		int x = getMaxRequestSize(SERVER, CLIENT);
-		System.out.println("MAX SERVER TO CLIENT : " + x);
+		Logger.debug("MAX SERVER TO CLIENT : " + x);
 		return x;
 	}
 }

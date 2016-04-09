@@ -47,4 +47,10 @@ class ClientDataBase {
 		return ClientCommunication.sendRequestPVCOREQ(publicChannel, username);
 	}
 
+	boolean acceptPrivateConnection(String username) throws IOException {
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOACC);
+		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
+		return ClientCommunication.sendRequestPVCOACC(publicChannel, username);
+	}
+
 }
