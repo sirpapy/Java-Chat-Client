@@ -18,10 +18,9 @@ import fr.upem.matou.shared.network.NetworkProtocol;
 class ServerDataBase {
 	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxServerToClientRequestSize();
 
-	private final HashMap<SocketChannel, String> connected = new HashMap<>();
 	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
-	private final Set<SocketChannel> connectedKeysView = connected.keySet();
-	private final Collection<String> connectedValuesView = connected.values();
+	private final HashMap<SocketChannel, String> connected = new HashMap<>();
+	private final Collection<String> names = connected.values();
 	private final Set<SelectionKey> keys;
 	private final ByteBuffer bbBroadcast = ByteBuffer.allocateDirect(BUFFER_SIZE_BROADCAST);
 
@@ -30,7 +29,7 @@ class ServerDataBase {
 	}
 
 	private boolean checkAvailability(String pseudo) {
-		return !connectedValuesView.contains(pseudo); // FIXME : must be case insensitive
+		return !names.contains(pseudo); // FIXME : must be case insensitive
 	}
 
 	ByteBuffer getBroadcastBuffer() {
@@ -41,11 +40,10 @@ class ServerDataBase {
 	 * Add a new client.
 	 * Check if : available & no illegal characters
 	 */
-	boolean addNewClient(SocketChannel sc, ServerSession session, String pseudo) {
+	boolean addNewConnected(SocketChannel sc, String pseudo) {
 		if (!(checkAvailability(pseudo))) {
 			return false;
 		}
-		sessions.put(sc, session);
 		connected.put(sc, pseudo);
 		return true;
 	}
@@ -62,10 +60,6 @@ class ServerDataBase {
 				.filter(e -> e.getValue().equals(pseudo)) // FIXME : case sensitive
 				.map(e -> e.getKey()).findFirst() // FIXME : Optional
 				.get();
-	}
-	
-	ByteBuffer getWriteBuffer(SocketChannel sc) {
-		return sessions.get(sc).getWriteBuffer();
 	}
 
 	// TODO : Intégrer à l'ajout du broadcast
@@ -120,9 +114,18 @@ class ServerDataBase {
 		return disconnected;
 	}
 
-	ByteBuffer targetWriteBuffer(String pseudo) {
-		SocketChannel sc = channelOf(pseudo);
-		return getWriteBuffer(sc);
+	ServerSession newServerSession(SocketChannel sc, SelectionKey key) {
+		ServerSession session = new ServerSession(this, sc, key);
+		sessions.put(sc, session);
+		return session;
+	}
+
+	ServerSession sessionOf(String pseudo) {
+		SocketChannel sc = connected.entrySet().stream()
+				.filter(e -> e.getValue().equals(pseudo)) // TODO : ignore case
+				.map(e -> e.getKey())
+				.findFirst().get(); // FIXME : Optional (crash server)
+		return sessions.get(sc);
 	}
 
 }

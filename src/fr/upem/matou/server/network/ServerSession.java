@@ -25,6 +25,8 @@ class ServerSession {
 
 	private final ServerDataBase db;
 	private final SocketChannel sc;
+	private final SelectionKey key;
+	
 	private boolean authent = false;
 	private NetworkProtocol protocol = null;
 	private int arg = -1;
@@ -54,9 +56,10 @@ class ServerSession {
 		String pseudo;
 	}
 
-	ServerSession(ServerDataBase db, SocketChannel sc) {
+	ServerSession(ServerDataBase db, SocketChannel sc, SelectionKey key) {
 		this.db = db;
 		this.sc = sc;
+		this.key = key;
 		clearAndLimit(bbRead, Integer.BYTES);
 	}
 
@@ -161,7 +164,7 @@ class ServerSession {
 			return;
 		}
 
-		boolean acceptation = db.addNewClient(sc, this, pseudo);
+		boolean acceptation = db.addNewConnected(sc, pseudo);
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES);
 		Logger.network(NetworkLogType.WRITE, "ACCEPTATION : " + acceptation);
 
@@ -321,13 +324,18 @@ class ServerSession {
 
 	private void answerPVCODISP(String pseudo) {
 		String source = db.pseudoOf(sc);
-		ByteBuffer bbTarget = db.targetWriteBuffer(pseudo);
+		ServerSession session = db.sessionOf(pseudo);
+		ByteBuffer bbTarget = session.getWriteBuffer();
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCODISP);
 		Logger.network(NetworkLogType.WRITE, "PSEUDO : " + source);
 
 		if (!ServerCommunication.addRequestPVCODISP(bbTarget, source)) {
 			Logger.warning("PVCODISP lost | Write Buffer cannot hold it");
+			return;
 		}
+		
+		int ops = session.computeInterestOps(); // TODO : change to update ?
+		session.key.interestOps(ops);
 	}
 
 	/*

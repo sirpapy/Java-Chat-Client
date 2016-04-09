@@ -83,7 +83,7 @@ public class ServerCore implements Closeable {
 		}
 		acceptedChannel.configureBlocking(false);
 		SelectionKey registeredKey = acceptedChannel.register(selector, SelectionKey.OP_READ);
-		ServerSession session = new ServerSession(db, acceptedChannel);
+		ServerSession session = db.newServerSession(acceptedChannel,registeredKey);
 		registeredKey.attach(session);
 	}
 

@@ -75,9 +75,6 @@ class ClientCommunication {
 		return request;
 	}
 	
-	/*
-	 * Encodes a COREQ request.
-	 */
 	public static ByteBuffer encodeRequestPVCOREQ(ByteBuffer encodedPseudo) {
 		int length = encodedPseudo.remaining();
 
