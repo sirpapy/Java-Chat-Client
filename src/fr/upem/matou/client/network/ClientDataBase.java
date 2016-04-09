@@ -43,7 +43,7 @@ class ClientDataBase {
 
 	boolean openPrivateConnection(String username) throws IOException {
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOREQ);
-		Logger.network(NetworkLogType.WRITE, "PSEUDO : " + username);
+		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 		return ClientCommunication.sendRequestPVCOREQ(publicChannel, username);
 	}
 

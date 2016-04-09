@@ -133,7 +133,7 @@ class ServerSession {
 	private void processCOREQarg1(StateCOREQ state) {
 		bbRead.flip();
 		state.sizeUsername = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE PSEUDO : " + state.sizeUsername);
+		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + state.sizeUsername);
 		if (state.sizeUsername > USERNAME_MAX_SIZE || state.sizeUsername == 0) {
 			Logger.debug("Invalid size username");
 			disconnectClient();
@@ -245,13 +245,13 @@ class ServerSession {
 			disconnectClient();
 			return;
 		}
-		String username = db.usernameOf(sc).toString();
+		Username username = db.usernameOf(sc).get();
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSGBC);
 		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + message);
 
 		ByteBuffer bbWriteAll = db.getBroadcastBuffer();
-		if (!ServerCommunication.addRequestMSGBC(bbWriteAll, username, message)) {
+		if (!ServerCommunication.addRequestMSGBC(bbWriteAll, username.toString(), message)) {
 			Logger.warning("MSGBC lost | Broadcast Buffer cannot hold it");
 			return;
 		}
@@ -304,7 +304,7 @@ class ServerSession {
 	private void processPVCOREQarg1(StatePVCOREQ state) {
 		bbRead.flip();
 		state.sizeUsername = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE PSEUDO : " + state.sizeUsername);
+		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + state.sizeUsername);
 		if (state.sizeUsername > USERNAME_MAX_SIZE || state.sizeUsername == 0) {
 			Logger.debug("Invalid size username");
 			disconnectClient();
@@ -324,8 +324,13 @@ class ServerSession {
 	}
 
 	private void answerPVCODISP(String username) {
-		Username source = db.usernameOf(sc);
-		ServerSession session = db.sessionOf(new Username(username));
+		Username source = db.usernameOf(sc).get();
+		Optional<ServerSession> optional = db.sessionOf(new Username(username));
+		if(!optional.isPresent()) {
+			Logger.debug("Target " + username + " is not connected");
+			return;
+		}
+		ServerSession session = optional.get();
 		ByteBuffer bbTarget = session.getWriteBuffer();
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCODISP);
 		Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
@@ -433,9 +438,12 @@ class ServerSession {
 
 	void disconnectClient() {
 		Logger.debug("SILENTLY CLOSE OF : " + sc);
-		String username = db.removeClient(sc).toString();
-
-		if (username != null) {
+		Optional<Username> disconnected = db.removeClient(sc);
+		if (!disconnected.isPresent()) {
+			Logger.debug("DISCONNECTION : {UNAUTHENTICATED CLIENT}");
+		} else {
+			Logger.debug("DISCONNECTION : " + disconnected);
+			String username = disconnected.get().toString();
 			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCODISP);
 			Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 			ByteBuffer bbWriteAll = db.getBroadcastBuffer();

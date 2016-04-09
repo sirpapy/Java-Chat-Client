@@ -51,7 +51,7 @@ public class NetworkCommunication {
 
 	public static Optional<ByteBuffer> encodeUsername(String username) {
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(username);
-		Logger.debug("ENCODED PSEUDO SIZE : " + encoded.remaining());
+		Logger.debug("ENCODED USERNAME SIZE : " + encoded.remaining());
 		if (!checkEncodedUsernameValidity(encoded)) {
 			return Optional.empty();
 		}

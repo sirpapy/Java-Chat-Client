@@ -5,6 +5,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.Set;
 
 import fr.upem.matou.shared.logger.Logger;
@@ -25,10 +26,16 @@ class ServerDataBase {
 	private final Set<SelectionKey> keys;
 	private final ByteBuffer bbBroadcast = ByteBuffer.allocateDirect(BUFFER_SIZE_BROADCAST);
 
-	public ServerDataBase(Set<SelectionKey> keys) {
+	ServerDataBase(Set<SelectionKey> keys) {
 		this.keys = keys;
 	}
 
+	ServerSession newServerSession(SocketChannel sc, SelectionKey key) {
+		ServerSession session = new ServerSession(this, sc, key);
+		sessions.put(sc, session);
+		return session;
+	}
+	
 	private boolean checkAvailability(Username username) {
 		return !names.contains(username); // FIXME : must be case insensitive
 	}
@@ -47,13 +54,6 @@ class ServerDataBase {
 		}
 		connected.put(sc, username);
 		return true;
-	}
-
-	/*
-	 * Returns the username associated with this SocketChannel.
-	 */
-	Username usernameOf(SocketChannel sc) {
-		return connected.get(sc); // TODO : Optional
 	}
 
 	// TODO : Intégrer à l'ajout du broadcast
@@ -97,33 +97,31 @@ class ServerDataBase {
 		// TEMP
 	}
 
-	Username removeClient(SocketChannel channel) {
+	Optional<Username> removeClient(SocketChannel channel) {
 		Username disconnected = connected.remove(channel);
-		if (disconnected == null) {
-			Logger.debug("DISCONNECTION : {UNAUTHENTICATED CLIENT}");
-		} else {
-			Logger.debug("DISCONNECTION : " + disconnected);
-		}
-
-		return disconnected;
+		return Optional.ofNullable(disconnected);
 	}
 
-	ServerSession newServerSession(SocketChannel sc, SelectionKey key) {
-		ServerSession session = new ServerSession(this, sc, key);
-		sessions.put(sc, session);
-		return session;
+	/*
+	 * Returns the username associated with this SocketChannel.
+	 */
+	Optional<Username> usernameOf(SocketChannel sc) {
+		return Optional.ofNullable(connected.get(sc));
+	}
+	
+	Optional<ServerSession> sessionOf(SocketChannel sc) {
+		return Optional.ofNullable(sessions.get(sc)); // FIXME : Optional
 	}
 
-	ServerSession sessionOf(SocketChannel sc) {
-		return sessions.get(sc); // FIXME : Optional
-	}
-
-	ServerSession sessionOf(Username username) {
-		SocketChannel sc = connected.entrySet().stream()
+	Optional<ServerSession> sessionOf(Username username) {
+		Optional<SocketChannel> sc = connected.entrySet().stream()
 				.filter(e -> e.getValue().equals(username)) // TODO : ignore case
 				.map(e -> e.getKey())
-				.findFirst().get(); // FIXME : Optional (crash server)
-		return sessionOf(sc);
+				.findFirst(); // FIXME : Optional (crash server)
+		if(!sc.isPresent()) {
+			return Optional.empty();
+		}
+		return sessionOf(sc.get());
 	}
 
 }

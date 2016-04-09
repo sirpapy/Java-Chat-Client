@@ -56,7 +56,7 @@ public class ClientCore implements Closeable {
 				continue;
 			}
 			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
-			Logger.network(NetworkLogType.WRITE, "PSEUDO : " + username);
+			Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 			if (!ClientCommunication.sendRequestCOREQ(sc, username)) {
 				ui.warnInvalidUsername(username);
 				continue;
@@ -121,7 +121,7 @@ public class ClientCore implements Closeable {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			Message receivedMessage = optionalRequestMSGBC.get();
-			Logger.network(NetworkLogType.READ, "PSEUDO : " + receivedMessage.getUsername());
+			Logger.network(NetworkLogType.READ, "USERNAME : " + receivedMessage.getUsername());
 			Logger.network(NetworkLogType.READ, "MESSAGE : " + receivedMessage.getContent());
 			ui.displayMessage(receivedMessage);
 
@@ -137,7 +137,7 @@ public class ClientCore implements Closeable {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			String receivedConnected = optionalRequestCODISP.get();
-			Logger.network(NetworkLogType.READ, "PSEUDO : " + receivedConnected);
+			Logger.network(NetworkLogType.READ, "USERNAME : " + receivedConnected);
 			ui.displayNewConnectionEvent(receivedConnected);
 
 			break;
@@ -151,7 +151,7 @@ public class ClientCore implements Closeable {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			String receivedDisconnected = optionalRequestDISCODISP.get();
-			Logger.network(NetworkLogType.READ, "PSEUDO : " + receivedDisconnected);
+			Logger.network(NetworkLogType.READ, "USERNAME : " + receivedDisconnected);
 			ui.displayNewDisconnectionEvent(receivedDisconnected);
 
 			break;
@@ -166,7 +166,7 @@ public class ClientCore implements Closeable {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			String receivedConnectionRequest = optionalRequestPVCODISP.get();
-			Logger.network(NetworkLogType.READ, "PSEUDO : " + receivedConnectionRequest);
+			Logger.network(NetworkLogType.READ, "USERNAME : " + receivedConnectionRequest);
 			ui.displayNewPrivateRequestEvent(receivedConnectionRequest);
 
 			break;
