@@ -29,8 +29,6 @@ public class ClientMatou {
 			return;
 		}
 		
-		// TODO : Mode privé
-		
 //		PrintStream out = new PrintStream(Files.newOutputStream(Paths.get("client_out.log"), WRITE, CREATE, APPEND), true);
 //		PrintStream err = new PrintStream(Files.newOutputStream(Paths.get("client_err.log"), WRITE, CREATE, APPEND), true);
 //		Logger.attachOutput(out);

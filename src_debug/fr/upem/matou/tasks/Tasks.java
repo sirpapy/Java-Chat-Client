@@ -6,6 +6,7 @@ public class Tasks {
 	// TODO : Logger sur les exceptions -> Logger.warning/Logger.error
 	// TODO : Tests unitaires
 	// TODO : Programmation par contrat
+	// TODO : Check warnings et suppress
 	
 	// TODO : Visibilité minimale
 	// TODO : Vérifier qu'il n'y a pas de code mort

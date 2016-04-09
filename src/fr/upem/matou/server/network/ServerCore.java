@@ -87,7 +87,7 @@ public class ServerCore implements Closeable {
 		registeredKey.attach(session);
 	}
 
-	private void doRead(SelectionKey key) throws IOException {
+	private static void doRead(SelectionKey key) throws IOException {
 		SocketChannel channel = (SocketChannel) key.channel();
 		ServerSession session = (ServerSession) key.attachment();
 		ByteBuffer bb = session.getReadBuffer();
@@ -98,12 +98,11 @@ public class ServerCore implements Closeable {
 		}
 
 		session.updateStateRead();
-		db.updateStateReadAll();
 
 		session.updateKey();
 	}
 
-	private void doWrite(SelectionKey key) throws IOException {
+	private static void doWrite(SelectionKey key) throws IOException {
 		SocketChannel channel = (SocketChannel) key.channel();
 		ServerSession session = (ServerSession) key.attachment();
 		ByteBuffer bb = session.getWriteBuffer();
@@ -135,7 +134,6 @@ public class ServerCore implements Closeable {
 		bb.compact();
 
 		session.updateStateWrite();
-		db.updateStateWriteAll();
 
 		session.updateKey();
 	}

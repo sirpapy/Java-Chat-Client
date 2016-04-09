@@ -469,7 +469,7 @@ public class ClientCoreHack implements Closeable {
 		System.out.println("SUCCESS");
 	}
 
-	// FIXME : NPE
+	// OK
 	public void startChat_UnauthentMessage() throws IOException {
 		ClientCommunication.sendRequestMSG(sc, "Hello world");
 

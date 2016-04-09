@@ -184,6 +184,7 @@ class ServerSession {
 				Logger.warning("CODISP lost | Broadcast Buffer cannot hold it");
 				return;
 			}
+			db.updateStateReadAll();
 		}
 	}
 
@@ -260,6 +261,7 @@ class ServerSession {
 			Logger.warning("MSGBC lost | Broadcast Buffer cannot hold it");
 			return;
 		}
+		db.updateStateReadAll();
 	}
 
 	private void processMSG() {
