@@ -44,28 +44,28 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void pseudoSender(UserInterface ui) throws IOException {
+	private void usernameSender(UserInterface ui) throws IOException {
 		while (true) {
-			Optional<String> optionalInput = ui.getPseudo();
+			Optional<String> optionalInput = ui.getUsername();
 			if (!optionalInput.isPresent()) {
 				throw new IOException("User exited"); // TODO : Ne plus renvoyer d'exception
 			}
-			String pseudo = optionalInput.get();
-			if (!NetworkCommunication.checkPseudoValidity(pseudo)) {
-				ui.warnInvalidPseudo(pseudo);
+			String username = optionalInput.get();
+			if (!NetworkCommunication.checkUsernameValidity(username)) {
+				ui.warnInvalidUsername(username);
 				continue;
 			}
 			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
-			Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
-			if (!ClientCommunication.sendRequestCOREQ(sc, pseudo)) {
-				ui.warnInvalidPseudo(pseudo);
+			Logger.network(NetworkLogType.WRITE, "PSEUDO : " + username);
+			if (!ClientCommunication.sendRequestCOREQ(sc, username)) {
+				ui.warnInvalidUsername(username);
 				continue;
 			}
 			return;
 		}
 	}
 
-	private boolean pseudoReceiver() throws IOException {
+	private boolean usernameReceiver() throws IOException {
 		Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
 		if (!optionalRequestType.isPresent()) {
 			throw new IOException("Protocol violation");
@@ -121,7 +121,7 @@ public class ClientCore implements Closeable {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			Message receivedMessage = optionalRequestMSGBC.get();
-			Logger.network(NetworkLogType.READ, "PSEUDO : " + receivedMessage.getPseudo());
+			Logger.network(NetworkLogType.READ, "PSEUDO : " + receivedMessage.getUsername());
 			Logger.network(NetworkLogType.READ, "MESSAGE : " + receivedMessage.getContent());
 			ui.displayMessage(receivedMessage);
 
@@ -243,11 +243,11 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void processPseudo(UserInterface ui) throws IOException {
+	private void processUsername(UserInterface ui) throws IOException {
 		boolean isAccepted = false;
 		while (!isAccepted) {
-			pseudoSender(ui);
-			isAccepted = pseudoReceiver();
+			usernameSender(ui);
+			isAccepted = usernameReceiver();
 		}
 	}
 
@@ -275,7 +275,7 @@ public class ClientCore implements Closeable {
 	public void startChat() throws IOException, InterruptedException {
 		UserInterface ui = new ShellInterface();
 
-		processPseudo(ui);
+		processUsername(ui);
 		processMessages(ui);
 
 		Logger.debug("DISCONNECTION");

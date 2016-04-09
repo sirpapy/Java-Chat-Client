@@ -4,45 +4,45 @@ package fr.upem.matou.client.ui;
  * This class represents a chat message.
  */
 public class Message {
-	private final String pseudo;
+	private final String username;
 	private final String content;
 	private final boolean isPrivate;
 
 	/**
 	 * Creates a new message.
 	 * 
-	 * @param pseudo
-	 *            The pseudo of the speaker.
+	 * @param username
+	 *            The username of the speaker.
 	 * @param content
 	 *            The content of the message.
 	 */
-	public Message(String pseudo, String content) {
-		this(pseudo, content, false);
+	public Message(String username, String content) {
+		this(username, content, false);
 	}
 
 	/**
 	 * Creates a new message.
 	 * 
-	 * @param pseudo
-	 *            The pseudo of the speaker.
+	 * @param username
+	 *            The username of the speaker.
 	 * @param content
 	 *            The content of the message.
 	 * @param isPrivate
 	 *            true if the message is private, false otherwise.
 	 */
-	public Message(String pseudo, String content, boolean isPrivate) {
-		this.pseudo = pseudo;
+	public Message(String username, String content, boolean isPrivate) {
+		this.username = username;
 		this.content = content;
 		this.isPrivate = isPrivate;
 	}
 
 	/**
-	 * Returns the pseudo of the speaker.
+	 * Returns the username of the speaker.
 	 * 
-	 * @return The pseudo of the speaker.
+	 * @return The username of the speaker.
 	 */
-	public String getPseudo() {
-		return pseudo;
+	public String getUsername() {
+		return username;
 	}
 
 	/**
@@ -68,10 +68,10 @@ public class Message {
 		String string;
 
 		if (isPrivate) {
-			string = "#" + pseudo + "#";
+			string = "#" + username + "#";
 
 		} else {
-			string = "<" + pseudo + ">";
+			string = "<" + username + ">";
 		}
 
 		return string + " " + content;

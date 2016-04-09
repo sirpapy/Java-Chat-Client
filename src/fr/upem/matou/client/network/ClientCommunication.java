@@ -39,14 +39,14 @@ class ClientCommunication {
 	/*
 	 * Encodes a COREQ request.
 	 */
-	public static ByteBuffer encodeRequestCOREQ(ByteBuffer encodedPseudo) {
-		int length = encodedPseudo.remaining();
+	public static ByteBuffer encodeRequestCOREQ(ByteBuffer encodedUsername) {
+		int length = encodedUsername.remaining();
 
 		int capacity = Integer.BYTES + Integer.BYTES + length;
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 
 		request.putInt(NetworkProtocol.COREQ.ordinal());
-		request.putInt(length).put(encodedPseudo);
+		request.putInt(length).put(encodedUsername);
 
 		return request;
 	}
@@ -75,14 +75,14 @@ class ClientCommunication {
 		return request;
 	}
 	
-	public static ByteBuffer encodeRequestPVCOREQ(ByteBuffer encodedPseudo) {
-		int length = encodedPseudo.remaining();
+	public static ByteBuffer encodeRequestPVCOREQ(ByteBuffer encodedUsername) {
+		int length = encodedUsername.remaining();
 
 		int capacity = Integer.BYTES + Integer.BYTES + length;
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 
 		request.putInt(NetworkProtocol.PVCOREQ.ordinal());
-		request.putInt(length).put(encodedPseudo);
+		request.putInt(length).put(encodedUsername);
 
 		return request;
 	}
@@ -90,8 +90,8 @@ class ClientCommunication {
 	/*
 	 * Sends a COREQ request.
 	 */
-	public static boolean sendRequestCOREQ(SocketChannel sc, String pseudo) throws IOException {
-		Optional<ByteBuffer> optional = NetworkCommunication.encodePseudo(pseudo);
+	public static boolean sendRequestCOREQ(SocketChannel sc, String username) throws IOException {
+		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
 		if (!optional.isPresent()) {
 			return false;
 		}
@@ -123,8 +123,8 @@ class ClientCommunication {
 		sendRequest(sc, bb);
 	}
 
-	public static boolean sendRequestPVCOREQ(SocketChannel sc, String pseudo) throws IOException {
-		Optional<ByteBuffer> optional = NetworkCommunication.encodePseudo(pseudo);
+	public static boolean sendRequestPVCOREQ(SocketChannel sc, String username) throws IOException {
+		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
 		if (!optional.isPresent()) {
 			return false;
 		}
@@ -164,19 +164,19 @@ class ClientCommunication {
 	 * Receives a MSGBG request.
 	 */
 	public static Optional<Message> receiveRequestMSGBC(SocketChannel sc) throws IOException {
-		ByteBuffer bbSizePseudo = ByteBuffer.allocate(Integer.BYTES);
-		if (!readFully(sc, bbSizePseudo)) {
+		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
 		}
-		bbSizePseudo.flip();
-		int sizePseudo = bbSizePseudo.getInt();
+		bbSizeUsername.flip();
+		int sizeUsername = bbSizeUsername.getInt();
 
-		ByteBuffer bbPseudo = ByteBuffer.allocate(sizePseudo);
-		if (!readFully(sc, bbPseudo)) {
+		ByteBuffer bbUsername = ByteBuffer.allocate(sizeUsername);
+		if (!readFully(sc, bbUsername)) {
 			throw new IOException("Connection closed");
 		}
-		bbPseudo.flip();
-		String pseudo = PROTOCOL_CHARSET.decode(bbPseudo).toString();
+		bbUsername.flip();
+		String username = PROTOCOL_CHARSET.decode(bbUsername).toString();
 
 		ByteBuffer bbSizeMessage = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeMessage)) {
@@ -192,67 +192,67 @@ class ClientCommunication {
 		bbMessage.flip();
 		String message = PROTOCOL_CHARSET.decode(bbMessage).toString();
 
-		return Optional.of(new Message(pseudo, message));
+		return Optional.of(new Message(username, message));
 	}
 
 	/*
 	 * Receives a CODISP request.
 	 */
 	public static Optional<String> receiveRequestCODISP(SocketChannel sc) throws IOException {
-		ByteBuffer bbSizePseudo = ByteBuffer.allocate(Integer.BYTES);
-		if (!readFully(sc, bbSizePseudo)) {
+		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
 		}
-		bbSizePseudo.flip();
-		int sizePseudo = bbSizePseudo.getInt();
+		bbSizeUsername.flip();
+		int sizeUsername = bbSizeUsername.getInt();
 
-		ByteBuffer bbPseudo = ByteBuffer.allocate(sizePseudo);
-		if (!readFully(sc, bbPseudo)) {
+		ByteBuffer bbUsername = ByteBuffer.allocate(sizeUsername);
+		if (!readFully(sc, bbUsername)) {
 			throw new IOException("Connection closed");
 		}
-		bbPseudo.flip();
-		String pseudo = PROTOCOL_CHARSET.decode(bbPseudo).toString();
+		bbUsername.flip();
+		String username = PROTOCOL_CHARSET.decode(bbUsername).toString();
 
-		return Optional.of(pseudo);
+		return Optional.of(username);
 	}
 
 	/*
 	 * Receives a DISCODISP request.
 	 */
 	public static Optional<String> receiveRequestDISCODISP(SocketChannel sc) throws IOException {
-		ByteBuffer bbSizePseudo = ByteBuffer.allocate(Integer.BYTES);
-		if (!readFully(sc, bbSizePseudo)) {
+		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
 		}
-		bbSizePseudo.flip();
-		int sizePseudo = bbSizePseudo.getInt();
+		bbSizeUsername.flip();
+		int sizeUsername = bbSizeUsername.getInt();
 
-		ByteBuffer bbPseudo = ByteBuffer.allocate(sizePseudo);
-		if (!readFully(sc, bbPseudo)) {
+		ByteBuffer bbUsername = ByteBuffer.allocate(sizeUsername);
+		if (!readFully(sc, bbUsername)) {
 			throw new IOException("Connection closed");
 		}
-		bbPseudo.flip();
-		String pseudo = PROTOCOL_CHARSET.decode(bbPseudo).toString();
+		bbUsername.flip();
+		String username = PROTOCOL_CHARSET.decode(bbUsername).toString();
 
-		return Optional.of(pseudo);
+		return Optional.of(username);
 	}
 
 	public static Optional<String> receiveRequestPVCODISP(SocketChannel sc) throws IOException {
-		ByteBuffer bbSizePseudo = ByteBuffer.allocate(Integer.BYTES);
-		if (!readFully(sc, bbSizePseudo)) {
+		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
 		}
-		bbSizePseudo.flip();
-		int sizePseudo = bbSizePseudo.getInt();
+		bbSizeUsername.flip();
+		int sizeUsername = bbSizeUsername.getInt();
 
-		ByteBuffer bbPseudo = ByteBuffer.allocate(sizePseudo);
-		if (!readFully(sc, bbPseudo)) {
+		ByteBuffer bbUsername = ByteBuffer.allocate(sizeUsername);
+		if (!readFully(sc, bbUsername)) {
 			throw new IOException("Connection closed");
 		}
-		bbPseudo.flip();
-		String pseudo = PROTOCOL_CHARSET.decode(bbPseudo).toString();
+		bbUsername.flip();
+		String username = PROTOCOL_CHARSET.decode(bbUsername).toString();
 
-		return Optional.of(pseudo);
+		return Optional.of(username);
 	}
 	
 }

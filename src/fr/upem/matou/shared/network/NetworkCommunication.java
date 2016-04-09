@@ -13,13 +13,13 @@ public class NetworkCommunication {
 	private static final Charset PROTOCOL_CHARSET = Charset.forName("UTF-8");
 
 	static final int LENGTH_SIZE = Integer.BYTES;
-	static final int PSEUDO_MAX_SIZE = 32;
+	static final int USERNAME_MAX_SIZE = 32;
 	static final int MESSAGE_MAX_SIZE = 512;
 
 	private NetworkCommunication() {
 	}
 
-	private static boolean isValidPseudoCharacter(int codePoint) {
+	private static boolean isValidUsernameCharacter(int codePoint) {
 		return Character.isLetterOrDigit(codePoint);
 	}
 
@@ -27,17 +27,17 @@ public class NetworkCommunication {
 		return !Character.isISOControl(codePoint);
 	}
 
-	public static boolean checkPseudoValidity(String pseudo) {
-		return pseudo.chars().allMatch(NetworkCommunication::isValidPseudoCharacter);
+	public static boolean checkUsernameValidity(String username) {
+		return username.chars().allMatch(NetworkCommunication::isValidUsernameCharacter);
 	}
 
 	public static boolean checkMessageValidity(String message) {
 		return message.chars().allMatch(NetworkCommunication::isValidMessageCharacter);
 	}
 
-	public static boolean checkEncodedPseudoValidity(ByteBuffer pseudo) {
-		int size = pseudo.remaining();
-		return size <= PSEUDO_MAX_SIZE && size > 0;
+	public static boolean checkEncodedUsernameValidity(ByteBuffer username) {
+		int size = username.remaining();
+		return size <= USERNAME_MAX_SIZE && size > 0;
 	}
 
 	public static boolean checkEncodedMessageValidity(ByteBuffer message) {
@@ -49,10 +49,10 @@ public class NetworkCommunication {
 		return PROTOCOL_CHARSET;
 	}
 
-	public static Optional<ByteBuffer> encodePseudo(String pseudo) {
-		ByteBuffer encoded = PROTOCOL_CHARSET.encode(pseudo);
+	public static Optional<ByteBuffer> encodeUsername(String username) {
+		ByteBuffer encoded = PROTOCOL_CHARSET.encode(username);
 		Logger.debug("ENCODED PSEUDO SIZE : " + encoded.remaining());
-		if (!checkEncodedPseudoValidity(encoded)) {
+		if (!checkEncodedUsernameValidity(encoded)) {
 			return Optional.empty();
 		}
 		return Optional.of(encoded);
@@ -67,8 +67,8 @@ public class NetworkCommunication {
 		return Optional.of(encoded);
 	}
 
-	public static int getPseudoMaxSize() {
-		return PSEUDO_MAX_SIZE;
+	public static int getUsernameMaxSize() {
+		return USERNAME_MAX_SIZE;
 	}
 
 	public static int getMessageMaxSize() {

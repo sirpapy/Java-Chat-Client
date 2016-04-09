@@ -24,15 +24,15 @@ class ClientDataBase {
 		return publicChannel;
 	}
 
-	void addNewPrivateChannel(String pseudo, SocketChannel sc) {
-		requireNonNull(pseudo);
+	void addNewPrivateChannel(String username, SocketChannel sc) {
+		requireNonNull(username);
 		requireNonNull(sc);
-		privateChannels.put(pseudo, sc);
+		privateChannels.put(username, sc);
 	}
 
-	Optional<SocketChannel> getPrivateChannel(String pseudo) {
-		requireNonNull(pseudo);
-		return Optional.ofNullable(privateChannels.get(pseudo));
+	Optional<SocketChannel> getPrivateChannel(String username) {
+		requireNonNull(username);
+		return Optional.ofNullable(privateChannels.get(username));
 	}
 
 	boolean sendMessage(String message) throws IOException {
@@ -41,10 +41,10 @@ class ClientDataBase {
 		return ClientCommunication.sendRequestMSG(publicChannel, message);
 	}
 
-	boolean openPrivateConnection(String pseudo) throws IOException {
+	boolean openPrivateConnection(String username) throws IOException {
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOREQ);
-		Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
-		return ClientCommunication.sendRequestPVCOREQ(publicChannel, pseudo);
+		Logger.network(NetworkLogType.WRITE, "PSEUDO : " + username);
+		return ClientCommunication.sendRequestPVCOREQ(publicChannel, username);
 	}
 
 }

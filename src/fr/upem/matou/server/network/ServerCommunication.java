@@ -45,20 +45,20 @@ class ServerCommunication {
 	/*
 	 * Encodes a MSGBC request.
 	 */
-	static boolean addRequestMSGBC(ByteBuffer bbWrite, String pseudo, String message) {
-		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
+	static boolean addRequestMSGBC(ByteBuffer bbWrite, String username, String message) {
+		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 		ByteBuffer encodedMessage = PROTOCOL_CHARSET.encode(message);
 
-		int sizePseudo = encodedPseudo.remaining();
+		int sizeUsername = encodedUsername.remaining();
 		int sizeMessage = encodedMessage.remaining();
 
-		int length = Integer.BYTES + Integer.BYTES + sizePseudo + Integer.BYTES + sizeMessage;
+		int length = Integer.BYTES + Integer.BYTES + sizeUsername + Integer.BYTES + sizeMessage;
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
 
 		bbWrite.putInt(NetworkProtocol.MSGBC.ordinal());
-		bbWrite.putInt(sizePseudo).put(encodedPseudo);
+		bbWrite.putInt(sizeUsername).put(encodedUsername);
 		bbWrite.putInt(sizeMessage).put(encodedMessage);
 
 		return true;
@@ -67,17 +67,17 @@ class ServerCommunication {
 	/*
 	 * Encodes a CODISP request.
 	 */
-	static boolean addRequestCODISP(ByteBuffer bbWrite, String pseudo) {
-		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
+	static boolean addRequestCODISP(ByteBuffer bbWrite, String username) {
+		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 
-		int sizePseudo = encodedPseudo.remaining();
+		int sizeUsername = encodedUsername.remaining();
 
-		int length = Integer.BYTES + Integer.BYTES + sizePseudo;
+		int length = Integer.BYTES + Integer.BYTES + sizeUsername;
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
 		bbWrite.putInt(NetworkProtocol.CODISP.ordinal());
-		bbWrite.putInt(sizePseudo).put(encodedPseudo);
+		bbWrite.putInt(sizeUsername).put(encodedUsername);
 
 		return true;
 	}
@@ -85,32 +85,32 @@ class ServerCommunication {
 	/*
 	 * Encodes a DISCODISP request.
 	 */
-	static boolean addRequestDISCODISP(ByteBuffer bbWrite, String pseudo) {
-		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
+	static boolean addRequestDISCODISP(ByteBuffer bbWrite, String username) {
+		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 
-		int sizePseudo = encodedPseudo.remaining();
+		int sizeUsername = encodedUsername.remaining();
 
-		int length = Integer.BYTES + Integer.BYTES + sizePseudo;
+		int length = Integer.BYTES + Integer.BYTES + sizeUsername;
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
 		bbWrite.putInt(NetworkProtocol.DISCODISP.ordinal());
-		bbWrite.putInt(sizePseudo).put(encodedPseudo);
+		bbWrite.putInt(sizeUsername).put(encodedUsername);
 
 		return true;
 	}
 
-	static boolean addRequestPVCODISP(ByteBuffer bbWrite, String pseudo) {
-		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
+	static boolean addRequestPVCODISP(ByteBuffer bbWrite, String username) {
+		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 
-		int sizePseudo = encodedPseudo.remaining();
+		int sizeUsername = encodedUsername.remaining();
 
-		int length = Integer.BYTES + Integer.BYTES + sizePseudo;
+		int length = Integer.BYTES + Integer.BYTES + sizeUsername;
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
 		bbWrite.putInt(NetworkProtocol.PVCODISP.ordinal());
-		bbWrite.putInt(sizePseudo).put(encodedPseudo);
+		bbWrite.putInt(sizeUsername).put(encodedUsername);
 
 		return true;
 	}

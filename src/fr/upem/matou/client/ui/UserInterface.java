@@ -10,7 +10,7 @@ import fr.upem.matou.client.network.ClientEvent;
  */
 public interface UserInterface {
 
-	public Optional<String> getPseudo();
+	public Optional<String> getUsername();
 
 	public Optional<ClientEvent> getEvent();
 
@@ -22,13 +22,13 @@ public interface UserInterface {
 	 */
 	public void displayMessage(Message message);
 
-	public void displayNewConnectionEvent(String pseudo);
+	public void displayNewConnectionEvent(String username);
 
-	public void displayNewDisconnectionEvent(String pseudo);
+	public void displayNewDisconnectionEvent(String username);
 	
-	public void displayNewPrivateRequestEvent(String pseudo);
+	public void displayNewPrivateRequestEvent(String username);
 
-	public void warnInvalidPseudo(String pseudo);
+	public void warnInvalidUsername(String username);
 
 	public void warnInvalidMessage(ClientEvent event);
 

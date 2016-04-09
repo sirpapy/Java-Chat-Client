@@ -11,6 +11,7 @@ import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
+import fr.upem.matou.shared.network.Username;
 
 // TEMP : Retirer les UnsupportedOperationException !
 
@@ -20,13 +21,13 @@ import fr.upem.matou.shared.network.NetworkProtocol;
 class ServerSession {
 	private static final int BUFFER_SIZE_INPUT = NetworkProtocol.getMaxClientToServerRequestSize();
 	private static final int BUFFER_SIZE_OUTPUT = NetworkProtocol.getMaxServerToClientRequestSize();
-	private static final int PSEUDO_MAX_SIZE = NetworkCommunication.getPseudoMaxSize();
+	private static final int USERNAME_MAX_SIZE = NetworkCommunication.getUsernameMaxSize();
 	private static final int MESSAGE_MAX_SIZE = NetworkCommunication.getMessageMaxSize();
 
 	private final ServerDataBase db;
 	private final SocketChannel sc;
 	private final SelectionKey key;
-	
+
 	private boolean authent = false;
 	private NetworkProtocol protocol = null;
 	private int arg = -1;
@@ -40,8 +41,8 @@ class ServerSession {
 
 	/* State of a COREQ request */
 	static class StateCOREQ implements ClientState {
-		int sizePseudo;
-		String pseudo;
+		int sizeUsername;
+		String username;
 	}
 
 	/* State of a MSG request */
@@ -52,8 +53,8 @@ class ServerSession {
 
 	/* State of a PVCOREQ request */
 	static class StatePVCOREQ implements ClientState {
-		int sizePseudo;
-		String pseudo;
+		int sizeUsername;
+		String username;
 	}
 
 	ServerSession(ServerDataBase db, SocketChannel sc, SelectionKey key) {
@@ -131,15 +132,15 @@ class ServerSession {
 	 */
 	private void processCOREQarg1(StateCOREQ state) {
 		bbRead.flip();
-		state.sizePseudo = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE PSEUDO : " + state.sizePseudo);
-		if (state.sizePseudo > PSEUDO_MAX_SIZE || state.sizePseudo == 0) {
-			Logger.debug("Invalid size pseudo");
+		state.sizeUsername = bbRead.getInt();
+		Logger.network(NetworkLogType.READ, "SIZE PSEUDO : " + state.sizeUsername);
+		if (state.sizeUsername > USERNAME_MAX_SIZE || state.sizeUsername == 0) {
+			Logger.debug("Invalid size username");
 			disconnectClient();
 			return;
 		}
 
-		clearAndLimit(bbRead, state.sizePseudo);
+		clearAndLimit(bbRead, state.sizeUsername);
 		arg++;
 	}
 
@@ -148,8 +149,8 @@ class ServerSession {
 	 */
 	private void processCOREQarg2(StateCOREQ state) {
 		bbRead.flip();
-		state.pseudo = ServerCommunication.readStringUTF8(bbRead);
-		Logger.network(NetworkLogType.READ, "PSEUDO : " + state.pseudo);
+		state.username = ServerCommunication.readStringUTF8(bbRead);
+		Logger.network(NetworkLogType.READ, "USERNAME : " + state.username);
 
 		resetReadState();
 	}
@@ -157,14 +158,14 @@ class ServerSession {
 	/*
 	 * Answers by a CORES request and fills the write buffer.
 	 */
-	private void answerCORES(String pseudo) {
-		if (!NetworkCommunication.checkPseudoValidity(pseudo)) {
-			Logger.debug("INVALID PSEUDO : " + pseudo);
+	private void answerCORES(String username) {
+		if (!NetworkCommunication.checkUsernameValidity(username)) {
+			Logger.debug("INVALID USERNAME : " + username);
 			disconnectClient();
 			return;
 		}
 
-		boolean acceptation = db.addNewConnected(sc, pseudo);
+		boolean acceptation = db.addNewConnected(sc, new Username(username));
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES);
 		Logger.network(NetworkLogType.WRITE, "ACCEPTATION : " + acceptation);
 
@@ -176,10 +177,10 @@ class ServerSession {
 			setAuthent();
 
 			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CODISP);
-			Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
+			Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 
 			ByteBuffer bbWriteAll = db.getBroadcastBuffer();
-			if (!ServerCommunication.addRequestCODISP(bbWriteAll, pseudo)) {
+			if (!ServerCommunication.addRequestCODISP(bbWriteAll, username)) {
 				Logger.warning("CODISP lost | Broadcast Buffer cannot hold it");
 				return;
 			}
@@ -203,7 +204,7 @@ class ServerSession {
 			return;
 		case 2:
 			processCOREQarg2(state);
-			answerCORES(state.pseudo);
+			answerCORES(state.username);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for COREQ");
@@ -244,13 +245,13 @@ class ServerSession {
 			disconnectClient();
 			return;
 		}
-		String pseudo = db.pseudoOf(sc);
+		String username = db.usernameOf(sc).toString();
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSGBC);
-		Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
+		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + message);
 
 		ByteBuffer bbWriteAll = db.getBroadcastBuffer();
-		if (!ServerCommunication.addRequestMSGBC(bbWriteAll, pseudo, message)) {
+		if (!ServerCommunication.addRequestMSGBC(bbWriteAll, username, message)) {
 			Logger.warning("MSGBC lost | Broadcast Buffer cannot hold it");
 			return;
 		}
@@ -302,40 +303,39 @@ class ServerSession {
 
 	private void processPVCOREQarg1(StatePVCOREQ state) {
 		bbRead.flip();
-		state.sizePseudo = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE PSEUDO : " + state.sizePseudo);
-		if (state.sizePseudo > PSEUDO_MAX_SIZE || state.sizePseudo == 0) {
-			Logger.debug("Invalid size pseudo");
+		state.sizeUsername = bbRead.getInt();
+		Logger.network(NetworkLogType.READ, "SIZE PSEUDO : " + state.sizeUsername);
+		if (state.sizeUsername > USERNAME_MAX_SIZE || state.sizeUsername == 0) {
+			Logger.debug("Invalid size username");
 			disconnectClient();
 			return;
 		}
 
-		clearAndLimit(bbRead, state.sizePseudo);
+		clearAndLimit(bbRead, state.sizeUsername);
 		arg++;
 	}
 
 	private void processPVCOREQarg2(StatePVCOREQ state) {
 		bbRead.flip();
-		state.pseudo = ServerCommunication.readStringUTF8(bbRead);
-		Logger.network(NetworkLogType.READ, "PSEUDO : " + state.pseudo);
+		state.username = ServerCommunication.readStringUTF8(bbRead);
+		Logger.network(NetworkLogType.READ, "USERNAME : " + state.username);
 
 		resetReadState();
 	}
 
-	private void answerPVCODISP(String pseudo) {
-		String source = db.pseudoOf(sc);
-		ServerSession session = db.sessionOf(pseudo);
+	private void answerPVCODISP(String username) {
+		Username source = db.usernameOf(sc);
+		ServerSession session = db.sessionOf(new Username(username));
 		ByteBuffer bbTarget = session.getWriteBuffer();
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCODISP);
-		Logger.network(NetworkLogType.WRITE, "PSEUDO : " + source);
+		Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
 
-		if (!ServerCommunication.addRequestPVCODISP(bbTarget, source)) {
+		if (!ServerCommunication.addRequestPVCODISP(bbTarget, source.toString())) {
 			Logger.warning("PVCODISP lost | Write Buffer cannot hold it");
 			return;
 		}
-		
-		int ops = session.computeInterestOps(); // TODO : change to update ?
-		session.key.interestOps(ops);
+
+		session.updateKey();
 	}
 
 	/*
@@ -355,7 +355,7 @@ class ServerSession {
 			return;
 		case 2:
 			processPVCOREQarg2(state);
-			answerPVCODISP(state.pseudo);
+			answerPVCODISP(state.username);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for PVCOREQ");
@@ -433,13 +433,13 @@ class ServerSession {
 
 	void disconnectClient() {
 		Logger.debug("SILENTLY CLOSE OF : " + sc);
-		String pseudo = db.removeClient(sc);
+		String username = db.removeClient(sc).toString();
 
-		if (pseudo != null) {
+		if (username != null) {
 			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCODISP);
-			Logger.network(NetworkLogType.WRITE, "PSEUDO : " + pseudo);
+			Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 			ByteBuffer bbWriteAll = db.getBroadcastBuffer();
-			if (!ServerCommunication.addRequestDISCODISP(bbWriteAll, pseudo)) {
+			if (!ServerCommunication.addRequestDISCODISP(bbWriteAll, username)) {
 				Logger.warning("DISCODISP lost | Broadcast Buffer cannot hold it");
 			} else {
 				db.updateStateReadAll();
@@ -456,5 +456,18 @@ class ServerSession {
 			Logger.exception(e);
 			return;
 		}
+	}
+
+	void updateKey() {
+		if (!key.isValid()) {
+			Logger.debug("Key not valid anymore");
+			return;
+		}
+
+		int ops = computeInterestOps();
+		if (ops == 0) {
+			throw new AssertionError("Key is inactive");
+		}
+		key.interestOps(ops);
 	}
 }

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.network.NetworkProtocol;
+import fr.upem.matou.shared.network.Username;
 
 /*
  * This class represents the state of the chat server.
@@ -19,8 +20,8 @@ class ServerDataBase {
 	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxServerToClientRequestSize();
 
 	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
-	private final HashMap<SocketChannel, String> connected = new HashMap<>();
-	private final Collection<String> names = connected.values();
+	private final HashMap<SocketChannel, Username> connected = new HashMap<>();
+	private final Collection<Username> names = connected.values();
 	private final Set<SelectionKey> keys;
 	private final ByteBuffer bbBroadcast = ByteBuffer.allocateDirect(BUFFER_SIZE_BROADCAST);
 
@@ -28,8 +29,8 @@ class ServerDataBase {
 		this.keys = keys;
 	}
 
-	private boolean checkAvailability(String pseudo) {
-		return !names.contains(pseudo); // FIXME : must be case insensitive
+	private boolean checkAvailability(Username username) {
+		return !names.contains(username); // FIXME : must be case insensitive
 	}
 
 	ByteBuffer getBroadcastBuffer() {
@@ -40,26 +41,19 @@ class ServerDataBase {
 	 * Add a new client.
 	 * Check if : available & no illegal characters
 	 */
-	boolean addNewConnected(SocketChannel sc, String pseudo) {
-		if (!(checkAvailability(pseudo))) {
+	boolean addNewConnected(SocketChannel sc, Username username) {
+		if (!(checkAvailability(username))) {
 			return false;
 		}
-		connected.put(sc, pseudo);
+		connected.put(sc, username);
 		return true;
 	}
 
 	/*
-	 * Returns the pseudo associated with this SocketChannel.
+	 * Returns the username associated with this SocketChannel.
 	 */
-	String pseudoOf(SocketChannel sc) {
+	Username usernameOf(SocketChannel sc) {
 		return connected.get(sc); // TODO : Optional
-	}
-
-	SocketChannel channelOf(String pseudo) {
-		return connected.entrySet().stream()
-				.filter(e -> e.getValue().equals(pseudo)) // FIXME : case sensitive
-				.map(e -> e.getKey()).findFirst() // FIXME : Optional
-				.get();
 	}
 
 	// TODO : Intégrer à l'ajout du broadcast
@@ -103,8 +97,8 @@ class ServerDataBase {
 		// TEMP
 	}
 
-	String removeClient(SocketChannel channel) {
-		String disconnected = connected.remove(channel);
+	Username removeClient(SocketChannel channel) {
+		Username disconnected = connected.remove(channel);
 		if (disconnected == null) {
 			Logger.debug("DISCONNECTION : {UNAUTHENTICATED CLIENT}");
 		} else {
@@ -120,12 +114,16 @@ class ServerDataBase {
 		return session;
 	}
 
-	ServerSession sessionOf(String pseudo) {
+	ServerSession sessionOf(SocketChannel sc) {
+		return sessions.get(sc); // FIXME : Optional
+	}
+
+	ServerSession sessionOf(Username username) {
 		SocketChannel sc = connected.entrySet().stream()
-				.filter(e -> e.getValue().equals(pseudo)) // TODO : ignore case
+				.filter(e -> e.getValue().equals(username)) // TODO : ignore case
 				.map(e -> e.getKey())
 				.findFirst().get(); // FIXME : Optional (crash server)
-		return sessions.get(sc);
+		return sessionOf(sc);
 	}
 
 }

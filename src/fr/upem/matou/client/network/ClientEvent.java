@@ -24,10 +24,10 @@ public interface ClientEvent {
 	}
 
 	public static class ClientEventClosePrivate implements ClientEvent {
-		private final String pseudo;
+		private final String username;
 
-		public ClientEventClosePrivate(String pseudo) {
-			this.pseudo = pseudo;
+		public ClientEventClosePrivate(String username) {
+			this.username = username;
 		}
 
 		@Override
@@ -39,24 +39,24 @@ public interface ClientEvent {
 	}
 
 	public static class ClientEventOpenPrivate implements ClientEvent {
-		private final String pseudo;
+		private final String username;
 
-		public ClientEventOpenPrivate(String pseudo) {
-			this.pseudo = pseudo;
+		public ClientEventOpenPrivate(String username) {
+			this.username = username;
 		}
 
 		@Override
 		public boolean execute(ClientDataBase db) throws IOException {
-			return db.openPrivateConnection(pseudo);
+			return db.openPrivateConnection(username);
 		}
 
 	}
 
 	public static class ClientEventAcceptPrivate implements ClientEvent {
-		private final String pseudo;
+		private final String username;
 
-		public ClientEventAcceptPrivate(String pseudo) {
-			this.pseudo = pseudo;
+		public ClientEventAcceptPrivate(String username) {
+			this.username = username;
 		}
 
 		@Override
@@ -67,11 +67,11 @@ public interface ClientEvent {
 	}
 
 	public static class ClientEventSendPrivateFile implements ClientEvent {
-		private final String pseudo;
+		private final String username;
 		private final Path path;
 
-		public ClientEventSendPrivateFile(String pseudo, Path path) {
-			this.pseudo = pseudo;
+		public ClientEventSendPrivateFile(String username, Path path) {
+			this.username = username;
 			this.path = path;
 		}
 
@@ -84,11 +84,11 @@ public interface ClientEvent {
 	}
 
 	public static class ClientEventSendPrivateMessage implements ClientEvent {
-		private final String pseudo;
+		private final String username;
 		private final String message;
 
-		public ClientEventSendPrivateMessage(String pseudo, String message) {
-			this.pseudo = pseudo;
+		public ClientEventSendPrivateMessage(String username, String message) {
+			this.username = username;
 			this.message = message;
 		}
 

@@ -83,7 +83,7 @@ public class ServerCore implements Closeable {
 		}
 		acceptedChannel.configureBlocking(false);
 		SelectionKey registeredKey = acceptedChannel.register(selector, SelectionKey.OP_READ);
-		ServerSession session = db.newServerSession(acceptedChannel,registeredKey);
+		ServerSession session = db.newServerSession(acceptedChannel, registeredKey);
 		registeredKey.attach(session);
 	}
 
@@ -100,17 +100,7 @@ public class ServerCore implements Closeable {
 		session.updateStateRead();
 		db.updateStateReadAll();
 
-		if (!key.isValid()) {
-			Logger.debug("Key not valid anymore");
-			return;
-		}
-
-		int ops = session.computeInterestOps();
-		if (ops == 0) {
-			throw new AssertionError("Key is inactive after read");
-		}
-		key.interestOps(ops);
-
+		session.updateKey();
 	}
 
 	private void doWrite(SelectionKey key) throws IOException {
@@ -147,16 +137,7 @@ public class ServerCore implements Closeable {
 		session.updateStateWrite();
 		db.updateStateWriteAll();
 
-		if (!key.isValid()) {
-			Logger.debug("Key not valid anymore");
-			return;
-		}
-
-		int ops = session.computeInterestOps();
-		if (ops == 0) {
-			throw new AssertionError("Key is inactive after write");
-		}
-		key.interestOps(ops);
+		session.updateKey();
 	}
 
 	@Override

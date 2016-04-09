@@ -26,8 +26,8 @@ public class ShellInterface implements UserInterface {
 	}
 
 	@Override
-	public Optional<String> getPseudo() {
-		output.print("Pseudo > ");
+	public Optional<String> getUsername() {
+		output.print("Username > ");
 		return readLine();
 	}
 
@@ -52,15 +52,15 @@ public class ShellInterface implements UserInterface {
 	@Override
 	public void displayMessage(Message message) {
 		boolean isPrivate = message.isPrivate();
-		String pseudo = message.getPseudo();
+		String username = message.getUsername();
 		String content = message.getContent();
 
 		String string;
 		if (isPrivate) {
-			string = "#" + pseudo + "#";
+			string = "#" + username + "#";
 
 		} else {
-			string = "<" + pseudo + ">";
+			string = "<" + username + ">";
 		}
 		string = string + " " + content;
 
@@ -68,23 +68,23 @@ public class ShellInterface implements UserInterface {
 	}
 
 	@Override
-	public void displayNewConnectionEvent(String pseudo) {
-		output.println("<" + pseudo + " joins the chat>");
+	public void displayNewConnectionEvent(String username) {
+		output.println("<" + username + " joins the chat>");
 	}
 
 	@Override
-	public void displayNewDisconnectionEvent(String pseudo) {
-		output.println("<" + pseudo + " left the chat>");
+	public void displayNewDisconnectionEvent(String username) {
+		output.println("<" + username + " left the chat>");
 	}
 
 	@Override
-	public void displayNewPrivateRequestEvent(String pseudo) {
-		output.println("<" + pseudo + " asks for a private connection>");		
+	public void displayNewPrivateRequestEvent(String username) {
+		output.println("<" + username + " asks for a private connection>");		
 	}
 	
 	@Override
-	public void warnInvalidPseudo(String pseudo) {
-		output.println("This pseudo is not valid");
+	public void warnInvalidUsername(String username) {
+		output.println("This username is not valid");
 	}
 
 	@Override

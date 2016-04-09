@@ -10,8 +10,8 @@ Description:
 The purpose of Matou project is to realize a discussion and file exchanger service.
 
 The clients are connected to a primary server. 
-Each connected client is identified by a unique pseudo. 
-The server must guarantee that two client will not have the same pseudo. 
+Each connected client is identified by a unique username. 
+The server must guarantee that two client will not have the same username. 
 After etablishing the connection, the client can:
 	* Send message to all connected clients.
 	* Send privates messages or files to a particular client.
@@ -31,9 +31,9 @@ Specifications:
 	* Numbers are in Big Endian format.
 	* String are encoded into UTF-8 charset.
 	* The transport protocol used is TCP (with limit size specified in 4 bytes).
-	* The maximum size of an encoded pseudo is 32 bytes.
+	* The maximum size of an encoded username is 32 bytes.
 	* The maximum size of an encoded message is 512 bytes.
-	* A pseudo can only contain alphanumeric characters.
+	* A username can only contain alphanumeric characters.
 	* A message cannot contain any control character (\n, \r, \t, ...).
 	* The size of a chunk of file is 4096 bytes.
 	* Private connections are etablished on 2 ports : the first one for messages and the second one for files.
@@ -56,15 +56,15 @@ Acronym formats:
 Interactions:
 	Request for public connection
 		[C-S] Request connection to Server
-		The client requests a connection to the server with a specified pseudo
-		+------+------------+--------+
-		| int  |    int     | String |
-		+------+------------+--------+
-		| Type | SizePseudo | Pseudo |
-		+------+------------+--------+
+		The client requests a connection to the server with a specified username.
+		+------+--------------+----------+
+		| int  |     int      |  String  |
+		+------+--------------+----------+
+		| Type | SizeUsername | Username |
+		+------+--------------+----------+
 
 		[S-C] Validation of the connection
-		The serveur answers with a boolean which will indicate whether the pseudo is valid or not. If the pseudo is valid the connection is established.
+		The serveur answers with a boolean which will indicate whether the username is valid or not. If the username is valid the connection is established.
 		+------+-------------+
 		| int  |    byte     |
 		+------+-------------+
@@ -73,11 +73,11 @@ Interactions:
 		
 		[S-A] Notification of the new connection
 		The server notifies all clients that a new one is connected.
-		+------+------------+--------+
-		| int  |    int     | String |
-		+------+------------+--------+
-		| Type | SizePseudo | Pseudo |  
-		+------+------------+--------+
+		+------+--------------+----------+
+		| int  |     int      |  String  |
+		+------+--------------+----------+
+		| Type | SizeUsername | Username |  
+		+------+--------------+----------+
 
 	Sending message to the public domain
 		[C-S] Sending message
@@ -90,52 +90,52 @@ Interactions:
 
 		[S-A] Retransmission of the message
 		The server forwards the public message to all connected clients.
-		+------+------------+--------+-------------+---------+
-		| int  |    int     | String |     int     | String  |
-		+------+------------+--------+-------------+---------+
-		| Type | SizePseudo | Pseudo | SizeMessage | Message |
-		+------+------------+--------+-------------+---------+
+		+------+--------------+----------+-------------+---------+
+		| int  |     int      |  String  |     int     | String  |
+		+------+--------------+----------+-------------+---------+
+		| Type | SizeUsername | Username | SizeMessage | Message |
+		+------+--------------+----------+-------------+---------+
 
 	Requesting private connection
 		[C-S] Requesting connection between the source(Src) and the destination(Dst)
 		The client Src notifies the server that he wants to be connected with the client Dst.
-		+------+---------------+-----------+
-		| int  |      int      |  String   |
-		+------+---------------+-----------+
-		| Type | SizePseudoDst | PseudoDst |
-		+------+---------------+-----------+
+		+------+-----------------+-------------+
+		| int  |       int       |   String    |
+		+------+-----------------+-------------+
+		| Type | SizeUsernameDst | UsernameDst |
+		+------+-----------------+-------------+
 
 		[S-C] Notification of a new private connection request
 		The server notifies the client Dst that he received a connection request from client Src.
-		+------+---------------+-----------+
-		| int  |      int      |  String   |
-		+------+---------------+-----------+
-		| Type | SizePseudoSrc | PseudoSrc |
-		+------+---------------+-----------+
+		+------+-----------------+-------------+
+		| int  |       int       |   String    |
+		+------+-----------------+-------------+
+		| Type | SizeUsernameSrc | UsernameSrc |
+		+------+-----------------+-------------+
 
 		[C-S] Accept the connection request to Src
 		The client Dst notifies the server that he accepts the private connection request of client Src.
-		+------+---------------+-----------+
-		| int  |      int      |  String   |
-		+------+---------------+-----------+
-		| Type | SizePseudoSrc | PseudoSrc |
-		+------+---------------+-----------+
+		+------+-----------------+-------------+
+		| int  |       int       |   String    |
+		+------+-----------------+-------------+
+		| Type | SizeUsernameSrc | UsernameSrc |
+		+------+-----------------+-------------+
 
 		[S-C] Connection between the source(Src) and the destination(Dst)
 		The server sends the private connection data for the private connection of client Dst to client Src.
-		+------+---------------+-----------+-------------------+
-		| int  |      int      |  String   | InetSocketAddress |
-		+------+---------------+-----------+-------------------+
-		| Type | SizePseudoDst | PseudoDst |    AddressDst     |
-		+------+---------------+-----------+-------------------+
+		+------+-----------------+-------------+-------------------+
+		| int  |       int       |   String    | InetSocketAddress |
+		+------+-----------------+-------------+-------------------+
+		| Type | SizeUsernameDst | UsernameDst |    AddressDst     |
+		+------+-----------------+-------------+-------------------+
 		
 		[S-C] Connection between the source(Src) and the destination(Dst)
 		The server sends the private connection data for the private connection of client Src to client Dst.
-		+------+---------------+-----------+-------------------+----------+----------+
-		| int  |      int      |  String   | InetSocketAddress |   int    |   int    |
-		+------+---------------+-----------+-------------------+----------+----------+
-		| Type | SizePseudoSrc | PseudoSrc |    AddressSrc     | PortSrc1 | PortSrc2 |
-		+------+---------------+-----------+-------------------+----------+----------+
+		+------+-----------------+-------------+-------------------+----------+----------+
+		| int  |       int       |   String    | InetSocketAddress |   int    |   int    |
+		+------+-----------------+-------------+-------------------+----------+----------+
+		| Type | SizeUsernameSrc | UsernameSrc |    AddressSrc     | PortSrc1 | PortSrc2 |
+		+------+-----------------+-------------+-------------------+----------+----------+
 
 	Sending private message
 		[C-C] Sending private message between Src and Dst
@@ -175,8 +175,8 @@ Interactions:
 
 		[S-A] Sign out notification
 		The server notifies all clients that a client has left the chat room.
-		+------+------------+--------+
-		| int  |    int     | String |
-		+------+------------+--------+
-		| Type | SizePseudo | Pseudo |
-		+------+------------+--------+
+		+------+--------------+----------+
+		| int  |     int      |  String  |
+		+------+--------------+----------+
+		| Type | SizeUsername | Username |
+		+------+--------------+----------+
