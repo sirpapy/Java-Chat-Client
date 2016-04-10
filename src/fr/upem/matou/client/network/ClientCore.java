@@ -2,7 +2,9 @@ package fr.upem.matou.client.network;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Optional;
 
@@ -17,6 +19,7 @@ import fr.upem.matou.shared.network.NetworkProtocol;
 /*
  * This class is the core of the client.
  */
+@SuppressWarnings("resource")
 public class ClientCore implements Closeable {
 
 	private static final int TIMEOUT = 3000; // in millis
@@ -128,46 +131,65 @@ public class ClientCore implements Closeable {
 			break;
 		}
 
-		case CODISP: {
+		case CONOTIF: {
 			setChrono(true);
-			Optional<String> optionalRequestCODISP = ClientCommunication.receiveRequestCODISP(sc);
+			Optional<String> optionalRequestCONOTIF = ClientCommunication.receiveRequestCONOTIF(sc);
 			setChrono(false);
 
-			if (!optionalRequestCODISP.isPresent()) {
+			if (!optionalRequestCONOTIF.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
-			String receivedConnected = optionalRequestCODISP.get();
+			String receivedConnected = optionalRequestCONOTIF.get();
 			Logger.network(NetworkLogType.READ, "USERNAME : " + receivedConnected);
 			ui.displayNewConnectionEvent(receivedConnected);
 
 			break;
 		}
 
-		case DISCODISP: {
+		case DISCONOTIF: {
 			setChrono(true);
-			Optional<String> optionalRequestDISCODISP = ClientCommunication.receiveRequestDISCODISP(sc);
+			Optional<String> optionalRequestDISCONOTIF = ClientCommunication.receiveRequestDISCONOTIF(sc);
 			setChrono(false);
-			if (!optionalRequestDISCODISP.isPresent()) {
+			if (!optionalRequestDISCONOTIF.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
-			String receivedDisconnected = optionalRequestDISCODISP.get();
+			String receivedDisconnected = optionalRequestDISCONOTIF.get();
 			Logger.network(NetworkLogType.READ, "USERNAME : " + receivedDisconnected);
 			ui.displayNewDisconnectionEvent(receivedDisconnected);
 
 			break;
 		}
 
-		case PVCODISP: {
+		case PVCOREQNOTIF: {
 			setChrono(true);
-			Optional<String> optionalRequestPVCODISP = ClientCommunication.receiveRequestPVCODISP(sc);
+			Optional<String> optionalRequestPVCOREQNOTIF = ClientCommunication.receiveRequestPVCOREQNOTIF(sc);
 			setChrono(false);
 
-			if (!optionalRequestPVCODISP.isPresent()) {
+			if (!optionalRequestPVCOREQNOTIF.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
-			String receivedConnectionRequest = optionalRequestPVCODISP.get();
+			String receivedConnectionRequest = optionalRequestPVCOREQNOTIF.get();
 			Logger.network(NetworkLogType.READ, "USERNAME : " + receivedConnectionRequest);
 			ui.displayNewPrivateRequestEvent(receivedConnectionRequest);
+
+			break;
+		}
+
+		case PVCOESTASRC: {
+			setChrono(true);
+			Optional<SourceConnection> optionalRequestPVCOESTASRC = ClientCommunication.receiveRequestPVCOESTASRC(sc);
+			setChrono(false);
+
+			if (!optionalRequestPVCOESTASRC.isPresent()) {
+				throw new IOException("Protocol violation : " + protocol);
+			}
+			SourceConnection receivedConnectionRequest = optionalRequestPVCOESTASRC.get();
+			String username = receivedConnectionRequest.getUsername();
+			InetAddress address = receivedConnectionRequest.getAddress();
+			Logger.network(NetworkLogType.READ, "USERNAME : " + username);
+			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
+			ui.displayNewPrivateAcceptionEvent(username);
+			launchPrivateConnection(address,username); // TEMP : variable locale
 
 			break;
 		}
@@ -177,6 +199,76 @@ public class ClientCore implements Closeable {
 
 		}
 
+	}
+
+	private void privateCommunicationMessage(ServerSocketChannel ssc, InetAddress address) throws IOException {
+		SocketChannel pv;
+		while (true) {
+			pv = ssc.accept();
+			InetAddress connected = ((InetSocketAddress) pv.getRemoteAddress()).getAddress();
+			if (!address.equals(connected)) {
+				Logger.debug("CONNECTION HACK !!!");
+				continue;
+			}
+			break;
+		}
+
+		Logger.debug("ESTABLISHED");
+	}
+
+	private void privateCommunicationFile(ServerSocketChannel ssc, InetAddress address) throws IOException {
+		SocketChannel pv;
+		while (true) {
+			pv = ssc.accept();
+			InetAddress connected = ((InetSocketAddress) pv.getRemoteAddress()).getAddress();
+			if (!address.equals(connected)) {
+				Logger.debug("CONNECTION HACK !!!");
+				continue;
+			}
+			break;
+		}
+
+		Logger.debug("ESTABLISHED");
+	}
+
+	private void privateCommunication(InetAddress address, String username) throws IOException {
+		ServerSocketChannel sscMessage = ServerSocketChannel.open();
+		ServerSocketChannel sscFile = ServerSocketChannel.open();
+		sscMessage.bind(null);
+		sscFile.bind(null);
+
+		int portMessage = ((InetSocketAddress) sscMessage.getLocalAddress()).getPort();
+		int portFile = ((InetSocketAddress) sscFile.getLocalAddress()).getPort();
+		System.out.println("MESSAGE PORT : " + portMessage);
+		System.out.println("FILE PORT : " + portFile);
+
+		ClientCommunication.sendRequestPVCOPORT(sc, username, address, portMessage, portFile);
+
+		new Thread(() -> {
+			try {
+				privateCommunicationMessage(sscMessage, address);
+			} catch (IOException e) {
+				Logger.exception(e);
+			}
+		}).start();
+
+		new Thread(() -> {
+			try {
+				privateCommunicationFile(sscFile, address);
+			} catch (IOException e) {
+				Logger.exception(e);
+			}
+		}).start();
+	}
+
+	private void launchPrivateConnection(InetAddress address, String username) {
+		new Thread(() -> {
+			try {
+				privateCommunication(address,username);
+			} catch (IOException e) {
+				Logger.exception(e);
+			}
+		}).start();
 	}
 
 	private void cleaner() throws InterruptedException {

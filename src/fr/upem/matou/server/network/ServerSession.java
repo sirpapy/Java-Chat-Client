@@ -1,6 +1,9 @@
 package fr.upem.matou.server.network;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -26,6 +29,7 @@ class ServerSession {
 
 	private final ServerDataBase db;
 	private final SocketChannel sc;
+	private final InetAddress address;
 	private final SelectionKey key;
 
 	private boolean authent = false;
@@ -56,17 +60,28 @@ class ServerSession {
 		int sizeUsername;
 		String username;
 	}
-	
+
 	/* State of a PVCOACC request */
 	static class StatePVCOACC implements ClientState {
 		int sizeUsername;
 		String username;
 	}
 
-	ServerSession(ServerDataBase db, SocketChannel sc, SelectionKey key) {
+	/* State of a PVCOPORT request */
+	static class StatePVCOPORT implements ClientState {
+		int sizeUsername;
+		String username;
+		int sizeAddress;
+		InetAddress address;
+		int portMessage;
+		int portFile;
+	}
+
+	ServerSession(ServerDataBase db, SocketChannel sc, SelectionKey key) throws IOException {
 		this.db = db;
 		this.sc = sc;
 		this.key = key;
+		this.address = ((InetSocketAddress) sc.getRemoteAddress()).getAddress();
 		clearAndLimit(bbRead, Integer.BYTES);
 	}
 
@@ -142,7 +157,7 @@ class ServerSession {
 			throw new AssertionError("Argument " + arg + " is not valid for COREQ");
 		}
 	}
-	
+
 	/*
 	 * Initializes the COREQ state.
 	 */
@@ -206,12 +221,12 @@ class ServerSession {
 		if (acceptation) {
 			setAuthent();
 
-			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CODISP);
+			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CONOTIF);
 			Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 
 			ByteBuffer bbWriteAll = db.getBroadcastBuffer();
-			if (!ServerCommunication.addRequestCODISP(bbWriteAll, username)) {
-				Logger.warning("CODISP lost | Broadcast Buffer cannot hold it");
+			if (!ServerCommunication.addRequestCONOTIF(bbWriteAll, username)) {
+				Logger.warning("CONOTIF lost | Broadcast Buffer cannot hold it");
 				return;
 			}
 			db.updateStateReadAll();
@@ -238,7 +253,7 @@ class ServerSession {
 			throw new AssertionError("Argument " + arg + " is not valid for MSG");
 		}
 	}
-	
+
 	private void processMSGinit() {
 		if (!isAuthent()) {
 			Logger.debug("Client not authenticated");
@@ -290,7 +305,7 @@ class ServerSession {
 		}
 		db.updateStateReadAll();
 	}
-	
+
 	private void processDISCO() {
 		if (arg == 0) {
 			processDISCOinit();
@@ -305,7 +320,7 @@ class ServerSession {
 		}
 		disconnectClient();
 	}
-	
+
 	private void processPVCOREQ() {
 		if (arg == 0) {
 			processPVCOREQinit();
@@ -320,7 +335,7 @@ class ServerSession {
 			return;
 		case 2:
 			processPVCOREQarg2(state);
-			answerPVCODISP(state.username);
+			answerPVCOREQNOTIF(state.username);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for PVCOREQ");
@@ -361,28 +376,28 @@ class ServerSession {
 	}
 
 	// FIXME : target == source
-	private void answerPVCODISP(String targetName) {
+	private void answerPVCOREQNOTIF(String targetName) {
 		Username source = db.usernameOf(sc).get();
 		Username target = new Username(targetName);
 		Optional<ServerSession> optional = db.sessionOf(target);
-		if(!optional.isPresent()) {
+		if (!optional.isPresent()) {
 			Logger.debug("Target " + target + " is not connected");
 			return;
 		}
-		db.addNewPrivateRequest(source,target); // TEMP : Username en argument
+		db.addNewPrivateRequest(source, target); // TEMP : Username en argument
 		ServerSession session = optional.get();
 		ByteBuffer bbTarget = session.getWriteBuffer();
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCODISP);
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOREQNOTIF);
 		Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
 
-		if (!ServerCommunication.addRequestPVCODISP(bbTarget, source.toString())) {
-			Logger.warning("PVCODISP lost | Write Buffer cannot hold it");
+		if (!ServerCommunication.addRequestPVCOREQNOTIF(bbTarget, source.toString())) {
+			Logger.warning("PVCOREQNOTIF lost | Write Buffer cannot hold it");
 			return;
 		}
 
 		session.updateKey();
 	}
-	
+
 	private void processPVCOACC() {
 		if (arg == 0) {
 			processPVCOACCinit();
@@ -397,13 +412,13 @@ class ServerSession {
 			return;
 		case 2:
 			processPVCOACCarg2(state);
-			answerPVCOACC(state.username);
+			answerPVCOESTASRC(state.username);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for PVCOACC");
 		}
 	}
-	
+
 	private void processPVCOACCinit() {
 		if (!isAuthent()) {
 			Logger.debug("Client not authenticated");
@@ -412,9 +427,9 @@ class ServerSession {
 		}
 		clearAndLimit(bbRead, Integer.BYTES);
 		clientState = new StatePVCOACC();
-		arg++;		
+		arg++;
 	}
-	
+
 	private void processPVCOACCarg1(StatePVCOACC state) {
 		bbRead.flip();
 		state.sizeUsername = bbRead.getInt();
@@ -426,27 +441,188 @@ class ServerSession {
 		}
 
 		clearAndLimit(bbRead, state.sizeUsername);
-		arg++;		
+		arg++;
 	}
-	
+
 	private void processPVCOACCarg2(StatePVCOACC state) {
 		bbRead.flip();
 		state.username = ServerCommunication.readStringUTF8(bbRead);
 		Logger.network(NetworkLogType.READ, "USERNAME : " + state.username);
 
-		resetReadState();		
+		resetReadState();
 	}
-	
-	private void answerPVCOACC(String targetName) {
+
+	private void answerPVCOESTASRC(String targetName) {
 		Username source = db.usernameOf(sc).get();
 		Username target = new Username(targetName);
-		Optional<ServerSession> optional = db.sessionOf(target);
-		if(!optional.isPresent()) {
-			Logger.debug("Target " + target + " is not connected");
+		boolean valid = db.checkPrivateRequest(source, target); // TEMP : Username en argument
+		Logger.debug("REQUEST ACCEPTATION : " + valid);
+
+		if (valid) {
+			Optional<ServerSession> optional = db.sessionOf(target);
+			if (!optional.isPresent()) { // XXX : Impossible car checked
+				Logger.debug("Target " + target + " is not connected");
+				return;
+			}
+
+			ServerSession session = optional.get();
+			ByteBuffer bbTarget = session.getWriteBuffer();
+			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTASRC);
+			Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
+			Logger.network(NetworkLogType.WRITE, "ADDRESS : " + address);
+
+			if (!ServerCommunication.addRequestPVCOESTASRC(bbTarget, source.toString(), address)) {
+				Logger.warning("PVCOESTASRC lost | Write Buffer cannot hold it");
+				return;
+			}
+
+			session.updateKey();
+		}
+	}
+
+	private void processPVCOPORT() {
+		if (arg == 0) {
+			processPVCOPORTinit();
 			return;
 		}
-		boolean valid = db.checkPrivateRequest(source,target); // TEMP : Username en argument
-		Logger.debug("REQUEST ACCEPTATION : " + valid);
+
+		StatePVCOPORT state = (StatePVCOPORT) clientState;
+
+		switch (arg) {
+		case 1:
+			processPVCOPORTarg1(state);
+			return;
+		case 2:
+			processPVCOPORTarg2(state);
+			break;
+		case 3:
+			processPVCOPORTarg3(state);
+			break;
+		case 4:
+			processPVCOPORTarg4(state);
+			break;
+		case 5:
+			processPVCOPORTarg5(state);
+			break;
+		case 6:
+			processPVCOPORTarg6(state);
+			answerPVCOESTADST(state.username,state.address);
+			return;
+		default:
+			throw new AssertionError("Argument " + arg + " is not valid for PVCOPORT");
+		}
+	}
+
+	private void processPVCOPORTinit() {
+		if (!isAuthent()) {
+			Logger.debug("Client not authenticated");
+			disconnectClient();
+			return;
+		}
+		// FIXME : Check accepted
+		clearAndLimit(bbRead, Integer.BYTES);
+		clientState = new StatePVCOPORT();
+		arg++;
+	}
+
+	private void processPVCOPORTarg1(StatePVCOPORT state) {
+		bbRead.flip();
+		state.sizeUsername = bbRead.getInt();
+		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + state.sizeUsername);
+		if (state.sizeUsername > USERNAME_MAX_SIZE || state.sizeUsername == 0) {
+			Logger.debug("Invalid size username");
+			disconnectClient();
+			return;
+		}
+
+		clearAndLimit(bbRead, state.sizeUsername);
+		arg++;
+	}
+
+	private void processPVCOPORTarg2(StatePVCOPORT state) {
+		bbRead.flip();
+		state.username = ServerCommunication.readStringUTF8(bbRead);
+		Logger.network(NetworkLogType.READ, "USERNAME : " + state.username);
+
+		clearAndLimit(bbRead, Integer.BYTES);
+		arg++;
+	}
+
+	private void processPVCOPORTarg3(StatePVCOPORT state) {
+		bbRead.flip();
+		state.sizeAddress = bbRead.getInt();
+		Logger.network(NetworkLogType.READ, "SIZE ADDRESS : " + state.sizeAddress);
+		if (state.sizeAddress != 4 && state.sizeAddress != 16) {
+			Logger.debug("Invalid size address");
+			disconnectClient();
+			return;
+		}
+
+		clearAndLimit(bbRead, state.sizeAddress);
+		arg++;
+	}
+
+	private void processPVCOPORTarg4(StatePVCOPORT state) {
+		bbRead.flip();
+		byte[] addr = new byte[state.sizeAddress];
+		for (int i = 0; i < state.sizeAddress; i++) {
+			byte b = bbRead.get();
+			System.out.println("Byte : " + b);
+			addr[i] = b;
+		}
+		try {
+			state.address = InetAddress.getByAddress(addr);
+		} catch (UnknownHostException e) {
+			Logger.exception(e);
+			disconnectClient();
+			return;
+		}
+
+		clearAndLimit(bbRead, Integer.BYTES);
+		arg++;
+	}
+
+	private void processPVCOPORTarg5(StatePVCOPORT state) {
+		bbRead.flip();
+		state.portMessage = bbRead.getInt();
+		
+		clearAndLimit(bbRead, Integer.BYTES);
+		arg++;
+	}
+
+	private void processPVCOPORTarg6(StatePVCOPORT state) {
+		bbRead.flip();
+		state.portFile = bbRead.getInt();
+		
+		resetReadState();
+	}
+
+	private void answerPVCOESTADST(String targetName, InetAddress address) {
+		Username source = db.usernameOf(sc).get();
+		Username target = new Username(targetName);
+		boolean valid = db.checkPrivateRequest(source, target); // TEMP : Username en argument
+		Logger.debug("PRIVATE ESTABLISHMENT VALIDITY : " + valid); // FIXME : False
+
+		if (valid) {
+			Optional<ServerSession> optional = db.sessionOf(target);
+			if (!optional.isPresent()) { // XXX : Impossible car checked
+				Logger.debug("Target " + target + " is not connected");
+				return;
+			}
+
+			ServerSession session = optional.get();
+			ByteBuffer bbTarget = session.getWriteBuffer();
+			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTASRC);
+			Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
+			Logger.network(NetworkLogType.WRITE, "ADDRESS : " + address);
+
+			if (!ServerCommunication.addRequestPVCOESTASRC(bbTarget, source.toString(), address)) {
+				Logger.warning("PVCOACCNOTIF lost | Write Buffer cannot hold it");
+				return;
+			}
+
+			session.updateKey();
+		} 
 	}
 
 	/*
@@ -482,6 +658,9 @@ class ServerSession {
 			return;
 		case PVCOACC:
 			processPVCOACC();
+			return;
+		case PVCOPORT:
+			processPVCOPORT();
 			return;
 		default:
 			Logger.error("Operation not implemented yet : " + protocol); // TEMP
@@ -529,11 +708,11 @@ class ServerSession {
 		} else {
 			Logger.debug("DISCONNECTION : " + disconnected);
 			String username = disconnected.get().toString();
-			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCODISP);
+			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCONOTIF);
 			Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 			ByteBuffer bbWriteAll = db.getBroadcastBuffer();
-			if (!ServerCommunication.addRequestDISCODISP(bbWriteAll, username)) {
-				Logger.warning("DISCODISP lost | Broadcast Buffer cannot hold it");
+			if (!ServerCommunication.addRequestDISCONOTIF(bbWriteAll, username)) {
+				Logger.warning("DISCONOTIF lost | Broadcast Buffer cannot hold it");
 			} else {
 				db.updateStateReadAll();
 			}

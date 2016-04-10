@@ -1,6 +1,7 @@
 package fr.upem.matou.debug.ip;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 public class InetAddressTools {
 	private InetAddressTools() {
@@ -21,8 +22,16 @@ public class InetAddressTools {
 		}
 
 		for(byte b : bytes) {
-			System.out.println("." + b + ".");
+			System.out.println("=> " + b);
 		}
 
+	}
+	
+	public static void main(String[] args) {
+		InetSocketAddress isa = new InetSocketAddress("localhost",7777);
+		InetAddress ia = isa.getAddress();
+		printAddress(isa.getAddress());
+		System.out.println(isa);
+		System.out.println(ia);
 	}
 }

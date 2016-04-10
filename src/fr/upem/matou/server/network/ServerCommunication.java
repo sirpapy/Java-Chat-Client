@@ -1,5 +1,6 @@
 package fr.upem.matou.server.network;
 
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
@@ -65,9 +66,9 @@ class ServerCommunication {
 	}
 
 	/*
-	 * Encodes a CODISP request.
+	 * Encodes a CONOTIF request.
 	 */
-	static boolean addRequestCODISP(ByteBuffer bbWrite, String username) {
+	static boolean addRequestCONOTIF(ByteBuffer bbWrite, String username) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 
 		int sizeUsername = encodedUsername.remaining();
@@ -76,16 +77,16 @@ class ServerCommunication {
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
-		bbWrite.putInt(NetworkProtocol.CODISP.ordinal());
+		bbWrite.putInt(NetworkProtocol.CONOTIF.ordinal());
 		bbWrite.putInt(sizeUsername).put(encodedUsername);
 
 		return true;
 	}
 
 	/*
-	 * Encodes a DISCODISP request.
+	 * Encodes a DISCONOTIF request.
 	 */
-	static boolean addRequestDISCODISP(ByteBuffer bbWrite, String username) {
+	static boolean addRequestDISCONOTIF(ByteBuffer bbWrite, String username) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 
 		int sizeUsername = encodedUsername.remaining();
@@ -94,13 +95,13 @@ class ServerCommunication {
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
-		bbWrite.putInt(NetworkProtocol.DISCODISP.ordinal());
+		bbWrite.putInt(NetworkProtocol.DISCONOTIF.ordinal());
 		bbWrite.putInt(sizeUsername).put(encodedUsername);
 
 		return true;
 	}
 
-	static boolean addRequestPVCODISP(ByteBuffer bbWrite, String username) {
+	static boolean addRequestPVCOREQNOTIF(ByteBuffer bbWrite, String username) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 
 		int sizeUsername = encodedUsername.remaining();
@@ -109,8 +110,30 @@ class ServerCommunication {
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
-		bbWrite.putInt(NetworkProtocol.PVCODISP.ordinal());
+		bbWrite.putInt(NetworkProtocol.PVCOREQNOTIF.ordinal());
 		bbWrite.putInt(sizeUsername).put(encodedUsername);
+
+		return true;
+	}
+
+	static boolean addRequestPVCOESTASRC(ByteBuffer bbWrite, String username, InetAddress address) {
+		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
+
+		int sizeUsername = encodedUsername.remaining();
+
+		int length = Integer.BYTES + Integer.BYTES + sizeUsername;
+		if (bbWrite.remaining() < length) {
+			return false;
+		}
+		bbWrite.putInt(NetworkProtocol.PVCOESTASRC.ordinal());
+		bbWrite.putInt(sizeUsername).put(encodedUsername);
+
+		byte[] addr = address.getAddress();
+		bbWrite.putInt(addr.length);
+		
+		for(byte b : addr) {
+			bbWrite.put(b);
+		}
 
 		return true;
 	}

@@ -1,6 +1,8 @@
 package fr.upem.matou.client.network;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
@@ -74,7 +76,7 @@ class ClientCommunication {
 
 		return request;
 	}
-	
+
 	public static ByteBuffer encodeRequestPVCOREQ(ByteBuffer encodedUsername) {
 		int length = encodedUsername.remaining();
 
@@ -86,7 +88,7 @@ class ClientCommunication {
 
 		return request;
 	}
-	
+
 	public static ByteBuffer encodeRequestPVCOACC(ByteBuffer encodedUsername) {
 		int length = encodedUsername.remaining();
 
@@ -95,6 +97,21 @@ class ClientCommunication {
 
 		request.putInt(NetworkProtocol.PVCOACC.ordinal());
 		request.putInt(length).put(encodedUsername);
+
+		return request;
+	}
+
+	private static ByteBuffer encodeRequestPVCOPORT(ByteBuffer encodedUsername, InetAddress address, int portMessage, int portFile) {
+		int length = encodedUsername.remaining();
+		byte[] addr = address.getAddress();
+
+		int capacity = Integer.BYTES + Integer.BYTES + length + Integer.BYTES + addr.length + (2 * Integer.BYTES);
+		ByteBuffer request = ByteBuffer.allocate(capacity);
+
+		request.putInt(NetworkProtocol.PVCOPORT.ordinal());
+		request.putInt(length).put(encodedUsername);
+		request.putInt(addr.length).put(addr);
+		request.putInt(portMessage).putInt(portFile);
 
 		return request;
 	}
@@ -116,15 +133,15 @@ class ClientCommunication {
 	 * Sends a MSG request.
 	 */
 	public static boolean sendRequestMSG(SocketChannel sc, String message) throws IOException {
-		if(!NetworkCommunication.checkMessageValidity(message)) {
+		if (!NetworkCommunication.checkMessageValidity(message)) {
 			return false;
 		}
-		
+
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeMessage(message);
 		if (!optional.isPresent()) {
 			return false;
 		}
-		
+
 		ByteBuffer bb = encodeRequestMSG(optional.get());
 		sendRequest(sc, bb);
 		return true;
@@ -144,7 +161,7 @@ class ClientCommunication {
 		sendRequest(sc, bb);
 		return true;
 	}
-	
+
 	public static boolean sendRequestPVCOACC(SocketChannel sc, String username) throws IOException {
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
 		if (!optional.isPresent()) {
@@ -154,9 +171,18 @@ class ClientCommunication {
 		sendRequest(sc, bb);
 		return true;
 	}
-	
 
-	
+	public static boolean sendRequestPVCOPORT(SocketChannel sc, String username, InetAddress address, int portMessage, int portFile)
+			throws IOException {
+		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
+		if (!optional.isPresent()) {
+			return false;
+		}
+		ByteBuffer bb = encodeRequestPVCOPORT(optional.get(), address, portMessage, portFile);
+		sendRequest(sc, bb);
+		return true;
+	}
+
 	/*
 	 * Receives a protocol type request.
 	 */
@@ -219,9 +245,9 @@ class ClientCommunication {
 	}
 
 	/*
-	 * Receives a CODISP request.
+	 * Receives a CONOTIF request.
 	 */
-	public static Optional<String> receiveRequestCODISP(SocketChannel sc) throws IOException {
+	public static Optional<String> receiveRequestCONOTIF(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
@@ -240,9 +266,9 @@ class ClientCommunication {
 	}
 
 	/*
-	 * Receives a DISCODISP request.
+	 * Receives a DISCONOTIF request.
 	 */
-	public static Optional<String> receiveRequestDISCODISP(SocketChannel sc) throws IOException {
+	public static Optional<String> receiveRequestDISCONOTIF(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
@@ -260,7 +286,7 @@ class ClientCommunication {
 		return Optional.of(username);
 	}
 
-	public static Optional<String> receiveRequestPVCODISP(SocketChannel sc) throws IOException {
+	public static Optional<String> receiveRequestPVCOREQNOTIF(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
@@ -276,6 +302,45 @@ class ClientCommunication {
 		String username = PROTOCOL_CHARSET.decode(bbUsername).toString();
 
 		return Optional.of(username);
+	}
+
+	public static Optional<SourceConnection> receiveRequestPVCOESTASRC(SocketChannel sc) throws IOException {
+		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizeUsername)) {
+			throw new IOException("Connection closed");
+		}
+		bbSizeUsername.flip();
+		int sizeUsername = bbSizeUsername.getInt();
+
+		ByteBuffer bbUsername = ByteBuffer.allocate(sizeUsername);
+		if (!readFully(sc, bbUsername)) {
+			throw new IOException("Connection closed");
+		}
+		bbUsername.flip();
+		String username = PROTOCOL_CHARSET.decode(bbUsername).toString();
+
+		ByteBuffer bbSizeAddress = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizeAddress)) {
+			throw new IOException("Connection closed");
+		}
+		bbSizeAddress.flip();
+		int sizeAddress = bbSizeAddress.getInt();
+
+		ByteBuffer bbAddress = ByteBuffer.allocate(sizeAddress);
+		if (!readFully(sc, bbAddress)) {
+			throw new IOException("Connection closed");
+		}
+		bbAddress.flip();
+		byte[] addr = new byte[sizeAddress];
+		for (int i = 0; i < sizeAddress; i++) {
+			byte b = bbAddress.get();
+			System.out.println("BYTE ADDRESS = " + b);
+			addr[i] = b;
+		}
+		InetAddress address = InetAddress.getByAddress(addr);
+		System.out.println("ADDRESS = " + address);
+
+		return Optional.of(new SourceConnection(address, username));
 	}
 
 }

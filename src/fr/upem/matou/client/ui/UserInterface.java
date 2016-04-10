@@ -27,10 +27,11 @@ public interface UserInterface {
 	public void displayNewDisconnectionEvent(String username);
 	
 	public void displayNewPrivateRequestEvent(String username);
+	
+	public void displayNewPrivateAcceptionEvent(String username);
 
 	public void warnInvalidUsername(String username);
 
 	public void warnInvalidMessage(ClientEvent event);
-
 
 }

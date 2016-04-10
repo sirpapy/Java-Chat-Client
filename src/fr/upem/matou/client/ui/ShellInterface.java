@@ -83,6 +83,11 @@ public class ShellInterface implements UserInterface {
 	}
 	
 	@Override
+	public void displayNewPrivateAcceptionEvent(String username) {
+		output.println("<" + username + " accepts the private connection>");				
+	}
+
+	@Override
 	public void warnInvalidUsername(String username) {
 		output.println("This username is not valid");
 	}
@@ -95,6 +100,5 @@ public class ShellInterface implements UserInterface {
 	private void warnInvalidCommand() {
 		output.println("Invalid command");
 	}
-
 
 }

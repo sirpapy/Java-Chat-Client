@@ -1,9 +1,9 @@
 package fr.upem.matou.server.network;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +24,7 @@ class ServerDataBase {
 
 	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
 	private final HashMap<SocketChannel, Username> connected = new HashMap<>();
-	private final HashMap<Username, HashSet<Username>> privateRequests = new HashMap<>();
+	private final HashMap<Username, HashSet<Username>> privateRequests = new HashMap<>(); 	// FIXME : En cas de déconnexion, non mis à jour
 	private final Collection<Username> names = connected.values();
 	private final Set<SelectionKey> keys;
 	private final ByteBuffer bbBroadcast = ByteBuffer.allocateDirect(BUFFER_SIZE_BROADCAST);
@@ -33,7 +33,7 @@ class ServerDataBase {
 		this.keys = keys;
 	}
 
-	ServerSession newServerSession(SocketChannel sc, SelectionKey key) {
+	ServerSession newServerSession(SocketChannel sc, SelectionKey key) throws IOException {
 		ServerSession session = new ServerSession(this, sc, key);
 		sessions.put(sc, session);
 		return session;

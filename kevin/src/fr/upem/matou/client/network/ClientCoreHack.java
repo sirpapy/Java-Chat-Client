@@ -104,8 +104,8 @@ public class ClientCoreHack implements Closeable {
 				boolean acceptation = optionalAcceptation.get();
 				System.out.println("Acceptation = " + acceptation);
 				break;
-			case CODISP:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCODISP(sc);
+			case CONOTIF:
+				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				if (!optionalPseudo.isPresent()) {
 					System.out.println("No message");
 					return;
@@ -154,8 +154,8 @@ public class ClientCoreHack implements Closeable {
 				boolean acceptation = optionalAcceptation.get();
 				System.out.println("Acceptation = " + acceptation);
 				break;
-			case CODISP:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCODISP(sc);
+			case CONOTIF:
+				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				if (!optionalPseudo.isPresent()) {
 					System.out.println("No message");
 					return;
@@ -201,8 +201,8 @@ public class ClientCoreHack implements Closeable {
 				boolean acceptation = optionalAcceptation.get();
 				System.out.println("Acceptation = " + acceptation);
 				break;
-			case CODISP:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCODISP(sc);
+			case CONOTIF:
+				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				if (!optionalPseudo.isPresent()) {
 					System.out.println("No message");
 					return;
@@ -249,8 +249,8 @@ public class ClientCoreHack implements Closeable {
 				boolean acceptation = optionalAcceptation.get();
 				System.out.println("Acceptation = " + acceptation);
 				break;
-			case CODISP:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCODISP(sc);
+			case CONOTIF:
+				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				if (!optionalPseudo.isPresent()) {
 					System.out.println("No message");
 					return;
@@ -299,8 +299,8 @@ public class ClientCoreHack implements Closeable {
 				boolean acceptation = optionalAcceptation.get();
 				System.out.println("Acceptation = " + acceptation);
 				break;
-			case CODISP:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCODISP(sc);
+			case CONOTIF:
+				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				if (!optionalPseudo.isPresent()) {
 					System.out.println("No message");
 					return;
@@ -348,8 +348,8 @@ public class ClientCoreHack implements Closeable {
 				boolean acceptation = optionalAcceptation.get();
 				System.out.println("Acceptation = " + acceptation);
 				break;
-			case CODISP:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCODISP(sc);
+			case CONOTIF:
+				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				if (!optionalPseudo.isPresent()) {
 					System.out.println("No message");
 					return;
@@ -388,8 +388,8 @@ public class ClientCoreHack implements Closeable {
 				boolean acceptation = optionalAcceptation.get();
 				System.out.println("Acceptation = " + acceptation);
 				break;
-			case CODISP:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCODISP(sc);
+			case CONOTIF:
+				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				if (!optionalPseudo.isPresent()) {
 					System.out.println("No message");
 					return;
@@ -442,8 +442,8 @@ public class ClientCoreHack implements Closeable {
 				boolean acceptation = optionalAcceptation.get();
 				System.out.println("Acceptation = " + acceptation);
 				break;
-			case CODISP:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCODISP(sc);
+			case CONOTIF:
+				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				if (!optionalPseudo.isPresent()) {
 					System.out.println("No message");
 					return;
