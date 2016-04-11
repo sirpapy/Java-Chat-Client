@@ -27,6 +27,7 @@ public class ClientCore implements Closeable {
 	private final Object monitor = new Object();
 	private final SocketChannel sc;
 	private final ClientDataBase db;
+	private final UserInterface ui = new ShellInterface();
 	private boolean isReceiverActivated = false;
 
 	public ClientCore(String hostname, int port) throws IOException {
@@ -47,7 +48,7 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void usernameSender(UserInterface ui) throws IOException {
+	private void usernameSender() throws IOException {
 		while (true) {
 			Optional<String> optionalInput = ui.getUsername();
 			if (!optionalInput.isPresent()) {
@@ -90,7 +91,7 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private boolean messageSender(UserInterface ui) throws IOException {
+	private boolean messageSender() throws IOException {
 		Optional<ClientEvent> optionalEvent = ui.getEvent();
 		if (!optionalEvent.isPresent()) {
 			return true;
@@ -104,7 +105,7 @@ public class ClientCore implements Closeable {
 		return false;
 	}
 
-	private void messageReceiver(UserInterface ui) throws IOException {
+	private void messageReceiver() throws IOException {
 		Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
 		if (!optionalRequestType.isPresent()) {
 			throw new IOException("Protocol violation");
@@ -189,14 +190,15 @@ public class ClientCore implements Closeable {
 			Logger.network(NetworkLogType.READ, "USERNAME : " + username);
 			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
 			ui.displayNewPrivateAcceptionEvent(username);
-			launchPrivateConnection(address,username); // TEMP : variable locale
+			launchPrivateConnection(address, username); // TEMP : variable locale
 
 			break;
 		}
-		
+
 		case PVCOESTADST: {
 			setChrono(true);
-			Optional<DestinationConnection> optionalRequestPVCOESTADST = ClientCommunication.receiveRequestPVCOESTADST(sc);
+			Optional<DestinationConnection> optionalRequestPVCOESTADST = ClientCommunication
+					.receiveRequestPVCOESTADST(sc);
 			setChrono(false);
 
 			if (!optionalRequestPVCOESTADST.isPresent()) {
@@ -212,7 +214,7 @@ public class ClientCore implements Closeable {
 			Logger.network(NetworkLogType.READ, "PORT MESSAGE : " + portMessage);
 			Logger.network(NetworkLogType.READ, "PORT FILE : " + portFile);
 			ui.displayNewPrivateAcceptionEvent(username);
-			launchPrivateConnection(address,username,portMessage, portFile); // TEMP : variable locale
+			launchPrivateConnection(address, username, portMessage, portFile); // TEMP : variable locale
 
 			break;
 		}
@@ -225,13 +227,41 @@ public class ClientCore implements Closeable {
 	}
 
 	private void privateCommunicationMessage(SocketChannel pv, String username) throws IOException {
-		// TODO
+		while (true) {
+			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(pv);
+			if (!optionalRequestType.isPresent()) {
+				throw new IOException("Protocol violation");
+			}
+			NetworkProtocol protocol = optionalRequestType.get();
+			Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
+
+			switch (protocol) {
+
+			case PVMSG: {
+				Optional<Message> optionalRequestPVMSG = ClientCommunication.receiveRequestPVMSG(pv, username);
+
+				if (!optionalRequestPVMSG.isPresent()) {
+					throw new IOException("Protocol violation : " + protocol);
+				}
+				Message receivedMessage = optionalRequestPVMSG.get();
+				Logger.network(NetworkLogType.READ, "USERNAME : " + receivedMessage.getUsername());
+				Logger.network(NetworkLogType.READ, "MESSAGE : " + receivedMessage.getContent());
+				ui.displayMessage(receivedMessage);
+
+				break;
+			}
+
+			default:
+				throw new UnsupportedOperationException("Unsupported protocol request : " + protocol); // TEMP
+
+			}
+		}
 	}
 
 	private void privateCommunicationFile(SocketChannel pv, String username) throws IOException {
 		// TODO
 	}
-	
+
 	private static SocketChannel acceptCommunication(ServerSocketChannel ssc, InetAddress address) throws IOException {
 		SocketChannel pv;
 		while (true) {
@@ -262,36 +292,9 @@ public class ClientCore implements Closeable {
 
 		new Thread(() -> {
 			try {
-				SocketChannel scMessage = acceptCommunication(sscMessage,address);
-				Logger.debug("CONNECTED (SOURCE MESSAGE)");	
-				privateCommunicationMessage(scMessage,username);
-			} catch (IOException e) {
-				Logger.exception(e);
-			}
-		}).start();
-
-		new Thread(() -> {
-			try {
-				SocketChannel scFile = acceptCommunication(sscFile,address);
-				Logger.debug("CONNECTED (SOURCE FILE)");	
-				privateCommunicationFile(scFile,username);
-			} catch (IOException e) {
-				Logger.exception(e);
-			}
-		}).start();
-	}
-
-	private void privateCommunicationDestination(InetAddress address, String username, int portMessage, int portFile) throws IOException {
-		SocketChannel scMessage = SocketChannel.open(new InetSocketAddress(address, portMessage));
-		SocketChannel scFile = SocketChannel.open(new InetSocketAddress(address, portFile));
-
-		System.out.println("MESSAGE PORT : " + portMessage);
-		System.out.println("FILE PORT : " + portFile);
-		
-		Logger.debug("CONNECTED (DESTINATION)");		
-		
-		new Thread(() -> {
-			try {
+				SocketChannel scMessage = acceptCommunication(sscMessage, address);
+				Logger.debug("CONNECTED (SOURCE MESSAGE)");
+				db.addNewPrivateMessageChannel(username, scMessage);
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
 				Logger.exception(e);
@@ -300,31 +303,63 @@ public class ClientCore implements Closeable {
 
 		new Thread(() -> {
 			try {
+				SocketChannel scFile = acceptCommunication(sscFile, address);
+				Logger.debug("CONNECTED (SOURCE FILE)");
+				db.addNewPrivateFileChannel(username, scFile);
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
 		}).start();
 	}
-	
-	private void launchPrivateConnection(InetAddress address, String username) {
+
+	private void privateCommunicationDestination(InetAddress address, String username, int portMessage, int portFile)
+			throws IOException {
+		SocketChannel scMessage = SocketChannel.open(new InetSocketAddress(address, portMessage));
+		SocketChannel scFile = SocketChannel.open(new InetSocketAddress(address, portFile));
+
+		System.out.println("MESSAGE PORT : " + portMessage);
+		System.out.println("FILE PORT : " + portFile);
+
+		Logger.debug("CONNECTED (DESTINATION)");
+
 		new Thread(() -> {
 			try {
-				privateCommunicationSource(address,username);
+				db.addNewPrivateMessageChannel(username, scMessage);
+				privateCommunicationMessage(scMessage, username);
+			} catch (IOException e) {
+				Logger.exception(e);
+			}
+		}).start();
+
+		new Thread(() -> {
+			try {
+				db.addNewPrivateFileChannel(username, scFile);
+				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
 		}).start();
 	}
-	
-	private void launchPrivateConnection(InetAddress address, String username, int portMessage, int portFile) {
+
+	private void launchPrivateConnection(InetAddress address, String username) {
 		new Thread(() -> {
 			try {
-				privateCommunicationDestination(address,username, portMessage, portFile);
+				privateCommunicationSource(address, username);
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
-		}).start();		
+		}).start();
+	}
+
+	private void launchPrivateConnection(InetAddress address, String username, int portMessage, int portFile) {
+		new Thread(() -> {
+			try {
+				privateCommunicationDestination(address, username, portMessage, portFile);
+			} catch (IOException e) {
+				Logger.exception(e);
+			}
+		}).start();
 	}
 
 	private void cleaner() throws InterruptedException {
@@ -355,11 +390,11 @@ public class ClientCore implements Closeable {
 
 	}
 
-	private void threadMessageSender(UserInterface ui) {
+	private void threadMessageSender() {
 		boolean exit = false;
 		while (!Thread.interrupted() && exit == false) {
 			try {
-				exit = messageSender(ui);
+				exit = messageSender();
 			} catch (IOException e) {
 				Logger.warning("WARNING | " + e.toString());
 				Logger.exception(e);
@@ -368,10 +403,10 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void threadMessageReceiver(UserInterface ui) {
+	private void threadMessageReceiver() {
 		while (!Thread.interrupted()) {
 			try {
-				messageReceiver(ui);
+				messageReceiver();
 			} catch (IOException e) {
 				Logger.warning("WARNING | " + e.toString());
 				Logger.exception(e);
@@ -391,17 +426,17 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void processUsername(UserInterface ui) throws IOException {
+	private void processUsername() throws IOException {
 		boolean isAccepted = false;
 		while (!isAccepted) {
-			usernameSender(ui);
+			usernameSender();
 			isAccepted = usernameReceiver();
 		}
 	}
 
-	private void processMessages(UserInterface ui) throws InterruptedException, IOException {
-		Thread sender = new Thread(() -> threadMessageSender(ui));
-		Thread receiver = new Thread(() -> threadMessageReceiver(ui));
+	private void processMessages() throws InterruptedException, IOException {
+		Thread sender = new Thread(() -> threadMessageSender());
+		Thread receiver = new Thread(() -> threadMessageReceiver());
 		Thread cleaner = new Thread(() -> threadCleaner());
 
 		sender.start();
@@ -421,11 +456,8 @@ public class ClientCore implements Closeable {
 	}
 
 	public void startChat() throws IOException, InterruptedException {
-		UserInterface ui = new ShellInterface();
-
-		processUsername(ui);
-		processMessages(ui);
-
+		processUsername();
+		processMessages();
 		Logger.debug("DISCONNECTION");
 	}
 

@@ -101,7 +101,8 @@ class ClientCommunication {
 		return request;
 	}
 
-	private static ByteBuffer encodeRequestPVCOPORT(ByteBuffer encodedUsername, InetAddress address, int portMessage, int portFile) {
+	public static ByteBuffer encodeRequestPVCOPORT(ByteBuffer encodedUsername, InetAddress address, int portMessage,
+			int portFile) {
 		int length = encodedUsername.remaining();
 		byte[] addr = address.getAddress();
 
@@ -112,6 +113,18 @@ class ClientCommunication {
 		request.putInt(length).put(encodedUsername);
 		request.putInt(addr.length).put(addr);
 		request.putInt(portMessage).putInt(portFile);
+
+		return request;
+	}
+	
+	public static ByteBuffer encodeRequestPVMSG(ByteBuffer encodedMessage) {
+		int length = encodedMessage.remaining();
+
+		int capacity = Integer.BYTES + Integer.BYTES + length;
+		ByteBuffer request = ByteBuffer.allocate(capacity);
+
+		request.putInt(NetworkProtocol.PVMSG.ordinal());
+		request.putInt(length).put(encodedMessage);
 
 		return request;
 	}
@@ -172,13 +185,29 @@ class ClientCommunication {
 		return true;
 	}
 
-	public static boolean sendRequestPVCOPORT(SocketChannel sc, String username, InetAddress address, int portMessage, int portFile)
+	public static boolean sendRequestPVCOPORT(SocketChannel sc, String username, InetAddress address, int portMessage,
+			int portFile)
 			throws IOException {
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
 		if (!optional.isPresent()) {
 			return false;
 		}
 		ByteBuffer bb = encodeRequestPVCOPORT(optional.get(), address, portMessage, portFile);
+		sendRequest(sc, bb);
+		return true;
+	}
+
+	public static boolean sendRequestPVMSG(SocketChannel sc, String message) throws IOException {
+		if (!NetworkCommunication.checkMessageValidity(message)) {
+			return false;
+		}
+
+		Optional<ByteBuffer> optional = NetworkCommunication.encodeMessage(message);
+		if (!optional.isPresent()) {
+			return false;
+		}
+
+		ByteBuffer bb = encodeRequestPVMSG(optional.get());
 		sendRequest(sc, bb);
 		return true;
 	}
@@ -385,15 +414,33 @@ class ClientCommunication {
 		}
 		bbPortMessage.flip();
 		int portMessage = bbPortMessage.getInt();
-		
+
 		ByteBuffer bbPortFile = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbPortFile)) {
 			throw new IOException("Connection closed");
 		}
 		bbPortFile.flip();
 		int portFile = bbPortFile.getInt();
-		
+
 		return Optional.of(new DestinationConnection(username, address, portMessage, portFile));
+	}
+
+	public static Optional<Message> receiveRequestPVMSG(SocketChannel sc, String username) throws IOException {
+		ByteBuffer bbSizeMessage = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizeMessage)) {
+			throw new IOException("Connection closed");
+		}
+		bbSizeMessage.flip();
+		int sizeMessage = bbSizeMessage.getInt();
+
+		ByteBuffer bbMessage = ByteBuffer.allocate(sizeMessage);
+		if (!readFully(sc, bbMessage)) {
+			throw new IOException("Connection closed");
+		}
+		bbMessage.flip();
+		String message = PROTOCOL_CHARSET.decode(bbMessage).toString();
+
+		return Optional.of(new Message(username, message, true));
 	}
 
 }
