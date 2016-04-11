@@ -15,6 +15,7 @@ public class NetworkCommunication {
 	static final int LENGTH_SIZE = Integer.BYTES;
 	static final int USERNAME_MAX_SIZE = 32;
 	static final int MESSAGE_MAX_SIZE = 512;
+	static final int FILE_CHUNK_SIZE = 4096;
 
 	private NetworkCommunication() {
 	}
@@ -73,5 +74,9 @@ public class NetworkCommunication {
 
 	public static int getMessageMaxSize() {
 		return MESSAGE_MAX_SIZE;
+	}
+	
+	public static int getFileChunkSize() {
+		return FILE_CHUNK_SIZE;
 	}
 }

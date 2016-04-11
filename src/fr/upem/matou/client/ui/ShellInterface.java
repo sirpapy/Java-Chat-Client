@@ -2,6 +2,7 @@ package fr.upem.matou.client.ui;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -79,12 +80,17 @@ public class ShellInterface implements UserInterface {
 
 	@Override
 	public void displayNewPrivateRequestEvent(String username) {
-		output.println("<" + username + " asks for a private connection>");		
+		output.println("<" + username + " asks for a private connection>");
 	}
-	
+
 	@Override
 	public void displayNewPrivateAcceptionEvent(String username) {
-		output.println("<" + username + " accepts the private connection>");				
+		output.println("<" + username + " accepts the private connection>");
+	}
+
+	@Override
+	public void displayFile(String username, Path path) {
+		output.print("<" + username + " sends a file : " + path + " >");
 	}
 
 	@Override

@@ -1,11 +1,16 @@
 package fr.upem.matou.client.network;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
 import fr.upem.matou.client.ui.Message;
@@ -19,6 +24,7 @@ import fr.upem.matou.shared.network.NetworkProtocol;
 class ClientCommunication {
 
 	private static final Charset PROTOCOL_CHARSET = NetworkCommunication.getProtocolCharset();
+	private static final int CHUNK_SIZE = NetworkCommunication.getFileChunkSize();
 
 	private ClientCommunication() {
 	}
@@ -116,7 +122,7 @@ class ClientCommunication {
 
 		return request;
 	}
-	
+
 	public static ByteBuffer encodeRequestPVMSG(ByteBuffer encodedMessage) {
 		int length = encodedMessage.remaining();
 
@@ -125,6 +131,16 @@ class ClientCommunication {
 
 		request.putInt(NetworkProtocol.PVMSG.ordinal());
 		request.putInt(length).put(encodedMessage);
+
+		return request;
+	}
+
+	private static ByteBuffer encodeRequestPVFILE(long totalSize) {
+		int capacity = Integer.BYTES + Long.BYTES;
+		ByteBuffer request = ByteBuffer.allocate(capacity);
+
+		request.putInt(NetworkProtocol.PVFILE.ordinal());
+		request.putLong(totalSize);
 
 		return request;
 	}
@@ -210,6 +226,27 @@ class ClientCommunication {
 		ByteBuffer bb = encodeRequestPVMSG(optional.get());
 		sendRequest(sc, bb);
 		return true;
+	}
+
+	public static void sendRequestPVFILE(SocketChannel sc, Path path) throws IOException {
+		long totalSize = Files.size(path);
+		ByteBuffer bb = encodeRequestPVFILE(totalSize);
+		sendRequest(sc, bb);
+
+		try (InputStream is = Files.newInputStream(path, StandardOpenOption.READ)) {
+			byte[] chunk = new byte[CHUNK_SIZE];
+			int read = 0;
+			long totalRead = 0;
+			while ((read = is.read(chunk)) != -1) {
+				totalRead += read;
+				long percent = totalRead * 100 / totalSize;
+				System.out.println(
+						"READ LENGTH : " + read + "\n\tTotal : " + totalRead + "/" + totalSize + " [" + percent + "%]");
+				ByteBuffer wrap = ByteBuffer.wrap(chunk, 0, read);
+				// TODO : flip ?
+				sc.write(wrap);
+			}
+		}
 	}
 
 	/*
@@ -441,6 +478,36 @@ class ClientCommunication {
 		String message = PROTOCOL_CHARSET.decode(bbMessage).toString();
 
 		return Optional.of(new Message(username, message, true));
+	}
+
+	public static Optional<Path> receiveRequestPVFILE(SocketChannel sc, String username) throws IOException {
+		ByteBuffer bbSizeFile = ByteBuffer.allocate(Long.BYTES);
+		if (!readFully(sc, bbSizeFile)) {
+			throw new IOException("Connection closed");
+		}
+		bbSizeFile.flip();
+		long totalSize = bbSizeFile.getLong();
+
+		Path path = Paths.get(username + "_FILE");
+		try (OutputStream os = Files.newOutputStream(path, StandardOpenOption.WRITE,
+				StandardOpenOption.CREATE, StandardOpenOption.CREATE_NEW)) {
+			long totalRead = 0;
+			while (totalRead < totalSize) {
+				ByteBuffer bbChunk = ByteBuffer.allocate(CHUNK_SIZE);
+				if (!readFully(sc, bbChunk)) {
+					throw new IOException("Connection closed");
+				}
+				bbChunk.flip();
+				byte[] chunk = bbChunk.array();
+				int read = bbChunk.remaining();				
+				totalRead += read;
+				long percent = totalRead * 100 / totalSize;
+				System.out.println("READ LENGTH : " + read + "\n\tTotal : " + totalRead + "/" + totalSize + " [" + percent + "%]");
+				os.write(chunk, 0, read);
+			}
+		}
+		
+		return Optional.of(path);
 	}
 
 }

@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import fr.upem.matou.client.ui.Message;
@@ -259,7 +260,35 @@ public class ClientCore implements Closeable {
 	}
 
 	private void privateCommunicationFile(SocketChannel pv, String username) throws IOException {
-		// TODO
+		while (true) {
+			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(pv);
+			if (!optionalRequestType.isPresent()) {
+				throw new IOException("Protocol violation");
+			}
+			NetworkProtocol protocol = optionalRequestType.get();
+			Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
+
+			switch (protocol) {
+
+			case PVFILE: {
+				Optional<Path> optionalRequestPVFILE = ClientCommunication.receiveRequestPVFILE(pv, username);
+
+				if (!optionalRequestPVFILE.isPresent()) {
+					throw new IOException("Protocol violation : " + protocol);
+				}
+				Path path = optionalRequestPVFILE.get();
+				Logger.network(NetworkLogType.READ, "USERNAME : " + username);
+				Logger.network(NetworkLogType.READ, "PATH : " + path);
+				ui.displayFile(username,path);
+
+				break;
+			}
+
+			default:
+				throw new UnsupportedOperationException("Unsupported protocol request : " + protocol); // TEMP
+
+			}
+		}
 	}
 
 	private static SocketChannel acceptCommunication(ServerSocketChannel ssc, InetAddress address) throws IOException {

@@ -1,5 +1,6 @@
 package fr.upem.matou.client.ui;
 
+import java.nio.file.Path;
 import java.util.Optional;
 
 import fr.upem.matou.client.network.ClientEvent;
@@ -25,10 +26,12 @@ public interface UserInterface {
 	public void displayNewConnectionEvent(String username);
 
 	public void displayNewDisconnectionEvent(String username);
-	
+
 	public void displayNewPrivateRequestEvent(String username);
-	
+
 	public void displayNewPrivateAcceptionEvent(String username);
+
+	public void displayFile(String username, Path path);
 
 	public void warnInvalidUsername(String username);
 
