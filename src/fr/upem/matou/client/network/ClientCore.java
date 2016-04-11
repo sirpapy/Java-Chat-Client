@@ -224,37 +224,30 @@ public class ClientCore implements Closeable {
 
 	}
 
-	private void privateCommunicationMessage(ServerSocketChannel ssc, InetAddress address) throws IOException {
+	private void privateCommunicationMessage(SocketChannel pv, String username) throws IOException {
+		// TODO
+	}
+
+	private void privateCommunicationFile(SocketChannel pv, String username) throws IOException {
+		// TODO
+	}
+	
+	private static SocketChannel acceptCommunication(ServerSocketChannel ssc, InetAddress address) throws IOException {
 		SocketChannel pv;
 		while (true) {
 			pv = ssc.accept();
 			InetAddress connected = ((InetSocketAddress) pv.getRemoteAddress()).getAddress();
 			if (!address.equals(connected)) {
 				Logger.debug("CONNECTION HACK !!!");
+				// TODO : close
 				continue;
 			}
-			break;
+			Logger.debug("CONNECTION ACCEPTED");
+			return pv;
 		}
-
-		Logger.debug("ESTABLISHED");
 	}
 
-	private void privateCommunicationFile(ServerSocketChannel ssc, InetAddress address) throws IOException {
-		SocketChannel pv;
-		while (true) {
-			pv = ssc.accept();
-			InetAddress connected = ((InetSocketAddress) pv.getRemoteAddress()).getAddress();
-			if (!address.equals(connected)) {
-				Logger.debug("CONNECTION HACK !!!");
-				continue;
-			}
-			Logger.debug("CONNECTED (SOURCE)");
-			break;
-		}
-		
-	}
-
-	private void privateCommunication(InetAddress address, String username) throws IOException {
+	private void privateCommunicationSource(InetAddress address, String username) throws IOException {
 		ServerSocketChannel sscMessage = ServerSocketChannel.open();
 		ServerSocketChannel sscFile = ServerSocketChannel.open();
 		sscMessage.bind(null);
@@ -269,7 +262,9 @@ public class ClientCore implements Closeable {
 
 		new Thread(() -> {
 			try {
-				privateCommunicationMessage(sscMessage, address);
+				SocketChannel scMessage = acceptCommunication(sscMessage,address);
+				Logger.debug("CONNECTED (SOURCE MESSAGE)");	
+				privateCommunicationMessage(scMessage,username);
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
@@ -277,15 +272,16 @@ public class ClientCore implements Closeable {
 
 		new Thread(() -> {
 			try {
-				privateCommunicationFile(sscFile, address);
+				SocketChannel scFile = acceptCommunication(sscFile,address);
+				Logger.debug("CONNECTED (SOURCE FILE)");	
+				privateCommunicationFile(scFile,username);
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
 		}).start();
 	}
 
-
-	private void privateCommunication(InetAddress address, String username, int portMessage, int portFile) throws IOException {
+	private void privateCommunicationDestination(InetAddress address, String username, int portMessage, int portFile) throws IOException {
 		SocketChannel scMessage = SocketChannel.open(new InetSocketAddress(address, portMessage));
 		SocketChannel scFile = SocketChannel.open(new InetSocketAddress(address, portFile));
 
@@ -293,12 +289,28 @@ public class ClientCore implements Closeable {
 		System.out.println("FILE PORT : " + portFile);
 		
 		Logger.debug("CONNECTED (DESTINATION)");		
+		
+		new Thread(() -> {
+			try {
+				privateCommunicationMessage(scMessage, username);
+			} catch (IOException e) {
+				Logger.exception(e);
+			}
+		}).start();
+
+		new Thread(() -> {
+			try {
+				privateCommunicationFile(scFile, username);
+			} catch (IOException e) {
+				Logger.exception(e);
+			}
+		}).start();
 	}
 	
 	private void launchPrivateConnection(InetAddress address, String username) {
 		new Thread(() -> {
 			try {
-				privateCommunication(address,username);
+				privateCommunicationSource(address,username);
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
@@ -308,7 +320,7 @@ public class ClientCore implements Closeable {
 	private void launchPrivateConnection(InetAddress address, String username, int portMessage, int portFile) {
 		new Thread(() -> {
 			try {
-				privateCommunication(address,username, portMessage, portFile);
+				privateCommunicationDestination(address,username, portMessage, portFile);
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
