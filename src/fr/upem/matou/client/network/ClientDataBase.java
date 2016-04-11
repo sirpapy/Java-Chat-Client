@@ -75,7 +75,7 @@ class ClientDataBase {
 	}
 
 	@SuppressWarnings("resource")
-	public boolean sendPrivateFile(String username, Path path) {
+	boolean sendPrivateFile(String username, Path path) {
 		SocketChannel sc = privateFiles.get(username); // FIXME : NPE si la personne n'a pas ouvert de privé
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVFILE);
 		Logger.network(NetworkLogType.WRITE, "PATH : " + path);

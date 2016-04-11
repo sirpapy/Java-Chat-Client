@@ -90,7 +90,7 @@ public class ShellInterface implements UserInterface {
 
 	@Override
 	public void displayFile(String username, Path path) {
-		output.print("<" + username + " sends a file : " + path + " >");
+		output.println("<" + username + " sends a file : " + path + " >");
 	}
 
 	@Override

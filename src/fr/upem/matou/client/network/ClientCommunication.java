@@ -14,6 +14,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
 import fr.upem.matou.client.ui.Message;
+import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 
@@ -488,12 +489,14 @@ class ClientCommunication {
 		bbSizeFile.flip();
 		long totalSize = bbSizeFile.getLong();
 
-		Path path = Paths.get(username + "_FILE");
+		Path path = Files.createTempFile(Paths.get("./files"),username + "_", "");
 		try (OutputStream os = Files.newOutputStream(path, StandardOpenOption.WRITE,
-				StandardOpenOption.CREATE, StandardOpenOption.CREATE_NEW)) {
+				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
 			long totalRead = 0;
 			while (totalRead < totalSize) {
-				ByteBuffer bbChunk = ByteBuffer.allocate(CHUNK_SIZE);
+				long diff = totalSize - totalRead;
+				long capacity = diff <= CHUNK_SIZE ? diff : CHUNK_SIZE;
+				ByteBuffer bbChunk = ByteBuffer.allocate((int) capacity);
 				if (!readFully(sc, bbChunk)) {
 					throw new IOException("Connection closed");
 				}
@@ -507,6 +510,7 @@ class ClientCommunication {
 			}
 		}
 		
+		Logger.debug("FILE FINISHED");
 		return Optional.of(path);
 	}
 
