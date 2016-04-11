@@ -343,4 +343,57 @@ class ClientCommunication {
 		return Optional.of(new SourceConnection(address, username));
 	}
 
+	public static Optional<DestinationConnection> receiveRequestPVCOESTADST(SocketChannel sc) throws IOException {
+		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizeUsername)) {
+			throw new IOException("Connection closed");
+		}
+		bbSizeUsername.flip();
+		int sizeUsername = bbSizeUsername.getInt();
+
+		ByteBuffer bbUsername = ByteBuffer.allocate(sizeUsername);
+		if (!readFully(sc, bbUsername)) {
+			throw new IOException("Connection closed");
+		}
+		bbUsername.flip();
+		String username = PROTOCOL_CHARSET.decode(bbUsername).toString();
+
+		ByteBuffer bbSizeAddress = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizeAddress)) {
+			throw new IOException("Connection closed");
+		}
+		bbSizeAddress.flip();
+		int sizeAddress = bbSizeAddress.getInt();
+
+		ByteBuffer bbAddress = ByteBuffer.allocate(sizeAddress);
+		if (!readFully(sc, bbAddress)) {
+			throw new IOException("Connection closed");
+		}
+		bbAddress.flip();
+		byte[] addr = new byte[sizeAddress];
+		for (int i = 0; i < sizeAddress; i++) {
+			byte b = bbAddress.get();
+			System.out.println("BYTE ADDRESS = " + b);
+			addr[i] = b;
+		}
+		InetAddress address = InetAddress.getByAddress(addr);
+		System.out.println("ADDRESS = " + address);
+
+		ByteBuffer bbPortMessage = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbPortMessage)) {
+			throw new IOException("Connection closed");
+		}
+		bbPortMessage.flip();
+		int portMessage = bbPortMessage.getInt();
+		
+		ByteBuffer bbPortFile = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbPortFile)) {
+			throw new IOException("Connection closed");
+		}
+		bbPortFile.flip();
+		int portFile = bbPortFile.getInt();
+		
+		return Optional.of(new DestinationConnection(username, address, portMessage, portFile));
+	}
+
 }

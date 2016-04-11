@@ -118,22 +118,48 @@ class ServerCommunication {
 
 	static boolean addRequestPVCOESTASRC(ByteBuffer bbWrite, String username, InetAddress address) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
+		byte[] addr = address.getAddress();
 
 		int sizeUsername = encodedUsername.remaining();
+		int sizeAddress = addr.length;
 
-		int length = Integer.BYTES + Integer.BYTES + sizeUsername;
+		int length = Integer.BYTES + Integer.BYTES + sizeUsername + Integer.BYTES + sizeAddress;
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
+
 		bbWrite.putInt(NetworkProtocol.PVCOESTASRC.ordinal());
 		bbWrite.putInt(sizeUsername).put(encodedUsername);
 
-		byte[] addr = address.getAddress();
-		bbWrite.putInt(addr.length);
-		
-		for(byte b : addr) {
+		bbWrite.putInt(sizeAddress);
+		for (byte b : addr) {
 			bbWrite.put(b);
 		}
+
+		return true;
+	}
+
+	public static boolean addRequestPVCOESTADST(ByteBuffer bbWrite, String username, InetAddress address,
+			int portMessage, int portFile) {
+		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
+		byte[] addr = address.getAddress();
+
+		int sizeUsername = encodedUsername.remaining();
+		int sizeAddress = addr.length;
+
+		int length = Integer.BYTES + Integer.BYTES + sizeUsername + Integer.BYTES + sizeAddress + (2 * Integer.BYTES);
+		if (bbWrite.remaining() < length) {
+			return false;
+		}
+		bbWrite.putInt(NetworkProtocol.PVCOESTADST.ordinal());
+		bbWrite.putInt(sizeUsername).put(encodedUsername);
+
+		bbWrite.putInt(addr.length);
+		for (byte b : addr) {
+			bbWrite.put(b);
+		}
+
+		bbWrite.putInt(portMessage).putInt(portFile);
 
 		return true;
 	}

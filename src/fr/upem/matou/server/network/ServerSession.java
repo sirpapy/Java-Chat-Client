@@ -506,7 +506,7 @@ class ServerSession {
 			break;
 		case 6:
 			processPVCOPORTarg6(state);
-			answerPVCOESTADST(state.username,state.address);
+			answerPVCOESTADST(state.username, state.address, state.portMessage, state.portFile);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for PVCOPORT");
@@ -585,7 +585,7 @@ class ServerSession {
 	private void processPVCOPORTarg5(StatePVCOPORT state) {
 		bbRead.flip();
 		state.portMessage = bbRead.getInt();
-		
+
 		clearAndLimit(bbRead, Integer.BYTES);
 		arg++;
 	}
@@ -593,14 +593,14 @@ class ServerSession {
 	private void processPVCOPORTarg6(StatePVCOPORT state) {
 		bbRead.flip();
 		state.portFile = bbRead.getInt();
-		
+
 		resetReadState();
 	}
 
-	private void answerPVCOESTADST(String targetName, InetAddress address) {
+	private void answerPVCOESTADST(String targetName, InetAddress targetAddress, int portMessage, int portFile) {
 		Username source = db.usernameOf(sc).get();
 		Username target = new Username(targetName);
-		boolean valid = db.checkPrivateRequest(source, target); // TEMP : Username en argument
+		boolean valid = db.checkPrivateRequest(target, source); // TEMP : Username en argument
 		Logger.debug("PRIVATE ESTABLISHMENT VALIDITY : " + valid); // FIXME : False
 
 		if (valid) {
@@ -612,12 +612,14 @@ class ServerSession {
 
 			ServerSession session = optional.get();
 			ByteBuffer bbTarget = session.getWriteBuffer();
-			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTASRC);
+			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTADST);
 			Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
-			Logger.network(NetworkLogType.WRITE, "ADDRESS : " + address);
+			Logger.network(NetworkLogType.WRITE, "ADDRESS : " + targetAddress);
+			Logger.network(NetworkLogType.WRITE, "PORT MESSAGE : " + portMessage );
+			Logger.network(NetworkLogType.WRITE, "PORT FILE : " + portFile);
 
-			if (!ServerCommunication.addRequestPVCOESTASRC(bbTarget, source.toString(), address)) {
-				Logger.warning("PVCOACCNOTIF lost | Write Buffer cannot hold it");
+			if (!ServerCommunication.addRequestPVCOESTADST(bbTarget, source.toString(), targetAddress, portMessage, portFile)) {
+				Logger.warning("PVCOESTADST lost | Write Buffer cannot hold it");
 				return;
 			}
 

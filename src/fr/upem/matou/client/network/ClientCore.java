@@ -193,6 +193,29 @@ public class ClientCore implements Closeable {
 
 			break;
 		}
+		
+		case PVCOESTADST: {
+			setChrono(true);
+			Optional<DestinationConnection> optionalRequestPVCOESTADST = ClientCommunication.receiveRequestPVCOESTADST(sc);
+			setChrono(false);
+
+			if (!optionalRequestPVCOESTADST.isPresent()) {
+				throw new IOException("Protocol violation : " + protocol);
+			}
+			DestinationConnection receivedConnectionRequest = optionalRequestPVCOESTADST.get();
+			String username = receivedConnectionRequest.getUsername();
+			InetAddress address = receivedConnectionRequest.getAddress();
+			int portMessage = receivedConnectionRequest.getPortMessage();
+			int portFile = receivedConnectionRequest.getPortFile();
+			Logger.network(NetworkLogType.READ, "USERNAME : " + username);
+			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
+			Logger.network(NetworkLogType.READ, "PORT MESSAGE : " + portMessage);
+			Logger.network(NetworkLogType.READ, "PORT FILE : " + portFile);
+			ui.displayNewPrivateAcceptionEvent(username);
+			launchPrivateConnection(address,username,portMessage, portFile); // TEMP : variable locale
+
+			break;
+		}
 
 		default:
 			throw new UnsupportedOperationException("Unsupported protocol request : " + protocol); // TEMP
@@ -225,10 +248,10 @@ public class ClientCore implements Closeable {
 				Logger.debug("CONNECTION HACK !!!");
 				continue;
 			}
+			Logger.debug("CONNECTED (SOURCE)");
 			break;
 		}
-
-		Logger.debug("ESTABLISHED");
+		
 	}
 
 	private void privateCommunication(InetAddress address, String username) throws IOException {
@@ -261,6 +284,17 @@ public class ClientCore implements Closeable {
 		}).start();
 	}
 
+
+	private void privateCommunication(InetAddress address, String username, int portMessage, int portFile) throws IOException {
+		SocketChannel scMessage = SocketChannel.open(new InetSocketAddress(address, portMessage));
+		SocketChannel scFile = SocketChannel.open(new InetSocketAddress(address, portFile));
+
+		System.out.println("MESSAGE PORT : " + portMessage);
+		System.out.println("FILE PORT : " + portFile);
+		
+		Logger.debug("CONNECTED (DESTINATION)");		
+	}
+	
 	private void launchPrivateConnection(InetAddress address, String username) {
 		new Thread(() -> {
 			try {
@@ -269,6 +303,16 @@ public class ClientCore implements Closeable {
 				Logger.exception(e);
 			}
 		}).start();
+	}
+	
+	private void launchPrivateConnection(InetAddress address, String username, int portMessage, int portFile) {
+		new Thread(() -> {
+			try {
+				privateCommunication(address,username, portMessage, portFile);
+			} catch (IOException e) {
+				Logger.exception(e);
+			}
+		}).start();		
 	}
 
 	private void cleaner() throws InterruptedException {

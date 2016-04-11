@@ -11,11 +11,12 @@ class SourceConnection {
 		this.username = username;
 	}
 
+	String getUsername() {
+		return username;
+	}
+	
 	InetAddress getAddress() {
 		return address;
 	}
 
-	String getUsername() {
-		return username;
-	}
 }
