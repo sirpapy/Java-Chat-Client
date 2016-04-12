@@ -136,7 +136,7 @@ class ClientCommunication {
 		return request;
 	}
 
-	private static ByteBuffer encodeRequestPVFILE(long totalSize) {
+	public static ByteBuffer encodeRequestPVFILE(long totalSize) {
 		int capacity = Integer.BYTES + Long.BYTES;
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 

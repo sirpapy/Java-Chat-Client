@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="Matou" basedir="." default="all">
+
+	<!-- Project properties -->
+	<property name="dir.sources" value="src" />
+	<!--	<property name="dir.tests" value="test/src" /> -->
+	<property name="dir.classes" value="classes" />
+	<property name="dir.libraries" value="libs" />
+	<property name="dir.documentation" value="docs/api" />
+	<property name="file.client.jar" value="client.jar" />
+	<property name="file.server.jar" value="server.jar" />
+	<property name="class.client.main" value="fr.upem.matou.client.ClientMatou" />
+	<property name="class.server.main" value="fr.upem.matou.server.ServerMatou" />
+
+	<!-- Classpath -->
+	<path id="project.classpath">
+		<fileset dir="${dir.libraries}">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${dir.classes}" />
+	</path>
+
+	<!-- MANIFEST.MF generation from classpath -->
+	<manifestclasspath property="client.MANIFEST.MF" jarfile="${class.client.main}">
+		<classpath refid="project.classpath" />
+	</manifestclasspath>
+
+	<!-- MANIFEST.MF generation from classpath -->
+	<manifestclasspath property="server.MANIFEST.MF" jarfile="${class.server.main}">
+		<classpath refid="project.classpath" />
+	</manifestclasspath>
+
+
+
+	<!-- Default target -->
+	<target name="all" depends="compile,jar,javadoc" description="Default target" />
+
+	<!-- Initialization -->
+	<target name="init" description="Initialize the build">
+		<mkdir dir="${dir.classes}" />
+		<mkdir dir="${dir.documentation}" />
+	</target>
+
+	<!-- Cleaning -->
+	<target name="clean" description="Clean previous builds">
+		<delete dir="${dir.classes}" />
+		<delete dir="${dir.documentation}" />
+		<delete file="${file.client.jar}" />
+		<delete file="${file.server.jar}" />
+	</target>
+
+	<!-- Sources compilation -->
+	<target name="compile" depends="init" description="Compile the sources">
+		<javac srcdir="${dir.sources}" destdir="${dir.classes}" includeantruntime="false">
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>
+
+	<!-- Tests compilation -->
+	<!--	<target name="tests" depends="compile" description="Compile the unit tests">
+		<javac srcdir="${dir.tests}" destdir="${dir.classes}" includeantruntime="false">
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>-->
+
+	<!-- Javadoc generation -->
+	<target name="javadoc" description="Generate the javadoc">
+		<javadoc sourcepath="src" destdir="docs/api" access="public" link="http://docs.oracle.com/javase/8/docs/api/" />
+	</target>
+
+	<!-- Runnable jar generation -->
+	<target name="jar" depends="compile" description="Generate the runnable jar file">
+		<jar basedir="${dir.classes}" jarfile="${file.client.jar}">
+			<manifest>
+				<attribute name="Main-Class" value="${class.client.main}" />
+				<attribute name="Class-Path" value="${client.MANIFEST.MF}" />
+			</manifest>
+		</jar>
+		<jar basedir="${dir.classes}" jarfile="${file.server.jar}">
+			<manifest>
+				<attribute name="Main-Class" value="${class.server.main}" />
+				<attribute name="Class-Path" value="${server.MANIFEST.MF}" />
+			</manifest>
+		</jar>
+	</target>
+
+</project>

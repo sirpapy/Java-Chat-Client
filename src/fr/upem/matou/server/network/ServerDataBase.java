@@ -138,6 +138,7 @@ class ServerDataBase {
 	}
 
 	boolean checkPrivateRequest(Username source, Username target) {
+		// FIXME : Accept à l'infini
 		HashSet<Username> set = privateRequests.get(target);
 		Logger.debug("CHECK SET ( " + source + " -> " + target + " ) = " + set);
 		if(set==null) { // TODO : init ?
