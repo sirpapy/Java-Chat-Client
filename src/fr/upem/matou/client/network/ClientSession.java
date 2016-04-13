@@ -1,23 +1,20 @@
 package fr.upem.matou.client.network;
 
-import static java.util.Objects.requireNonNull;
-
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 
-// FIXME : concurrence !!!!!
 @SuppressWarnings("resource")
 class ClientSession {
 	private final SocketChannel publicChannel;
-	private final HashMap<Username, SocketChannel> privateMessages = new HashMap<>();
-	private final HashMap<Username, SocketChannel> privateFiles = new HashMap<>();
+	private final ConcurrentHashMap<Username, SocketChannel> privateMessages = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<Username, SocketChannel> privateFiles = new ConcurrentHashMap<>();
 
 	ClientSession(SocketChannel publicChannel) {
 		this.publicChannel = publicChannel;
@@ -28,26 +25,12 @@ class ClientSession {
 	}
 
 	void addNewPrivateMessageChannel(Username username, SocketChannel sc) {
-		requireNonNull(username);
-		requireNonNull(sc);
 		privateMessages.put(username, sc);
 	}
 
 	void addNewPrivateFileChannel(Username username, SocketChannel sc) {
-		requireNonNull(username);
-		requireNonNull(sc);
 		privateFiles.put(username, sc);
 	}
-
-	// Optional<SocketChannel> getPrivateMessageChannel(String username) {
-	// requireNonNull(username);
-	// return Optional.ofNullable(privateMessages.get(username));
-	// }
-	//
-	// Optional<SocketChannel> getPrivateFileChannel(String username) {
-	// requireNonNull(username);
-	// return Optional.ofNullable(privateFiles.get(username));
-	// }
 
 	boolean sendMessage(String message) throws IOException {
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSG);
@@ -107,7 +90,7 @@ class ClientSession {
 		}
 		return closed;
 
-		// FIXME : Si la connexion est fermée, l'autre peut encore écrire une fois avant de manger une IOException
+		// FIXME : Si la connexion est fermée, l'autre peut encore écrire une fois avant de se manger une IOException
 	}
 
 }

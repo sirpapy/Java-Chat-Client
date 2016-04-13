@@ -80,7 +80,7 @@ class ServerDataBase {
 		return bbBroadcast;
 	}
 
-	// TODO : Intégrer à l'ajout du broadcast
+	// FIXME : Intégrer à l'ajout du broadcast
 	void updateStateReadAll() {
 		Logger.debug("BROADCAST : " + bbBroadcast);
 		if (bbBroadcast.position() == 0) {

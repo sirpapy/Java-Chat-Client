@@ -117,7 +117,7 @@ public class ClientCore implements Closeable {
 
 		switch (protocol) {
 
-		// TODO : Renommer les optional
+		// FIXME : Renommer les optional
 
 		case MSGBC: {
 			setChrono(true);
