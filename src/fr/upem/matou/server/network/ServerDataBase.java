@@ -7,6 +7,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,7 +25,7 @@ class ServerDataBase {
 
 	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
 	private final HashMap<SocketChannel, Username> connected = new HashMap<>();
-	private final HashMap<Username, HashSet<Username>> privateRequests = new HashMap<>(); 	// FIXME : En cas de déconnexion, non mis à jour
+	private final HashMap<Username, HashSet<Username>> privateRequests = new HashMap<>();
 	private final Collection<Username> names = connected.values();
 	private final Set<SelectionKey> keys;
 	private final ByteBuffer bbBroadcast = ByteBuffer.allocateDirect(BUFFER_SIZE_BROADCAST);
@@ -39,24 +40,45 @@ class ServerDataBase {
 		return session;
 	}
 
+	/*
+	 * Add a new client.
+	 * Check if : available & no illegal characters
+	 */
+	boolean authentClient(SocketChannel sc, Username username) {
+		if (!(checkAvailability(username))) {
+			return false;
+		}
+		connected.put(sc, username);
+		return true;
+	}
+
+	Optional<Username> removeClient(SocketChannel channel) {
+		sessions.remove(channel);
+		Username disconnected = connected.remove(channel);
+		if (disconnected != null) {
+			privateRequests.remove(disconnected);
+			removeAllRequestTo(disconnected);
+		}
+		return Optional.ofNullable(disconnected);
+	}
+
+	private void removeAllRequestTo(Username disconnected) {
+		for (Entry<Username, HashSet<Username>> entry : privateRequests.entrySet()) {
+			Username key = entry.getKey();
+			HashSet<Username> values = entry.getValue();
+			boolean cancelled = values.remove(disconnected);
+			if(cancelled) {
+				Logger.debug("Cancel private request : " + key + " -> " + disconnected);
+			}
+		}
+	}
+
 	private boolean checkAvailability(Username username) {
 		return !names.contains(username);
 	}
 
 	ByteBuffer getBroadcastBuffer() {
 		return bbBroadcast;
-	}
-
-	/*
-	 * Add a new client.
-	 * Check if : available & no illegal characters
-	 */
-	boolean addNewConnected(SocketChannel sc, Username username) {
-		if (!(checkAvailability(username))) {
-			return false;
-		}
-		connected.put(sc, username);
-		return true;
 	}
 
 	// TODO : Intégrer à l'ajout du broadcast
@@ -100,11 +122,6 @@ class ServerDataBase {
 		// TEMP
 	}
 
-	Optional<Username> removeClient(SocketChannel channel) {
-		Username disconnected = connected.remove(channel);
-		return Optional.ofNullable(disconnected);
-	}
-
 	/*
 	 * Returns the username associated with this SocketChannel.
 	 */
@@ -138,13 +155,21 @@ class ServerDataBase {
 	}
 
 	boolean checkPrivateRequest(Username source, Username target) {
-		// FIXME : Accept à l'infini
 		HashSet<Username> set = privateRequests.get(target);
-		Logger.debug("CHECK SET ( " + source + " -> " + target + " ) = " + set);
-		if(set==null) { // TODO : init ?
+		Logger.debug("CHECK ( " + source + " -> " + target + " ) = " + set);
+		if (set == null) { // TODO : init ?
 			return false;
 		}
 		return set.contains(source);
+	}
+
+	boolean removePrivateRequest(Username source, Username target) {
+		HashSet<Username> set = privateRequests.get(target);
+		Logger.debug("CHECK & REMOVE ( " + source + " -> " + target + " ) = " + set);
+		if (set == null) {
+			return false;
+		}
+		return set.remove(source);
 	}
 
 }

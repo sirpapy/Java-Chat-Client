@@ -3,7 +3,6 @@ package fr.upem.matou.server.network;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -71,8 +70,6 @@ class ServerSession {
 	static class StatePVCOPORT implements ClientState {
 		int sizeUsername;
 		String username;
-		int sizeAddress;
-		InetAddress address;
 		int portMessage;
 		int portFile;
 	}
@@ -119,19 +116,25 @@ class ServerSession {
 		protocol = null;
 	}
 
+	private void advanceReadState(int size) {
+		clearAndLimit(bbRead, size);
+		arg++;
+	}
+
 	/*
 	 * Retrives the protocol request type from the read buffer and updates current state.
 	 */
-	private void processRequestType() {
+	private int processRequestType() {
 		bbRead.flip();
 		int ordinal = bbRead.getInt();
 		Optional<NetworkProtocol> optionalProtocol = NetworkProtocol.getProtocol(ordinal);
 		if (!optionalProtocol.isPresent()) {
-			return;
+			return ordinal;
 		}
 		protocol = optionalProtocol.get();
 		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 		arg++;
+		return ordinal;
 	}
 
 	/*
@@ -167,9 +170,8 @@ class ServerSession {
 			disconnectClient();
 			return;
 		}
-		clearAndLimit(bbRead, Integer.BYTES);
 		clientState = new StateCOREQ();
-		arg++;
+		advanceReadState(Integer.BYTES);
 	}
 
 	/*
@@ -185,8 +187,7 @@ class ServerSession {
 			return;
 		}
 
-		clearAndLimit(bbRead, state.sizeUsername);
-		arg++;
+		advanceReadState(state.sizeUsername);
 	}
 
 	/*
@@ -210,7 +211,7 @@ class ServerSession {
 			return;
 		}
 
-		boolean acceptation = db.addNewConnected(sc, new Username(username));
+		boolean acceptation = db.authentClient(sc, new Username(username));
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES);
 		Logger.network(NetworkLogType.WRITE, "ACCEPTATION : " + acceptation);
 
@@ -260,9 +261,9 @@ class ServerSession {
 			disconnectClient();
 			return;
 		}
-		clearAndLimit(bbRead, Integer.BYTES);
+
 		clientState = new StateMSG();
-		arg++;
+		advanceReadState(Integer.BYTES);
 	}
 
 	private void processMSGarg1(StateMSG state) {
@@ -275,8 +276,7 @@ class ServerSession {
 			return;
 		}
 
-		clearAndLimit(bbRead, state.sizeMessage);
-		arg++;
+		advanceReadState(state.sizeMessage);
 	}
 
 	private void processMSGarg2(StateMSG state) {
@@ -348,9 +348,9 @@ class ServerSession {
 			disconnectClient();
 			return;
 		}
-		clearAndLimit(bbRead, Integer.BYTES);
+
 		clientState = new StatePVCOREQ();
-		arg++;
+		advanceReadState(Integer.BYTES);
 	}
 
 	private void processPVCOREQarg1(StatePVCOREQ state) {
@@ -363,8 +363,7 @@ class ServerSession {
 			return;
 		}
 
-		clearAndLimit(bbRead, state.sizeUsername);
-		arg++;
+		advanceReadState(state.sizeUsername);
 	}
 
 	private void processPVCOREQarg2(StatePVCOREQ state) {
@@ -425,9 +424,9 @@ class ServerSession {
 			disconnectClient();
 			return;
 		}
-		clearAndLimit(bbRead, Integer.BYTES);
+
 		clientState = new StatePVCOACC();
-		arg++;
+		advanceReadState(Integer.BYTES);
 	}
 
 	private void processPVCOACCarg1(StatePVCOACC state) {
@@ -440,8 +439,7 @@ class ServerSession {
 			return;
 		}
 
-		clearAndLimit(bbRead, state.sizeUsername);
-		arg++;
+		advanceReadState(state.sizeUsername);
 	}
 
 	private void processPVCOACCarg2(StatePVCOACC state) {
@@ -494,19 +492,13 @@ class ServerSession {
 			return;
 		case 2:
 			processPVCOPORTarg2(state);
-			break;
+			return;
 		case 3:
 			processPVCOPORTarg3(state);
-			break;
+			return;
 		case 4:
 			processPVCOPORTarg4(state);
-			break;
-		case 5:
-			processPVCOPORTarg5(state);
-			break;
-		case 6:
-			processPVCOPORTarg6(state);
-			answerPVCOESTADST(state.username, state.address, state.portMessage, state.portFile);
+			answerPVCOESTADST(state.username, state.portMessage, state.portFile);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for PVCOPORT");
@@ -519,10 +511,9 @@ class ServerSession {
 			disconnectClient();
 			return;
 		}
-		// FIXME : Check accepted
-		clearAndLimit(bbRead, Integer.BYTES);
+
 		clientState = new StatePVCOPORT();
-		arg++;
+		advanceReadState(Integer.BYTES);
 	}
 
 	private void processPVCOPORTarg1(StatePVCOPORT state) {
@@ -535,8 +526,7 @@ class ServerSession {
 			return;
 		}
 
-		clearAndLimit(bbRead, state.sizeUsername);
-		arg++;
+		advanceReadState(state.sizeUsername);
 	}
 
 	private void processPVCOPORTarg2(StatePVCOPORT state) {
@@ -544,87 +534,55 @@ class ServerSession {
 		state.username = ServerCommunication.readStringUTF8(bbRead);
 		Logger.network(NetworkLogType.READ, "USERNAME : " + state.username);
 
-		clearAndLimit(bbRead, Integer.BYTES);
-		arg++;
+		advanceReadState(Integer.BYTES);
 	}
 
 	private void processPVCOPORTarg3(StatePVCOPORT state) {
 		bbRead.flip();
-		state.sizeAddress = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE ADDRESS : " + state.sizeAddress);
-		if (state.sizeAddress != 4 && state.sizeAddress != 16) {
-			Logger.debug("Invalid size address");
-			disconnectClient();
-			return;
-		}
+		state.portMessage = bbRead.getInt();
 
-		clearAndLimit(bbRead, state.sizeAddress);
-		arg++;
+		advanceReadState(Integer.BYTES);
 	}
 
 	private void processPVCOPORTarg4(StatePVCOPORT state) {
-		bbRead.flip();
-		byte[] addr = new byte[state.sizeAddress];
-		for (int i = 0; i < state.sizeAddress; i++) {
-			byte b = bbRead.get();
-			System.out.println("Byte : " + b);
-			addr[i] = b;
-		}
-		try {
-			state.address = InetAddress.getByAddress(addr);
-		} catch (UnknownHostException e) {
-			Logger.exception(e);
-			disconnectClient();
-			return;
-		}
-
-		clearAndLimit(bbRead, Integer.BYTES);
-		arg++;
-	}
-
-	private void processPVCOPORTarg5(StatePVCOPORT state) {
-		bbRead.flip();
-		state.portMessage = bbRead.getInt();
-
-		clearAndLimit(bbRead, Integer.BYTES);
-		arg++;
-	}
-
-	private void processPVCOPORTarg6(StatePVCOPORT state) {
 		bbRead.flip();
 		state.portFile = bbRead.getInt();
 
 		resetReadState();
 	}
 
-	private void answerPVCOESTADST(String targetName, InetAddress targetAddress, int portMessage, int portFile) {
+	private void answerPVCOESTADST(String targetName, int portMessage, int portFile) {
 		Username source = db.usernameOf(sc).get();
 		Username target = new Username(targetName);
-		boolean valid = db.checkPrivateRequest(target, source); // TEMP : Username en argument
+		boolean valid = db.removePrivateRequest(target, source); // TEMP : Username en argument
 		Logger.debug("PRIVATE ESTABLISHMENT VALIDITY : " + valid); // FIXME : False
 
-		if (valid) {
-			Optional<ServerSession> optional = db.sessionOf(target);
-			if (!optional.isPresent()) { // XXX : Impossible car checked
-				Logger.debug("Target " + target + " is not connected");
-				return;
-			}
+		if (!valid) {
+			disconnectClient();
+			return;
+		}
 
-			ServerSession session = optional.get();
-			ByteBuffer bbTarget = session.getWriteBuffer();
-			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTADST);
-			Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
-			Logger.network(NetworkLogType.WRITE, "ADDRESS : " + targetAddress);
-			Logger.network(NetworkLogType.WRITE, "PORT MESSAGE : " + portMessage );
-			Logger.network(NetworkLogType.WRITE, "PORT FILE : " + portFile);
+		Optional<ServerSession> optional = db.sessionOf(target);
+		if (!optional.isPresent()) { // XXX : Impossible car checked
+			Logger.debug("Target " + target + " is not connected");
+			return;
+		}
 
-			if (!ServerCommunication.addRequestPVCOESTADST(bbTarget, source.toString(), targetAddress, portMessage, portFile)) {
-				Logger.warning("PVCOESTADST lost | Write Buffer cannot hold it");
-				return;
-			}
+		ServerSession session = optional.get();
+		ByteBuffer bbTarget = session.getWriteBuffer();
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTADST);
+		Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
+		Logger.network(NetworkLogType.WRITE, "ADDRESS : " + address);
+		Logger.network(NetworkLogType.WRITE, "PORT MESSAGE : " + portMessage);
+		Logger.network(NetworkLogType.WRITE, "PORT FILE : " + portFile);
 
-			session.updateKey();
-		} 
+		if (!ServerCommunication.addRequestPVCOESTADST(bbTarget, source.toString(), address, portMessage,
+				portFile)) {
+			Logger.warning("PVCOESTADST lost | Write Buffer cannot hold it"); // TODO : Check du type de requête
+			return;
+		}
+
+		session.updateKey();
 	}
 
 	/*
@@ -637,12 +595,12 @@ class ServerSession {
 		}
 
 		if (protocol == null) {
-			processRequestType();
-		}
-
-		if (arg == -1) {
-			Logger.warning("ARG UNSET BUFFER : " + bbRead);
-			return;
+			int code = processRequestType();
+			if (arg == -1) {
+				Logger.warning("Invalid protocol code : " + code);
+				disconnectClient();
+				return;
+			}
 		}
 
 		switch (protocol) {
@@ -665,7 +623,7 @@ class ServerSession {
 			processPVCOPORT();
 			return;
 		default:
-			Logger.error("Operation not implemented yet : " + protocol); // TEMP
+			Logger.warning("Operation not implemented yet : " + protocol); // TEMP
 			disconnectClient();
 			return;
 		}
@@ -682,13 +640,7 @@ class ServerSession {
 		// TEMP
 	}
 
-	/*
-	 * Updates the interest operations after reading or writing.
-	 */
 	int computeInterestOps() {
-		// if (!key.isValid()) {
-		// return true;
-		// }
 		int ops = 0;
 
 		if (bbWrite.position() > 0) { // There is something to write
@@ -700,6 +652,19 @@ class ServerSession {
 		}
 
 		return ops;
+	}
+
+	void updateKey() {
+		if (!key.isValid()) {
+			Logger.debug("This key is not valid anymore");
+			return;
+		}
+
+		int ops = computeInterestOps();
+		if (ops == 0) {
+			throw new AssertionError("Key is inactive"); // TEMP for debug
+		}
+		key.interestOps(ops);
 	}
 
 	void disconnectClient() {
@@ -732,16 +697,4 @@ class ServerSession {
 		}
 	}
 
-	void updateKey() {
-		if (!key.isValid()) {
-			Logger.debug("Key not valid anymore");
-			return;
-		}
-
-		int ops = computeInterestOps();
-		if (ops == 0) {
-			throw new AssertionError("Key is inactive");
-		}
-		key.interestOps(ops);
-	}
 }

@@ -11,5 +11,5 @@ public class Tasks {
 	// TODO : Visibilité minimale
 	// TODO : Vérifier qu'il n'y a pas de code mort
 	// TODO : Ecrire la javadoc
-	// TODO : Ecrire le rapport
+	// TODO : Ecrire le rapport + disclaimers (colorator)
 }

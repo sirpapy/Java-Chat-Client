@@ -1,5 +1,10 @@
 package fr.upem.matou.shared.logger;
 
+/*
+ * Inspired from :
+ * http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
+ */
+
 public class Colorator {
 	private static boolean activated = true;
 
@@ -79,7 +84,7 @@ public class Colorator {
 		System.out.println(Colorator.colorWhite("WHITE"));
 		System.out.println(Colorator.colorYellow("YELLOW"));
 	}
-	
+
 	public static void main(String[] args) {
 		printColors();
 	}

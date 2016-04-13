@@ -108,17 +108,15 @@ class ClientCommunication {
 		return request;
 	}
 
-	public static ByteBuffer encodeRequestPVCOPORT(ByteBuffer encodedUsername, InetAddress address, int portMessage,
+	public static ByteBuffer encodeRequestPVCOPORT(ByteBuffer encodedUsername, int portMessage,
 			int portFile) {
 		int length = encodedUsername.remaining();
-		byte[] addr = address.getAddress();
 
-		int capacity = Integer.BYTES + Integer.BYTES + length + Integer.BYTES + addr.length + (2 * Integer.BYTES);
+		int capacity = Integer.BYTES + Integer.BYTES + length + (2 * Integer.BYTES);
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 
 		request.putInt(NetworkProtocol.PVCOPORT.ordinal());
 		request.putInt(length).put(encodedUsername);
-		request.putInt(addr.length).put(addr); // FIXME : NON ! Le serveur l'a déjà
 		request.putInt(portMessage).putInt(portFile);
 
 		return request;
@@ -202,14 +200,13 @@ class ClientCommunication {
 		return true;
 	}
 
-	public static boolean sendRequestPVCOPORT(SocketChannel sc, String username, InetAddress address, int portMessage,
-			int portFile)
+	public static boolean sendRequestPVCOPORT(SocketChannel sc, String username, int portMessage, int portFile)
 			throws IOException {
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
 		if (!optional.isPresent()) {
 			return false;
 		}
-		ByteBuffer bb = encodeRequestPVCOPORT(optional.get(), address, portMessage, portFile);
+		ByteBuffer bb = encodeRequestPVCOPORT(optional.get(), portMessage, portFile);
 		sendRequest(sc, bb);
 		return true;
 	}
@@ -489,7 +486,7 @@ class ClientCommunication {
 		bbSizeFile.flip();
 		long totalSize = bbSizeFile.getLong();
 
-		Path path = Files.createTempFile(Paths.get("./files"),username + "_", "");
+		Path path = Files.createTempFile(Paths.get("./files"), username + "_", "");
 		try (OutputStream os = Files.newOutputStream(path, StandardOpenOption.WRITE,
 				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
 			long totalRead = 0;
@@ -502,14 +499,15 @@ class ClientCommunication {
 				}
 				bbChunk.flip();
 				byte[] chunk = bbChunk.array();
-				int read = bbChunk.remaining();				
+				int read = bbChunk.remaining();
 				totalRead += read;
 				long percent = totalRead * 100 / totalSize;
-				System.out.println("READ LENGTH : " + read + "\n\tTotal : " + totalRead + "/" + totalSize + " [" + percent + "%]");
+				System.out.println(
+						"READ LENGTH : " + read + "\n\tTotal : " + totalRead + "/" + totalSize + " [" + percent + "%]");
 				os.write(chunk, 0, read);
 			}
 		}
-		
+
 		Logger.debug("FILE FINISHED");
 		return Optional.of(path);
 	}

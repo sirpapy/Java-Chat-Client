@@ -191,7 +191,7 @@ public class ClientCore implements Closeable {
 			Logger.network(NetworkLogType.READ, "USERNAME : " + username);
 			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
 			ui.displayNewPrivateAcceptionEvent(username);
-			launchPrivateConnection(address, username); // TEMP : variable locale
+			launchPrivateConnection(username, address); // TEMP : variable locale
 
 			break;
 		}
@@ -215,7 +215,7 @@ public class ClientCore implements Closeable {
 			Logger.network(NetworkLogType.READ, "PORT MESSAGE : " + portMessage);
 			Logger.network(NetworkLogType.READ, "PORT FILE : " + portFile);
 			ui.displayNewPrivateAcceptionEvent(username);
-			launchPrivateConnection(address, username, portMessage, portFile); // TEMP : variable locale
+			launchPrivateConnection(username, address, portMessage, portFile);
 
 			break;
 		}
@@ -279,7 +279,7 @@ public class ClientCore implements Closeable {
 				Path path = optionalRequestPVFILE.get();
 				Logger.network(NetworkLogType.READ, "USERNAME : " + username);
 				Logger.network(NetworkLogType.READ, "PATH : " + path);
-				ui.displayFile(username,path);
+				ui.displayFile(username, path);
 
 				break;
 			}
@@ -306,7 +306,7 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void privateCommunicationSource(InetAddress address, String username) throws IOException {
+	private void privateCommunicationSource(String username, InetAddress addressDst) throws IOException {
 		ServerSocketChannel sscMessage = ServerSocketChannel.open();
 		ServerSocketChannel sscFile = ServerSocketChannel.open();
 		sscMessage.bind(null);
@@ -317,11 +317,11 @@ public class ClientCore implements Closeable {
 		System.out.println("MESSAGE PORT : " + portMessage);
 		System.out.println("FILE PORT : " + portFile);
 
-		ClientCommunication.sendRequestPVCOPORT(sc, username, address, portMessage, portFile);
+		ClientCommunication.sendRequestPVCOPORT(sc, username, portMessage, portFile);
 
 		new Thread(() -> {
 			try {
-				SocketChannel scMessage = acceptCommunication(sscMessage, address);
+				SocketChannel scMessage = acceptCommunication(sscMessage, addressDst);
 				Logger.debug("CONNECTED (SOURCE MESSAGE)");
 				db.addNewPrivateMessageChannel(username, scMessage);
 				privateCommunicationMessage(scMessage, username);
@@ -332,7 +332,7 @@ public class ClientCore implements Closeable {
 
 		new Thread(() -> {
 			try {
-				SocketChannel scFile = acceptCommunication(sscFile, address);
+				SocketChannel scFile = acceptCommunication(sscFile, addressDst);
 				Logger.debug("CONNECTED (SOURCE FILE)");
 				db.addNewPrivateFileChannel(username, scFile);
 				privateCommunicationFile(scFile, username);
@@ -342,10 +342,10 @@ public class ClientCore implements Closeable {
 		}).start();
 	}
 
-	private void privateCommunicationDestination(InetAddress address, String username, int portMessage, int portFile)
+	private void privateCommunicationDestination(String username, InetAddress addressSrc, int portMessage, int portFile)
 			throws IOException {
-		SocketChannel scMessage = SocketChannel.open(new InetSocketAddress(address, portMessage));
-		SocketChannel scFile = SocketChannel.open(new InetSocketAddress(address, portFile));
+		SocketChannel scMessage = SocketChannel.open(new InetSocketAddress(addressSrc, portMessage));
+		SocketChannel scFile = SocketChannel.open(new InetSocketAddress(addressSrc, portFile));
 
 		System.out.println("MESSAGE PORT : " + portMessage);
 		System.out.println("FILE PORT : " + portFile);
@@ -371,20 +371,20 @@ public class ClientCore implements Closeable {
 		}).start();
 	}
 
-	private void launchPrivateConnection(InetAddress address, String username) {
+	private void launchPrivateConnection(String username, InetAddress addressDst) {
 		new Thread(() -> {
 			try {
-				privateCommunicationSource(address, username);
+				privateCommunicationSource(username, addressDst);
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
 		}).start();
 	}
 
-	private void launchPrivateConnection(InetAddress address, String username, int portMessage, int portFile) {
+	private void launchPrivateConnection(String username, InetAddress addressSrc, int portMessage, int portFile) {
 		new Thread(() -> {
 			try {
-				privateCommunicationDestination(address, username, portMessage, portFile);
+				privateCommunicationDestination(username, addressSrc, portMessage, portFile);
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
