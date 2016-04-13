@@ -231,6 +231,7 @@ class ClientCommunication {
 		ByteBuffer bb = encodeRequestPVFILE(totalSize);
 		sendRequest(sc, bb);
 
+		// FIXME : Fichier inexistant
 		try (InputStream is = Files.newInputStream(path, StandardOpenOption.READ)) {
 			byte[] chunk = new byte[CHUNK_SIZE];
 			int read = 0;

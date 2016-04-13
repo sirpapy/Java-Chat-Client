@@ -68,7 +68,10 @@ class ClientDataBase {
 
 	@SuppressWarnings("resource")
 	boolean sendPrivateMessage(String username, String message) throws IOException {
-		SocketChannel sc = privateMessages.get(username); // FIXME : NPE si la personne n'a pas ouvert de privé
+		SocketChannel sc = privateMessages.get(username);
+		if (sc == null) {
+			return false;
+		}
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVMSG);
 		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + message);
 		return ClientCommunication.sendRequestPVMSG(sc, message);
@@ -76,7 +79,10 @@ class ClientDataBase {
 
 	@SuppressWarnings("resource")
 	boolean sendPrivateFile(String username, Path path) {
-		SocketChannel sc = privateFiles.get(username); // FIXME : NPE si la personne n'a pas ouvert de privé
+		SocketChannel sc = privateFiles.get(username);
+		if (sc == null) {
+			return false;
+		}
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVFILE);
 		Logger.network(NetworkLogType.WRITE, "PATH : " + path);
 		new Thread(() -> {
@@ -87,6 +93,29 @@ class ClientDataBase {
 			}
 		}).start();
 		return true;
+	}
+
+	boolean closePrivateConnection(String username) {
+		SocketChannel scMessage = privateMessages.remove(username);
+		SocketChannel scFile = privateFiles.remove(username);
+		boolean closed = (scMessage != null) || (scFile != null);
+		if (scMessage != null) {
+			try {
+				scMessage.close();
+			} catch (IOException e) {
+				Logger.exception(e);
+			}
+		}
+		if (scFile != null) {
+			try {
+				scFile.close();
+			} catch (IOException e) {
+				Logger.exception(e);
+			}
+		}
+		return closed;
+		
+		// FIXME : Si la connexion est fermée, l'autre peut encore écrire une fois avant de manger une IOException
 	}
 
 }

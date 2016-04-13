@@ -31,28 +31,43 @@ class ShellCommand {
 		switch (command) {
 
 		case "pv": {
+			if(tokens.length < 3) {
+				return Optional.empty();
+			}
 			String username = tokens[1];
 			String message = Arrays.stream(tokens).skip(2).collect(Collectors.joining(" "));
 			return Optional.of(new ClientEventSendPrivateMessage(username, message));
 		}
 
 		case "file": {
+			if(tokens.length != 3) {
+				return Optional.empty();
+			}
 			String username = tokens[1];
 			Path path = Paths.get(tokens[2]);
 			return Optional.of(new ClientEventSendPrivateFile(username, path));
 		}
 
 		case "open": {
+			if(tokens.length != 2) {
+				return Optional.empty();
+			}
 			String username = tokens[1];
 			return Optional.of(new ClientEventOpenPrivate(username));
 		}
 
 		case "close": {
+			if(tokens.length != 2) {
+				return Optional.empty();
+			}
 			String username = tokens[1];
 			return Optional.of(new ClientEventClosePrivate(username));
 		}
 
 		case "accept": {
+			if(tokens.length != 2) {
+				return Optional.empty();
+			}
 			String username = tokens[1];
 			return Optional.of(new ClientEventAcceptPrivate(username));
 		}

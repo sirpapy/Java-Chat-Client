@@ -17,6 +17,7 @@ public class ShellInterface implements UserInterface {
 	private final InputStream input = System.in;
 	private final Scanner scanner = new Scanner(input, INPUT_CHARSET);
 	private final PrintStream output = System.out;
+	private final PrintStream error = System.err;
 
 	private Optional<String> readLine() {
 		if (scanner.hasNextLine()) {
@@ -95,16 +96,16 @@ public class ShellInterface implements UserInterface {
 
 	@Override
 	public void warnInvalidUsername(String username) {
-		output.println("This username is not valid");
+		error.println("This username is not valid");
 	}
 
 	@Override
 	public void warnInvalidMessage(ClientEvent event) {
-		output.println("This message is not valid");
+		error.println("This message is not valid");
 	}
 
 	private void warnInvalidCommand() {
-		output.println("Invalid command");
+		error.println("Invalid command");
 	}
 
 }

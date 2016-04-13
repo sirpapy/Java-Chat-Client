@@ -374,8 +374,8 @@ class ServerSession {
 		resetReadState();
 	}
 
-	// FIXME : target == source
 	private void answerPVCOREQNOTIF(String targetName) {
+		// TEMP : target == source
 		Username source = db.usernameOf(sc).get();
 		Username target = new Username(targetName);
 		Optional<ServerSession> optional = db.sessionOf(target);
@@ -551,32 +551,27 @@ class ServerSession {
 		resetReadState();
 	}
 
-	private void answerPVCOESTADST(String targetName, int portMessage, int portFile) {
-		Username source = db.usernameOf(sc).get();
-		Username target = new Username(targetName);
-		boolean valid = db.removePrivateRequest(target, source); // TEMP : Username en argument
-		Logger.debug("PRIVATE ESTABLISHMENT VALIDITY : " + valid); // FIXME : False
+	private void answerPVCOESTADST(String sourceName, int portMessage, int portFile) {
+		Username target = db.usernameOf(sc).get();
+		Username source = new Username(sourceName);
+		boolean valid = db.removePrivateRequest(source, target);
+		Logger.debug("PRIVATE ESTABLISHMENT VALIDITY : " + valid);
 
 		if (!valid) {
+			Logger.warning("Invalid private connection establishment of " + source + " to " + target);
 			disconnectClient();
 			return;
 		}
 
-		Optional<ServerSession> optional = db.sessionOf(target);
-		if (!optional.isPresent()) { // XXX : Impossible car checked
-			Logger.debug("Target " + target + " is not connected");
-			return;
-		}
-
-		ServerSession session = optional.get();
+		ServerSession session = db.sessionOf(source).get(); // Checked by removePrivateRequest
 		ByteBuffer bbTarget = session.getWriteBuffer();
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTADST);
-		Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
+		Logger.network(NetworkLogType.WRITE, "USERNAME : " + target);
 		Logger.network(NetworkLogType.WRITE, "ADDRESS : " + address);
 		Logger.network(NetworkLogType.WRITE, "PORT MESSAGE : " + portMessage);
 		Logger.network(NetworkLogType.WRITE, "PORT FILE : " + portFile);
 
-		if (!ServerCommunication.addRequestPVCOESTADST(bbTarget, source.toString(), address, portMessage,
+		if (!ServerCommunication.addRequestPVCOESTADST(bbTarget, target.toString(), address, portMessage,
 				portFile)) {
 			Logger.warning("PVCOESTADST lost | Write Buffer cannot hold it"); // TODO : Check du type de requête
 			return;

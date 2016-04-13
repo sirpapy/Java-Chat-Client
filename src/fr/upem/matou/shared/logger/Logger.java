@@ -91,6 +91,7 @@ public class Logger {
 
 	// TODO : Traçage des exceptions avec cette méthode
 	public static void exception(Exception exception) {
+		// TODO : Ne pas tracer les AsynchronousCloseException
 		if (LOG_EXCEPTION) {
 			exception.printStackTrace(STREAM_ERR);
 		}
