@@ -1,5 +1,7 @@
 package fr.upem.matou.client.ui;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Path;
@@ -54,6 +56,8 @@ public class ShellInterface implements UserInterface {
 
 	@Override
 	public void displayMessage(Message message) {
+		requireNonNull(message);
+		
 		boolean isPrivate = message.isPrivate();
 		String username = message.getUsername();
 		String content = message.getContent();
@@ -72,26 +76,32 @@ public class ShellInterface implements UserInterface {
 
 	@Override
 	public void displayNewConnectionEvent(String username) {
+		requireNonNull(username);
 		output.println("<" + username + " joins the chat>");
 	}
 
 	@Override
 	public void displayNewDisconnectionEvent(String username) {
+		requireNonNull(username);
 		output.println("<" + username + " left the chat>");
 	}
 
 	@Override
 	public void displayNewPrivateRequestEvent(String username) {
+		requireNonNull(username);
 		output.println("<" + username + " asks for a private connection>");
 	}
 
 	@Override
 	public void displayNewPrivateAcceptionEvent(String username) {
+		requireNonNull(username);
 		output.println("<" + username + " accepts the private connection>");
 	}
 
 	@Override
 	public void displayFile(String username, Path path) {
+		requireNonNull(username);
+		requireNonNull(path);
 		output.println("<" + username + " sends a file : " + path + ">");
 	}
 

@@ -1,5 +1,7 @@
 package fr.upem.matou.shared.network;
 
+import static java.util.Objects.requireNonNull;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Optional;
@@ -29,19 +31,27 @@ public class NetworkCommunication {
 	}
 
 	public static boolean checkUsernameValidity(String username) {
+		if (username == null) {
+			return false;
+		}
 		return username.chars().allMatch(NetworkCommunication::isValidUsernameCharacter);
 	}
 
 	public static boolean checkMessageValidity(String message) {
+		if (message == null) {
+			return false;
+		}
 		return message.chars().allMatch(NetworkCommunication::isValidMessageCharacter);
 	}
 
 	public static boolean checkEncodedUsernameValidity(ByteBuffer username) {
+		requireNonNull(username);
 		int size = username.remaining();
 		return size <= USERNAME_MAX_SIZE && size > 0;
 	}
 
 	public static boolean checkEncodedMessageValidity(ByteBuffer message) {
+		requireNonNull(message);
 		int size = message.remaining();
 		return size <= MESSAGE_MAX_SIZE && size > 0;
 	}
@@ -51,6 +61,7 @@ public class NetworkCommunication {
 	}
 
 	public static Optional<ByteBuffer> encodeUsername(String username) {
+		requireNonNull(username);
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(username);
 		Logger.debug("ENCODED USERNAME SIZE : " + encoded.remaining());
 		if (!checkEncodedUsernameValidity(encoded)) {
@@ -60,6 +71,7 @@ public class NetworkCommunication {
 	}
 
 	public static Optional<ByteBuffer> encodeMessage(String message) {
+		requireNonNull(message);
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(message);
 		Logger.debug("ENCODED MESSAGE SIZE : " + encoded.remaining());
 		if (!checkEncodedMessageValidity(encoded)) {
@@ -75,7 +87,7 @@ public class NetworkCommunication {
 	public static int getMessageMaxSize() {
 		return MESSAGE_MAX_SIZE;
 	}
-	
+
 	public static int getFileChunkSize() {
 		return FILE_CHUNK_SIZE;
 	}

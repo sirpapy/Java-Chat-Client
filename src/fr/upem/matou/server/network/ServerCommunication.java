@@ -139,7 +139,7 @@ class ServerCommunication {
 		return true;
 	}
 
-	public static boolean addRequestPVCOESTADST(ByteBuffer bbWrite, String username, InetAddress address,
+	static boolean addRequestPVCOESTADST(ByteBuffer bbWrite, String username, InetAddress address,
 			int portMessage, int portFile) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 		byte[] addr = address.getAddress();

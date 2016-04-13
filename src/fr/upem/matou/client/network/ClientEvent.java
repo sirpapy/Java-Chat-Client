@@ -1,5 +1,7 @@
 package fr.upem.matou.client.network;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -16,11 +18,13 @@ public interface ClientEvent {
 		private final String message;
 
 		public ClientEventSendMessage(String message) {
+			requireNonNull(message);
 			this.message = message;
 		}
 
 		@Override
 		public boolean execute(ClientSession session) throws IOException {
+			requireNonNull(session);
 			return session.sendMessage(message);
 		}
 	}
@@ -29,11 +33,13 @@ public interface ClientEvent {
 		private final Username username;
 
 		public ClientEventClosePrivate(String username) {
+			requireNonNull(username);
 			this.username = new Username(username);
 		}
 
 		@Override
 		public boolean execute(ClientSession session) throws IOException {
+			requireNonNull(session);
 			return session.closePrivateConnection(username);
 		}
 
@@ -43,11 +49,13 @@ public interface ClientEvent {
 		private final Username username;
 
 		public ClientEventOpenPrivate(String username) {
+			requireNonNull(username);
 			this.username = new Username(username);
 		}
 
 		@Override
 		public boolean execute(ClientSession session) throws IOException {
+			requireNonNull(session);
 			return session.openPrivateConnection(username);
 		}
 
@@ -57,11 +65,13 @@ public interface ClientEvent {
 		private final Username username;
 
 		public ClientEventAcceptPrivate(String username) {
+			requireNonNull(username);
 			this.username = new Username(username);
 		}
 
 		@Override
 		public boolean execute(ClientSession session) throws IOException {
+			requireNonNull(session);
 			return session.acceptPrivateConnection(username);
 		}
 	}
@@ -71,12 +81,15 @@ public interface ClientEvent {
 		private final Path path;
 
 		public ClientEventSendPrivateFile(String username, Path path) {
+			requireNonNull(username);
+			requireNonNull(path);
 			this.username = new Username(username);
 			this.path = path;
 		}
 
 		@Override
 		public boolean execute(ClientSession session) throws IOException {
+			requireNonNull(session);
 			return session.sendPrivateFile(username, path);
 		}
 
@@ -87,12 +100,15 @@ public interface ClientEvent {
 		private final String message;
 
 		public ClientEventSendPrivateMessage(String username, String message) {
+			requireNonNull(username);
+			requireNonNull(message);
 			this.username = new Username(username);
 			this.message = message;
 		}
 
 		@Override
 		public boolean execute(ClientSession session) throws IOException {
+			requireNonNull(session);
 			return session.sendPrivateMessage(username, message);
 		}
 

@@ -1,5 +1,7 @@
 package fr.upem.matou.client.network;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -51,11 +53,11 @@ public class ClientCore implements Closeable {
 
 	private void usernameSender() throws IOException {
 		while (true) {
-			Optional<String> optionalInput = ui.getUsername();
-			if (!optionalInput.isPresent()) {
+			Optional<String> optional = ui.getUsername();
+			if (!optional.isPresent()) {
 				throw new IOException("User exited"); // TEMP
 			}
-			String username = optionalInput.get();
+			String username = optional.get();
 			if (!NetworkCommunication.checkUsernameValidity(username)) {
 				ui.warnInvalidUsername(username);
 				continue;
@@ -79,25 +81,26 @@ public class ClientCore implements Closeable {
 		NetworkProtocol protocol = optionalRequestType.get();
 		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 		switch (protocol) {
-		case CORES:
-			Optional<Boolean> optionalRequestCORES = ClientCommunication.receiveRequestCORES(sc);
-			if (!optionalRequestCORES.isPresent()) {
+		case CORES: {
+			Optional<Boolean> optionalCORES = ClientCommunication.receiveRequestCORES(sc);
+			if (!optionalCORES.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
-			boolean acceptation = optionalRequestCORES.get();
+			boolean acceptation = optionalCORES.get();
 			Logger.network(NetworkLogType.READ, "ACCEPTATION : " + acceptation);
 			return acceptation;
+		}
 		default:
 			throw new AssertionError("Unexpected protocol request : " + protocol);
 		}
 	}
 
 	private boolean messageSender() throws IOException {
-		Optional<ClientEvent> optionalEvent = ui.getEvent();
-		if (!optionalEvent.isPresent()) {
+		Optional<ClientEvent> optional = ui.getEvent();
+		if (!optional.isPresent()) {
 			return true;
 		}
-		ClientEvent event = optionalEvent.get();
+		ClientEvent event = optional.get();
 
 		if (!event.execute(session)) {
 			ui.warnInvalidMessage(event);
@@ -116,80 +119,78 @@ public class ClientCore implements Closeable {
 
 		switch (protocol) {
 
-		// FIXME : Renommer les optional
-
 		case MSGBC: {
 			setChrono(true);
-
-			Optional<Message> optionalRequestMSGBC = ClientCommunication.receiveRequestMSGBC(sc);
+			Optional<Message> optionalMSGBC = ClientCommunication.receiveRequestMSGBC(sc);
 			setChrono(false);
 
-			if (!optionalRequestMSGBC.isPresent()) {
+			if (!optionalMSGBC.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
-			Message receivedMessage = optionalRequestMSGBC.get();
-			Logger.network(NetworkLogType.READ, "USERNAME : " + receivedMessage.getUsername());
-			Logger.network(NetworkLogType.READ, "MESSAGE : " + receivedMessage.getContent());
-			ui.displayMessage(receivedMessage);
+			Message message = optionalMSGBC.get();
+			Logger.network(NetworkLogType.READ, "USERNAME : " + message.getUsername());
+			Logger.network(NetworkLogType.READ, "MESSAGE : " + message.getContent());
+			ui.displayMessage(message);
 
 			break;
 		}
 
 		case CONOTIF: {
 			setChrono(true);
-			Optional<String> optionalRequestCONOTIF = ClientCommunication.receiveRequestCONOTIF(sc);
+			Optional<String> optionalCONOTIF = ClientCommunication.receiveRequestCONOTIF(sc);
 			setChrono(false);
 
-			if (!optionalRequestCONOTIF.isPresent()) {
+			if (!optionalCONOTIF.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
-			String receivedConnected = optionalRequestCONOTIF.get();
-			Logger.network(NetworkLogType.READ, "USERNAME : " + receivedConnected);
-			ui.displayNewConnectionEvent(receivedConnected);
+			String usernameConnected = optionalCONOTIF.get();
+			Logger.network(NetworkLogType.READ, "USERNAME : " + usernameConnected);
+			ui.displayNewConnectionEvent(usernameConnected);
 
 			break;
 		}
 
 		case DISCONOTIF: {
 			setChrono(true);
-			Optional<String> optionalRequestDISCONOTIF = ClientCommunication.receiveRequestDISCONOTIF(sc);
+			Optional<String> optionalDISCONOTIF = ClientCommunication.receiveRequestDISCONOTIF(sc);
 			setChrono(false);
-			if (!optionalRequestDISCONOTIF.isPresent()) {
+
+			if (!optionalDISCONOTIF.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
-			String receivedDisconnected = optionalRequestDISCONOTIF.get();
-			Logger.network(NetworkLogType.READ, "USERNAME : " + receivedDisconnected);
-			ui.displayNewDisconnectionEvent(receivedDisconnected);
+			String usernameDisconnected = optionalDISCONOTIF.get();
+			Logger.network(NetworkLogType.READ, "USERNAME : " + usernameDisconnected);
+			ui.displayNewDisconnectionEvent(usernameDisconnected);
 
 			break;
 		}
 
 		case PVCOREQNOTIF: {
 			setChrono(true);
-			Optional<String> optionalRequestPVCOREQNOTIF = ClientCommunication.receiveRequestPVCOREQNOTIF(sc);
+			Optional<String> optionalPVCOREQNOTIF = ClientCommunication.receiveRequestPVCOREQNOTIF(sc);
 			setChrono(false);
 
-			if (!optionalRequestPVCOREQNOTIF.isPresent()) {
+			if (!optionalPVCOREQNOTIF.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
-			String receivedConnectionRequest = optionalRequestPVCOREQNOTIF.get();
-			Logger.network(NetworkLogType.READ, "USERNAME : " + receivedConnectionRequest);
-			ui.displayNewPrivateRequestEvent(receivedConnectionRequest);
+			String usernameRequester = optionalPVCOREQNOTIF.get();
+			Logger.network(NetworkLogType.READ, "USERNAME : " + usernameRequester);
+			ui.displayNewPrivateRequestEvent(usernameRequester);
 
 			break;
 		}
 
 		case PVCOESTASRC: {
 			setChrono(true);
-			Optional<SourceConnection> optionalRequestPVCOESTASRC = ClientCommunication.receiveRequestPVCOESTASRC(sc);
+			Optional<SourceConnection> optionalPVCOESTASRC = ClientCommunication.receiveRequestPVCOESTASRC(sc);
 			setChrono(false);
 
-			if (!optionalRequestPVCOESTASRC.isPresent()) {
+			if (!optionalPVCOESTASRC.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
-			SourceConnection receivedConnectionRequest = optionalRequestPVCOESTASRC.get();
-			Username username = receivedConnectionRequest.getUsername();
-			InetAddress address = receivedConnectionRequest.getAddress();
+			SourceConnection sourceInfo = optionalPVCOESTASRC.get();
+			Username username = sourceInfo.getUsername();
+			InetAddress address = sourceInfo.getAddress();
 			Logger.network(NetworkLogType.READ, "USERNAME : " + username);
 			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
 			ui.displayNewPrivateAcceptionEvent(username.toString());
@@ -200,18 +201,17 @@ public class ClientCore implements Closeable {
 
 		case PVCOESTADST: {
 			setChrono(true);
-			Optional<DestinationConnection> optionalRequestPVCOESTADST = ClientCommunication
-					.receiveRequestPVCOESTADST(sc);
+			Optional<DestinationConnection> optionalPVCOESTADST = ClientCommunication.receiveRequestPVCOESTADST(sc);
 			setChrono(false);
 
-			if (!optionalRequestPVCOESTADST.isPresent()) {
+			if (!optionalPVCOESTADST.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
 			}
-			DestinationConnection receivedConnectionRequest = optionalRequestPVCOESTADST.get();
-			Username username = receivedConnectionRequest.getUsername();
-			InetAddress address = receivedConnectionRequest.getAddress();
-			int portMessage = receivedConnectionRequest.getPortMessage();
-			int portFile = receivedConnectionRequest.getPortFile();
+			DestinationConnection destinationInfo = optionalPVCOESTADST.get();
+			Username username = destinationInfo.getUsername();
+			InetAddress address = destinationInfo.getAddress();
+			int portMessage = destinationInfo.getPortMessage();
+			int portFile = destinationInfo.getPortFile();
 			Logger.network(NetworkLogType.READ, "USERNAME : " + username);
 			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
 			Logger.network(NetworkLogType.READ, "PORT MESSAGE : " + portMessage);
@@ -241,15 +241,16 @@ public class ClientCore implements Closeable {
 			switch (protocol) {
 
 			case PVMSG: {
-				Optional<Message> optionalRequestPVMSG = ClientCommunication.receiveRequestPVMSG(pv, username.toString());
+				Optional<Message> optionalPVMSG = ClientCommunication.receiveRequestPVMSG(pv,
+						username.toString());
 
-				if (!optionalRequestPVMSG.isPresent()) {
+				if (!optionalPVMSG.isPresent()) {
 					throw new IOException("Protocol violation : " + protocol);
 				}
-				Message receivedMessage = optionalRequestPVMSG.get();
-				Logger.network(NetworkLogType.READ, "USERNAME : " + receivedMessage.getUsername());
-				Logger.network(NetworkLogType.READ, "MESSAGE : " + receivedMessage.getContent());
-				ui.displayMessage(receivedMessage);
+				Message message = optionalPVMSG.get();
+				Logger.network(NetworkLogType.READ, "USERNAME : " + message.getUsername());
+				Logger.network(NetworkLogType.READ, "MESSAGE : " + message.getContent());
+				ui.displayMessage(message);
 
 				break;
 			}
@@ -273,12 +274,12 @@ public class ClientCore implements Closeable {
 			switch (protocol) {
 
 			case PVFILE: {
-				Optional<Path> optionalRequestPVFILE = ClientCommunication.receiveRequestPVFILE(pv, username.toString());
+				Optional<Path> optionalPVFILE = ClientCommunication.receiveRequestPVFILE(pv, username.toString());
 
-				if (!optionalRequestPVFILE.isPresent()) {
+				if (!optionalPVFILE.isPresent()) {
 					throw new IOException("Protocol violation : " + protocol);
 				}
-				Path path = optionalRequestPVFILE.get();
+				Path path = optionalPVFILE.get();
 				Logger.network(NetworkLogType.READ, "USERNAME : " + username);
 				Logger.network(NetworkLogType.READ, "PATH : " + path);
 				ui.displayFile(username.toString(), path);
@@ -307,8 +308,7 @@ public class ClientCore implements Closeable {
 				Logger.debug("CONNECTION ACCEPTED");
 				return pv;
 			}
-		}
-
+		} // close the ssc correctly
 	}
 
 	private void privateCommunicationSource(Username username, InetAddress addressDst) throws IOException {
@@ -347,8 +347,7 @@ public class ClientCore implements Closeable {
 	}
 
 	private void privateCommunicationDestination(Username username, InetAddress addressSrc, int portMessage,
-			int portFile)
-			throws IOException {
+			int portFile) throws IOException {
 		SocketChannel scMessage = SocketChannel.open(new InetSocketAddress(addressSrc, portMessage));
 		SocketChannel scFile = SocketChannel.open(new InetSocketAddress(addressSrc, portFile));
 
@@ -398,24 +397,24 @@ public class ClientCore implements Closeable {
 
 	private void cleaner() throws InterruptedException {
 		long delay = 0;
-		boolean testeur;
-		testeur = getChrono();
+		boolean isReceiving = getChrono();
 
-		if (testeur) {
+		if (isReceiving) {
 			long begin = System.currentTimeMillis();
-			while (testeur) {
+			while (isReceiving) {
 				delay = System.currentTimeMillis() - begin;
 				if ((delay) > TIMEOUT) {
-					Logger.debug("CLEANER ACTIVATION : delay " + delay + " > " + TIMEOUT);
+					Logger.warning("CLEANER ACTIVATION : delay " + delay + " > " + TIMEOUT);
 					setChrono(false);
 					try {
-						this.sc.close();
+						sc.close();
 						break;
 					} catch (IOException e) {
 						Logger.exception(e);
+						return;
 					}
 				}
-				testeur = getChrono();
+				isReceiving = getChrono();
 			}
 
 		} else {

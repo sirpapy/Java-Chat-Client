@@ -1,5 +1,7 @@
 package fr.upem.matou.client.network;
 
+import static java.util.Objects.requireNonNull;
+
 import java.net.InetAddress;
 
 import fr.upem.matou.shared.network.Username;
@@ -10,7 +12,9 @@ class DestinationConnection {
 	private final int portMessage;
 	private final int portFile;
 
-	public DestinationConnection(String username, InetAddress address, int portMessage, int portFile) {
+	DestinationConnection(String username, InetAddress address, int portMessage, int portFile) {
+		requireNonNull(username);
+		requireNonNull(address);
 		this.username = new Username(username);
 		this.address = address;
 		this.portMessage = portMessage;

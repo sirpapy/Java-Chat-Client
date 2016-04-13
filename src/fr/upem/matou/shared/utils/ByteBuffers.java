@@ -1,5 +1,7 @@
 package fr.upem.matou.shared.utils;
 
+import static java.util.Objects.requireNonNull;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ public class ByteBuffers {
 	 * @return The copied buffer (in write mode)
 	 */
 	public static ByteBuffer copy(ByteBuffer src) {
+		requireNonNull(src);
 		src.flip();
 		ByteBuffer dst = ByteBuffer.allocate(src.capacity());
 		dst.put(src);
@@ -44,6 +47,8 @@ public class ByteBuffers {
 	 * @return true if the operation succeeded, false otherwise (because of insufficient space in target buffer).
 	 */
 	public static boolean append(ByteBuffer target, ByteBuffer source) {
+		requireNonNull(target);
+		requireNonNull(source);
 		source.flip();
 		try {
 			if (source.remaining() > target.remaining()) {
@@ -69,6 +74,8 @@ public class ByteBuffers {
 	 * @return The resulting buffer (in write mode)
 	 */
 	public static ByteBuffer merge(ByteBuffer bb1, ByteBuffer bb2) {
+		requireNonNull(bb1);
+		requireNonNull(bb2);
 		ByteBuffer result = ByteBuffer.allocate(bb1.capacity() + bb2.capacity());
 		append(result, bb1);
 		append(result, bb2);
@@ -84,6 +91,7 @@ public class ByteBuffers {
 	 * @return The string representation of bytes in this buffer.
 	 */
 	public static String toByteString(ByteBuffer bb) {
+		requireNonNull(bb);
 		bb.flip();
 		ArrayList<Byte> elements = new ArrayList<>();
 		while (bb.hasRemaining()) {
@@ -105,6 +113,7 @@ public class ByteBuffers {
 	 * @return The string representation of bytes in this buffer.
 	 */
 	public static String toBinaryString(ByteBuffer bb) {
+		requireNonNull(bb);
 		bb.flip();
 		ArrayList<Byte> elements = new ArrayList<>();
 		while (bb.hasRemaining()) {

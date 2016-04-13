@@ -1,5 +1,7 @@
 package fr.upem.matou.client.network;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * This class represents a chat message.
  */
@@ -31,8 +33,8 @@ public class Message {
 	 *            true if the message is private, false otherwise.
 	 */
 	public Message(String username, String content, boolean isPrivate) {
-		this.username = username;
-		this.content = content;
+		this.username = requireNonNull(username);
+		this.content = requireNonNull(content);
 		this.isPrivate = isPrivate;
 	}
 
@@ -68,8 +70,7 @@ public class Message {
 		String string;
 
 		if (isPrivate) {
-			string = "#" + username + "#";
-
+			string = "{" + username + "}";
 		} else {
 			string = "<" + username + ">";
 		}

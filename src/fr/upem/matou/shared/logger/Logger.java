@@ -1,6 +1,7 @@
 package fr.upem.matou.shared.logger;
 
 import static fr.upem.matou.shared.logger.Colorator.*;
+import static java.util.Objects.requireNonNull;
 
 import java.io.PrintStream;
 
@@ -34,10 +35,12 @@ public class Logger {
 	 */
 
 	public static void attachOutput(PrintStream out) {
+		requireNonNull(out);
 		STREAM_OUT = out;
 	}
 
 	public static void attachError(PrintStream err) {
+		requireNonNull(err);
 		STREAM_ERR = err;
 	}
 

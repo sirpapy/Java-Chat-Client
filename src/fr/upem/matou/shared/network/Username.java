@@ -1,10 +1,12 @@
 package fr.upem.matou.shared.network;
 
+import java.util.Objects;
+
 public class Username {
 	private final String name;
 
 	public Username(String name) {
-		this.name = name;
+		this.name = Objects.requireNonNull(name);
 	}
 
 	@Override
