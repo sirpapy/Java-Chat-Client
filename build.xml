@@ -7,6 +7,7 @@
 	<property name="dir.classes" value="classes" />
 	<property name="dir.libraries" value="libs" />
 	<property name="dir.documentation" value="docs/api" />
+	<property name="dir.files" value="files/" />
 	<property name="file.client.jar" value="client.jar" />
 	<property name="file.server.jar" value="server.jar" />
 	<property name="class.client.main" value="fr.upem.matou.client.ClientMatou" />
@@ -39,6 +40,7 @@
 	<target name="init" description="Initialize the build">
 		<mkdir dir="${dir.classes}" />
 		<mkdir dir="${dir.documentation}" />
+		<mkdir dir="${dir.files}" />
 	</target>
 
 	<!-- Cleaning -->

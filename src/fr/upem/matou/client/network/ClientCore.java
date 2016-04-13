@@ -27,14 +27,14 @@ public class ClientCore implements Closeable {
 
 	private final Object monitor = new Object();
 	private final SocketChannel sc;
-	private final ClientDataBase db;
+	private final ClientSession session;
 	private final UserInterface ui = new ShellInterface();
 	private boolean isReceiverActivated = false;
 
 	public ClientCore(String hostname, int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(hostname, port);
 		sc = SocketChannel.open(address);
-		db = new ClientDataBase(sc);
+		session = new ClientSession(sc);
 	}
 
 	private void setChrono(boolean isActivated) {
@@ -99,7 +99,7 @@ public class ClientCore implements Closeable {
 		}
 		ClientEvent event = optionalEvent.get();
 
-		if (!event.execute(db)) {
+		if (!event.execute(session)) {
 			ui.warnInvalidMessage(event);
 			return false;
 		}
@@ -292,18 +292,21 @@ public class ClientCore implements Closeable {
 	}
 
 	private static SocketChannel acceptCommunication(ServerSocketChannel ssc, InetAddress address) throws IOException {
-		SocketChannel pv;
-		while (true) {
-			pv = ssc.accept();
-			InetAddress connected = ((InetSocketAddress) pv.getRemoteAddress()).getAddress();
-			if (!address.equals(connected)) {
-				Logger.debug("CONNECTION HACK !!!");
-				// TODO : close
-				continue;
+		try (ServerSocketChannel listening = ssc) {
+			SocketChannel pv;
+			while (true) {
+				pv = ssc.accept();
+				InetAddress connected = ((InetSocketAddress) pv.getRemoteAddress()).getAddress();
+				if (!address.equals(connected)) {
+					Logger.debug("CONNECTION HACK !!!");
+					pv.close();
+					continue;
+				}
+				Logger.debug("CONNECTION ACCEPTED");
+				return pv;
 			}
-			Logger.debug("CONNECTION ACCEPTED");
-			return pv;
 		}
+		
 	}
 
 	private void privateCommunicationSource(String username, InetAddress addressDst) throws IOException {
@@ -320,10 +323,9 @@ public class ClientCore implements Closeable {
 		ClientCommunication.sendRequestPVCOPORT(sc, username, portMessage, portFile);
 
 		new Thread(() -> {
-			try {
-				SocketChannel scMessage = acceptCommunication(sscMessage, addressDst);
+			try (SocketChannel scMessage = acceptCommunication(sscMessage, addressDst)) {
 				Logger.debug("CONNECTED (SOURCE MESSAGE)");
-				db.addNewPrivateMessageChannel(username, scMessage);
+				session.addNewPrivateMessageChannel(username, scMessage);
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
 				Logger.exception(e);
@@ -331,15 +333,15 @@ public class ClientCore implements Closeable {
 		}).start();
 
 		new Thread(() -> {
-			try {
-				SocketChannel scFile = acceptCommunication(sscFile, addressDst);
+			try (SocketChannel scFile = acceptCommunication(sscFile, addressDst)) {
 				Logger.debug("CONNECTED (SOURCE FILE)");
-				db.addNewPrivateFileChannel(username, scFile);
+				session.addNewPrivateFileChannel(username, scFile);
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
 		}).start();
+
 	}
 
 	private void privateCommunicationDestination(String username, InetAddress addressSrc, int portMessage, int portFile)
@@ -354,7 +356,7 @@ public class ClientCore implements Closeable {
 
 		new Thread(() -> {
 			try {
-				db.addNewPrivateMessageChannel(username, scMessage);
+				session.addNewPrivateMessageChannel(username, scMessage);
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
 				Logger.exception(e);
@@ -363,7 +365,7 @@ public class ClientCore implements Closeable {
 
 		new Thread(() -> {
 			try {
-				db.addNewPrivateFileChannel(username, scFile);
+				session.addNewPrivateFileChannel(username, scFile);
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
 				Logger.exception(e);

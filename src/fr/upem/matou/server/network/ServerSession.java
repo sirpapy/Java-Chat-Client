@@ -573,7 +573,7 @@ class ServerSession {
 
 		if (!ServerCommunication.addRequestPVCOESTADST(bbTarget, target.toString(), address, portMessage,
 				portFile)) {
-			Logger.warning("PVCOESTADST lost | Write Buffer cannot hold it"); // TODO : Check du type de requête
+			Logger.warning("PVCOESTADST lost | Write Buffer cannot hold it");
 			return;
 		}
 

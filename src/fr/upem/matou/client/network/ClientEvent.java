@@ -18,8 +18,8 @@ public interface ClientEvent {
 		}
 
 		@Override
-		public boolean execute(ClientDataBase db) throws IOException {
-			return db.sendMessage(message);
+		public boolean execute(ClientSession session) throws IOException {
+			return session.sendMessage(message);
 		}
 	}
 
@@ -31,8 +31,8 @@ public interface ClientEvent {
 		}
 
 		@Override
-		public boolean execute(ClientDataBase db) throws IOException {
-			return db.closePrivateConnection(username);
+		public boolean execute(ClientSession session) throws IOException {
+			return session.closePrivateConnection(username);
 		}
 
 	}
@@ -45,8 +45,8 @@ public interface ClientEvent {
 		}
 
 		@Override
-		public boolean execute(ClientDataBase db) throws IOException {
-			return db.openPrivateConnection(username);
+		public boolean execute(ClientSession session) throws IOException {
+			return session.openPrivateConnection(username);
 		}
 
 	}
@@ -59,8 +59,8 @@ public interface ClientEvent {
 		}
 
 		@Override
-		public boolean execute(ClientDataBase db) throws IOException {
-			return db.acceptPrivateConnection(username);
+		public boolean execute(ClientSession session) throws IOException {
+			return session.acceptPrivateConnection(username);
 		}
 	}
 
@@ -74,8 +74,8 @@ public interface ClientEvent {
 		}
 
 		@Override
-		public boolean execute(ClientDataBase db) throws IOException {
-			return db.sendPrivateFile(username,path);
+		public boolean execute(ClientSession session) throws IOException {
+			return session.sendPrivateFile(username,path);
 		}
 
 	}
@@ -90,12 +90,12 @@ public interface ClientEvent {
 		}
 
 		@Override
-		public boolean execute(ClientDataBase db) throws IOException {
-			return db.sendPrivateMessage(username,message);
+		public boolean execute(ClientSession session) throws IOException {
+			return session.sendPrivateMessage(username,message);
 		}
 
 	}
 
-	public boolean execute(ClientDataBase db) throws IOException;
+	public boolean execute(ClientSession session) throws IOException;
 
 }

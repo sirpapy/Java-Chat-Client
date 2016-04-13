@@ -260,7 +260,7 @@ class ClientCommunication {
 
 			return true;
 
-		} catch (NoSuchFileException e) {
+		} catch (@SuppressWarnings("unused") NoSuchFileException __) {
 			Logger.warning(path + " does not exist");
 			return false;
 		}
@@ -505,7 +505,7 @@ class ClientCommunication {
 		bbSizeFile.flip();
 		long totalSize = bbSizeFile.getLong();
 
-		// FIXME : Receive name
+		// TODO : Envoyer le nom du fichier ou son extension
 
 		Path path = Files.createTempFile(Paths.get("./files"), username + "_", "");
 		try (OutputStream os = Files.newOutputStream(path, StandardOpenOption.WRITE,

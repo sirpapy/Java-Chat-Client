@@ -11,14 +11,13 @@ import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkProtocol;
 
-// TODO : session au lieu de database
-// TODO : concurrence !!!!!
-class ClientDataBase {
+// FIXME : concurrence !!!!!
+class ClientSession {
 	private final SocketChannel publicChannel;
-	private final HashMap<String, SocketChannel> privateMessages = new HashMap<>(); // TODO : Username au lieu de String
-	private final HashMap<String, SocketChannel> privateFiles = new HashMap<>(); // TODO : Username au lieu de String
+	private final HashMap<String, SocketChannel> privateMessages = new HashMap<>(); // FIXME : Username au lieu de String
+	private final HashMap<String, SocketChannel> privateFiles = new HashMap<>(); // FIXME : Username au lieu de String
 
-	ClientDataBase(SocketChannel publicChannel) {
+	ClientSession(SocketChannel publicChannel) {
 		this.publicChannel = publicChannel;
 	}
 
