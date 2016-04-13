@@ -118,7 +118,7 @@ class ClientCommunication {
 
 		request.putInt(NetworkProtocol.PVCOPORT.ordinal());
 		request.putInt(length).put(encodedUsername);
-		request.putInt(addr.length).put(addr);
+		request.putInt(addr.length).put(addr); // FIXME : NON ! Le serveur l'a déjà
 		request.putInt(portMessage).putInt(portFile);
 
 		return request;

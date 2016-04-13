@@ -121,21 +121,29 @@ Interactions:
 		| Type | SizeUsernameSrc | UsernameSrc |
 		+------+-----------------+-------------+
 
-		[S-C] Connection between the source(Src) and the destination(Dst)
-		The server sends the private connection data for the private connection of client Dst to client Src.
-		+------+-----------------+-------------+-------------------+
-		| int  |       int       |   String    | InetSocketAddress |
-		+------+-----------------+-------------+-------------------+
-		| Type | SizeUsernameDst | UsernameDst |    AddressDst     |
-		+------+-----------------+-------------+-------------------+
-		
-		[S-C] Connection between the source(Src) and the destination(Dst)
+		[S-C] Sending data of Dst to Src
 		The server sends the private connection data for the private connection of client Src to client Dst.
-		+------+-----------------+-------------+-------------------+----------+----------+
-		| int  |       int       |   String    | InetSocketAddress |   int    |   int    |
-		+------+-----------------+-------------+-------------------+----------+----------+
-		| Type | SizeUsernameSrc | UsernameSrc |    AddressSrc     | PortSrc1 | PortSrc2 |
-		+------+-----------------+-------------+-------------------+----------+----------+
+		+------+-----------------+-------------+----------------+------------+
+		| int  |       int       |   String    |      int       |   bytes    |
+		+------+-----------------+-------------+----------------+------------+
+		| Type | SizeUsernameDst | UsernameDst | SizeAddressDst | AddressDst |
+		+------+-----------------+-------------+----------------+------------+
+		
+		[C-S] Sending connection data of Src
+		The client Src sends the private connection data to the server.
+		+------+-----------------+-------------+-------------+----------+
+		| int  |       int       |   String    |     int     |   int    |
+		+------+-----------------+-------------+-------------+----------+
+		| Type | SizeUsernameDst | UsernameDst | PortMessage | PortFile |
+		+------+-----------------+-------------+-------------+----------+
+		
+		[S-C] Sending data of Src to Dst
+		The server sends the private connection data for the private connection of client Dst to client Src.
+		+------+-----------------+-------------+----------------+------------+-------------+----------+
+		| int  |       int       |   String    |      int       |   bytes    |     int     |   int    |
+		+------+-----------------+-------------+----------------+------------+-------------+----------+
+		| Type | SizeUsernameSrc | UsernameSrc | SizeAddressSrc | AddressSrc | PortMessage | PortFile |
+		+------+-----------------+-------------+----------------+------------+-------------+----------+
 
 	Sending private message
 		[C-C] Sending private message between Src and Dst
