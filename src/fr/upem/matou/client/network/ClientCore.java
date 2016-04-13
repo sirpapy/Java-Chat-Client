@@ -16,6 +16,7 @@ import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
+import fr.upem.matou.shared.network.Username;
 
 /*
  * This class is the core of the client.
@@ -53,7 +54,7 @@ public class ClientCore implements Closeable {
 		while (true) {
 			Optional<String> optionalInput = ui.getUsername();
 			if (!optionalInput.isPresent()) {
-				throw new IOException("User exited"); // TODO : Ne plus renvoyer d'exception
+				throw new IOException("User exited"); // TEMP
 			}
 			String username = optionalInput.get();
 			if (!NetworkCommunication.checkUsernameValidity(username)) {
@@ -115,6 +116,8 @@ public class ClientCore implements Closeable {
 		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 
 		switch (protocol) {
+
+		// TODO : Renommer les optional
 
 		case MSGBC: {
 			setChrono(true);
@@ -186,12 +189,12 @@ public class ClientCore implements Closeable {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			SourceConnection receivedConnectionRequest = optionalRequestPVCOESTASRC.get();
-			String username = receivedConnectionRequest.getUsername();
+			Username username = receivedConnectionRequest.getUsername();
 			InetAddress address = receivedConnectionRequest.getAddress();
 			Logger.network(NetworkLogType.READ, "USERNAME : " + username);
 			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
-			ui.displayNewPrivateAcceptionEvent(username);
-			launchPrivateConnection(username, address); // TEMP : variable locale
+			ui.displayNewPrivateAcceptionEvent(username.toString());
+			launchPrivateConnection(username, address);
 
 			break;
 		}
@@ -206,7 +209,7 @@ public class ClientCore implements Closeable {
 				throw new IOException("Protocol violation : " + protocol);
 			}
 			DestinationConnection receivedConnectionRequest = optionalRequestPVCOESTADST.get();
-			String username = receivedConnectionRequest.getUsername();
+			Username username = receivedConnectionRequest.getUsername();
 			InetAddress address = receivedConnectionRequest.getAddress();
 			int portMessage = receivedConnectionRequest.getPortMessage();
 			int portFile = receivedConnectionRequest.getPortFile();
@@ -214,7 +217,7 @@ public class ClientCore implements Closeable {
 			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
 			Logger.network(NetworkLogType.READ, "PORT MESSAGE : " + portMessage);
 			Logger.network(NetworkLogType.READ, "PORT FILE : " + portFile);
-			ui.displayNewPrivateAcceptionEvent(username);
+			ui.displayNewPrivateAcceptionEvent(username.toString());
 			launchPrivateConnection(username, address, portMessage, portFile);
 
 			break;
@@ -227,7 +230,7 @@ public class ClientCore implements Closeable {
 
 	}
 
-	private void privateCommunicationMessage(SocketChannel pv, String username) throws IOException {
+	private void privateCommunicationMessage(SocketChannel pv, Username username) throws IOException {
 		while (true) {
 			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(pv);
 			if (!optionalRequestType.isPresent()) {
@@ -239,7 +242,7 @@ public class ClientCore implements Closeable {
 			switch (protocol) {
 
 			case PVMSG: {
-				Optional<Message> optionalRequestPVMSG = ClientCommunication.receiveRequestPVMSG(pv, username);
+				Optional<Message> optionalRequestPVMSG = ClientCommunication.receiveRequestPVMSG(pv, username.toString());
 
 				if (!optionalRequestPVMSG.isPresent()) {
 					throw new IOException("Protocol violation : " + protocol);
@@ -259,7 +262,7 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void privateCommunicationFile(SocketChannel pv, String username) throws IOException {
+	private void privateCommunicationFile(SocketChannel pv, Username username) throws IOException {
 		while (true) {
 			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(pv);
 			if (!optionalRequestType.isPresent()) {
@@ -271,7 +274,7 @@ public class ClientCore implements Closeable {
 			switch (protocol) {
 
 			case PVFILE: {
-				Optional<Path> optionalRequestPVFILE = ClientCommunication.receiveRequestPVFILE(pv, username);
+				Optional<Path> optionalRequestPVFILE = ClientCommunication.receiveRequestPVFILE(pv, username.toString());
 
 				if (!optionalRequestPVFILE.isPresent()) {
 					throw new IOException("Protocol violation : " + protocol);
@@ -279,7 +282,7 @@ public class ClientCore implements Closeable {
 				Path path = optionalRequestPVFILE.get();
 				Logger.network(NetworkLogType.READ, "USERNAME : " + username);
 				Logger.network(NetworkLogType.READ, "PATH : " + path);
-				ui.displayFile(username, path);
+				ui.displayFile(username.toString(), path);
 
 				break;
 			}
@@ -306,10 +309,10 @@ public class ClientCore implements Closeable {
 				return pv;
 			}
 		}
-		
+
 	}
 
-	private void privateCommunicationSource(String username, InetAddress addressDst) throws IOException {
+	private void privateCommunicationSource(Username username, InetAddress addressDst) throws IOException {
 		ServerSocketChannel sscMessage = ServerSocketChannel.open();
 		ServerSocketChannel sscFile = ServerSocketChannel.open();
 		sscMessage.bind(null);
@@ -320,7 +323,7 @@ public class ClientCore implements Closeable {
 		System.out.println("MESSAGE PORT : " + portMessage);
 		System.out.println("FILE PORT : " + portFile);
 
-		ClientCommunication.sendRequestPVCOPORT(sc, username, portMessage, portFile);
+		ClientCommunication.sendRequestPVCOPORT(sc, username.toString(), portMessage, portFile);
 
 		new Thread(() -> {
 			try (SocketChannel scMessage = acceptCommunication(sscMessage, addressDst)) {
@@ -344,7 +347,8 @@ public class ClientCore implements Closeable {
 
 	}
 
-	private void privateCommunicationDestination(String username, InetAddress addressSrc, int portMessage, int portFile)
+	private void privateCommunicationDestination(Username username, InetAddress addressSrc, int portMessage,
+			int portFile)
 			throws IOException {
 		SocketChannel scMessage = SocketChannel.open(new InetSocketAddress(addressSrc, portMessage));
 		SocketChannel scFile = SocketChannel.open(new InetSocketAddress(addressSrc, portFile));
@@ -373,7 +377,7 @@ public class ClientCore implements Closeable {
 		}).start();
 	}
 
-	private void launchPrivateConnection(String username, InetAddress addressDst) {
+	private void launchPrivateConnection(Username username, InetAddress addressDst) {
 		new Thread(() -> {
 			try {
 				privateCommunicationSource(username, addressDst);
@@ -383,7 +387,7 @@ public class ClientCore implements Closeable {
 		}).start();
 	}
 
-	private void launchPrivateConnection(String username, InetAddress addressSrc, int portMessage, int portFile) {
+	private void launchPrivateConnection(Username username, InetAddress addressSrc, int portMessage, int portFile) {
 		new Thread(() -> {
 			try {
 				privateCommunicationDestination(username, addressSrc, portMessage, portFile);

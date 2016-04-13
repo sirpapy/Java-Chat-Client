@@ -2,23 +2,25 @@ package fr.upem.matou.client.network;
 
 import java.net.InetAddress;
 
+import fr.upem.matou.shared.network.Username;
+
 class DestinationConnection {
-	private final String username;
+	private final Username username;
 	private final InetAddress address;
 	private final int portMessage;
 	private final int portFile;
-	
+
 	public DestinationConnection(String username, InetAddress address, int portMessage, int portFile) {
-		this.username = username;
+		this.username = new Username(username);
 		this.address = address;
 		this.portMessage = portMessage;
 		this.portFile = portFile;
 	}
 
-	String getUsername() {
+	Username getUsername() {
 		return username;
 	}
-	
+
 	InetAddress getAddress() {
 		return address;
 	}
@@ -30,6 +32,5 @@ class DestinationConnection {
 	int getPortFile() {
 		return portFile;
 	}
-
 
 }

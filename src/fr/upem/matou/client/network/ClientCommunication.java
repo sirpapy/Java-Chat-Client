@@ -423,7 +423,7 @@ class ClientCommunication {
 		InetAddress address = InetAddress.getByAddress(addr);
 		System.out.println("ADDRESS = " + address);
 
-		return Optional.of(new SourceConnection(address, username));
+		return Optional.of(new SourceConnection(username,address));
 	}
 
 	public static Optional<DestinationConnection> receiveRequestPVCOESTADST(SocketChannel sc) throws IOException {

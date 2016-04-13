@@ -20,7 +20,7 @@ import fr.upem.matou.shared.logger.Logger;
 public class ServerCore implements Closeable {
 
 	private static final boolean DELAY_ENABLED = false;
-	private static final long SERVER_DELAY = 100; // TEMP in millis
+	private static final long SERVER_DELAY = 100; // in millis (TEMP)
 
 	private final ServerSocketChannel ssc;
 	private final Selector selector;
@@ -110,7 +110,7 @@ public class ServerCore implements Closeable {
 		bb.flip();
 		Logger.debug("WRITING BUFFER : " + bb);
 		if (DELAY_ENABLED) {
-			for (int i = 1; bb.hasRemaining(); i++) { // TEMP
+			for (int i = 1; bb.hasRemaining(); i++) { // TEMP for cleaner debug
 				ByteBuffer writter = ByteBuffer.allocate(1);
 				byte oneByte = bb.get();
 				writter.put(oneByte);

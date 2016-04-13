@@ -19,7 +19,6 @@ import fr.upem.matou.shared.network.Username;
  * This class represents the state of the chat server.
  * This class is not thread-safe and should not be used by several threads.
  */
-@SuppressWarnings("resource")
 class ServerDataBase {
 	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxServerToClientRequestSize();
 
@@ -67,7 +66,7 @@ class ServerDataBase {
 			Username key = entry.getKey();
 			HashSet<Username> values = entry.getValue();
 			boolean cancelled = values.remove(disconnected);
-			if(cancelled) {
+			if (cancelled) {
 				Logger.debug("Cancel private request : " + key + " -> " + disconnected);
 			}
 		}
@@ -144,20 +143,21 @@ class ServerDataBase {
 		return sessionOf(sc.get());
 	}
 
-	void addNewPrivateRequest(Username source, Username target) {
+	boolean addNewPrivateRequest(Username source, Username target) {
 		HashSet<Username> set = privateRequests.get(source);
-		if (set == null) { // TODO : init ?
+		if (set == null) {
 			set = new HashSet<>();
 			privateRequests.put(source, set);
 		}
-		set.add(target); // TODO : utiliser le boolean pour envoyer ou non la notification
+		boolean added = set.add(target);
 		Logger.debug("SET : " + set);
+		return added;
 	}
 
 	boolean checkPrivateRequest(Username source, Username target) {
 		HashSet<Username> set = privateRequests.get(target);
 		Logger.debug("CHECK ( " + source + " -> " + target + " ) = " + set);
-		if (set == null) { // TODO : init ?
+		if (set == null) {
 			return false;
 		}
 		return set.contains(source);

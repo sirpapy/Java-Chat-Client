@@ -10,12 +10,14 @@ import java.util.HashMap;
 import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkProtocol;
+import fr.upem.matou.shared.network.Username;
 
 // FIXME : concurrence !!!!!
+@SuppressWarnings("resource")
 class ClientSession {
 	private final SocketChannel publicChannel;
-	private final HashMap<String, SocketChannel> privateMessages = new HashMap<>(); // FIXME : Username au lieu de String
-	private final HashMap<String, SocketChannel> privateFiles = new HashMap<>(); // FIXME : Username au lieu de String
+	private final HashMap<Username, SocketChannel> privateMessages = new HashMap<>();
+	private final HashMap<Username, SocketChannel> privateFiles = new HashMap<>();
 
 	ClientSession(SocketChannel publicChannel) {
 		this.publicChannel = publicChannel;
@@ -25,13 +27,13 @@ class ClientSession {
 		return publicChannel;
 	}
 
-	void addNewPrivateMessageChannel(String username, SocketChannel sc) {
+	void addNewPrivateMessageChannel(Username username, SocketChannel sc) {
 		requireNonNull(username);
 		requireNonNull(sc);
 		privateMessages.put(username, sc);
 	}
 
-	void addNewPrivateFileChannel(String username, SocketChannel sc) {
+	void addNewPrivateFileChannel(Username username, SocketChannel sc) {
 		requireNonNull(username);
 		requireNonNull(sc);
 		privateFiles.put(username, sc);
@@ -53,20 +55,19 @@ class ClientSession {
 		return ClientCommunication.sendRequestMSG(publicChannel, message);
 	}
 
-	boolean openPrivateConnection(String username) throws IOException {
+	boolean openPrivateConnection(Username username) throws IOException {
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOREQ);
 		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
-		return ClientCommunication.sendRequestPVCOREQ(publicChannel, username);
+		return ClientCommunication.sendRequestPVCOREQ(publicChannel, username.toString());
 	}
 
-	boolean acceptPrivateConnection(String username) throws IOException {
+	boolean acceptPrivateConnection(Username username) throws IOException {
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOACC);
 		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
-		return ClientCommunication.sendRequestPVCOACC(publicChannel, username);
+		return ClientCommunication.sendRequestPVCOACC(publicChannel, username.toString());
 	}
 
-	@SuppressWarnings("resource")
-	boolean sendPrivateMessage(String username, String message) throws IOException {
+	boolean sendPrivateMessage(Username username, String message) throws IOException {
 		SocketChannel sc = privateMessages.get(username);
 		if (sc == null) {
 			return false;
@@ -76,8 +77,7 @@ class ClientSession {
 		return ClientCommunication.sendRequestPVMSG(sc, message);
 	}
 
-	@SuppressWarnings("resource")
-	boolean sendPrivateFile(String username, Path path) throws IOException {
+	boolean sendPrivateFile(Username username, Path path) throws IOException {
 		SocketChannel sc = privateFiles.get(username);
 		if (sc == null) {
 			return false;
@@ -87,7 +87,7 @@ class ClientSession {
 		return ClientCommunication.sendRequestPVFILE(sc, path);
 	}
 
-	boolean closePrivateConnection(String username) {
+	boolean closePrivateConnection(Username username) {
 		SocketChannel scMessage = privateMessages.remove(username);
 		SocketChannel scFile = privateFiles.remove(username);
 		boolean closed = (scMessage != null) || (scFile != null);

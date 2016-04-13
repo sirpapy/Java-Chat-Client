@@ -3,7 +3,6 @@
 
 	<!-- Project properties -->
 	<property name="dir.sources" value="src" />
-	<!--	<property name="dir.tests" value="test/src" /> -->
 	<property name="dir.classes" value="classes" />
 	<property name="dir.libraries" value="libs" />
 	<property name="dir.documentation" value="docs/api" />
@@ -57,13 +56,6 @@
 			<classpath refid="project.classpath" />
 		</javac>
 	</target>
-
-	<!-- Tests compilation -->
-	<!--	<target name="tests" depends="compile" description="Compile the unit tests">
-		<javac srcdir="${dir.tests}" destdir="${dir.classes}" includeantruntime="false">
-			<classpath refid="project.classpath" />
-		</javac>
-	</target>-->
 
 	<!-- Javadoc generation -->
 	<target name="javadoc" description="Generate the javadoc">

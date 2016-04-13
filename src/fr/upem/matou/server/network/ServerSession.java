@@ -375,7 +375,7 @@ class ServerSession {
 	}
 
 	private void answerPVCOREQNOTIF(String targetName) {
-		// TEMP : target == source
+		// TEMP : traiter le cas "target == source"
 		Username source = db.usernameOf(sc).get();
 		Username target = new Username(targetName);
 		Optional<ServerSession> optional = db.sessionOf(target);
@@ -383,7 +383,13 @@ class ServerSession {
 			Logger.debug("Target " + target + " is not connected");
 			return;
 		}
-		db.addNewPrivateRequest(source, target); // TEMP : Username en argument
+
+		boolean valid = db.addNewPrivateRequest(source, target);
+		Logger.debug("PRIVATE REQUEST VALIDITY : " + valid);
+		if (!valid) {
+			return;
+		}
+
 		ServerSession session = optional.get();
 		ByteBuffer bbTarget = session.getWriteBuffer();
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOREQNOTIF);
@@ -453,29 +459,26 @@ class ServerSession {
 	private void answerPVCOESTASRC(String targetName) {
 		Username source = db.usernameOf(sc).get();
 		Username target = new Username(targetName);
-		boolean valid = db.checkPrivateRequest(source, target); // TEMP : Username en argument
-		Logger.debug("REQUEST ACCEPTATION : " + valid);
+		boolean valid = db.checkPrivateRequest(source, target);
+		Logger.debug("PRIVATE REQUEST ACCEPTATION : " + valid);
 
-		if (valid) {
-			Optional<ServerSession> optional = db.sessionOf(target);
-			if (!optional.isPresent()) { // XXX : Impossible car checked
-				Logger.debug("Target " + target + " is not connected");
-				return;
-			}
-
-			ServerSession session = optional.get();
-			ByteBuffer bbTarget = session.getWriteBuffer();
-			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTASRC);
-			Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
-			Logger.network(NetworkLogType.WRITE, "ADDRESS : " + address);
-
-			if (!ServerCommunication.addRequestPVCOESTASRC(bbTarget, source.toString(), address)) {
-				Logger.warning("PVCOESTASRC lost | Write Buffer cannot hold it");
-				return;
-			}
-
-			session.updateKey();
+		if (!valid) {
+			return;
 		}
+
+		ServerSession session = db.sessionOf(target).get(); // Checked by checkPrivateRequest
+		ByteBuffer bbTarget = session.getWriteBuffer();
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTASRC);
+		Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
+		Logger.network(NetworkLogType.WRITE, "ADDRESS : " + address);
+
+		if (!ServerCommunication.addRequestPVCOESTASRC(bbTarget, source.toString(), address)) {
+			Logger.warning("PVCOESTASRC lost | Write Buffer cannot hold it");
+			return;
+		}
+
+		session.updateKey();
+
 	}
 
 	private void processPVCOPORT() {
@@ -555,7 +558,7 @@ class ServerSession {
 		Username target = db.usernameOf(sc).get();
 		Username source = new Username(sourceName);
 		boolean valid = db.removePrivateRequest(source, target);
-		Logger.debug("PRIVATE ESTABLISHMENT VALIDITY : " + valid);
+		Logger.debug("PRIVATE REQUEST ESTABLISHMENT : " + valid);
 
 		if (!valid) {
 			Logger.warning("Invalid private connection establishment of " + source + " to " + target);
