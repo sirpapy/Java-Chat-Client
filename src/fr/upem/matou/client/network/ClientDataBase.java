@@ -78,21 +78,14 @@ class ClientDataBase {
 	}
 
 	@SuppressWarnings("resource")
-	boolean sendPrivateFile(String username, Path path) {
+	boolean sendPrivateFile(String username, Path path) throws IOException {
 		SocketChannel sc = privateFiles.get(username);
 		if (sc == null) {
 			return false;
 		}
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVFILE);
 		Logger.network(NetworkLogType.WRITE, "PATH : " + path);
-		new Thread(() -> {
-			try {
-				ClientCommunication.sendRequestPVFILE(sc, path);
-			} catch (Exception e) {
-				Logger.exception(e);
-			}
-		}).start();
-		return true;
+		return ClientCommunication.sendRequestPVFILE(sc, path);
 	}
 
 	boolean closePrivateConnection(String username) {
@@ -114,7 +107,7 @@ class ClientDataBase {
 			}
 		}
 		return closed;
-		
+
 		// FIXME : Si la connexion est fermée, l'autre peut encore écrire une fois avant de manger une IOException
 	}
 

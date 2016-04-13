@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -226,12 +227,7 @@ class ClientCommunication {
 		return true;
 	}
 
-	public static void sendRequestPVFILE(SocketChannel sc, Path path) throws IOException {
-		long totalSize = Files.size(path);
-		ByteBuffer bb = encodeRequestPVFILE(totalSize);
-		sendRequest(sc, bb);
-
-		// FIXME : Fichier inexistant
+	private static void sendFileChunks(SocketChannel sc, Path path, long totalSize) throws IOException {
 		try (InputStream is = Files.newInputStream(path, StandardOpenOption.READ)) {
 			byte[] chunk = new byte[CHUNK_SIZE];
 			int read = 0;
@@ -242,9 +238,31 @@ class ClientCommunication {
 				System.out.println(
 						"READ LENGTH : " + read + "\n\tTotal : " + totalRead + "/" + totalSize + " [" + percent + "%]");
 				ByteBuffer wrap = ByteBuffer.wrap(chunk, 0, read);
-				// TODO : flip ?
 				sc.write(wrap);
 			}
+		}
+	}
+
+	public static boolean sendRequestPVFILE(SocketChannel sc, Path path) throws IOException {
+		try {
+
+			long totalSize = Files.size(path);
+			ByteBuffer bb = encodeRequestPVFILE(totalSize);
+			sendRequest(sc, bb);
+
+			new Thread(() -> {
+				try {
+					sendFileChunks(sc, path, totalSize);
+				} catch (Exception e) {
+					Logger.exception(e);
+				}
+			}).start();
+
+			return true;
+
+		} catch (NoSuchFileException e) {
+			Logger.warning(path + " does not exist");
+			return false;
 		}
 	}
 
@@ -486,6 +504,8 @@ class ClientCommunication {
 		}
 		bbSizeFile.flip();
 		long totalSize = bbSizeFile.getLong();
+
+		// FIXME : Receive name
 
 		Path path = Files.createTempFile(Paths.get("./files"), username + "_", "");
 		try (OutputStream os = Files.newOutputStream(path, StandardOpenOption.WRITE,
