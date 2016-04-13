@@ -9,7 +9,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import fr.upem.matou.client.ui.Message;
 import fr.upem.matou.client.ui.ShellInterface;
 import fr.upem.matou.client.ui.UserInterface;
 import fr.upem.matou.shared.logger.Logger;

@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Scanner;
 
 import fr.upem.matou.client.network.ClientEvent;
+import fr.upem.matou.client.network.Message;
 
 /**
  * This class provides a user interface from a shell.

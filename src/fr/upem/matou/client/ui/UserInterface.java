@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import fr.upem.matou.client.network.ClientEvent;
+import fr.upem.matou.client.network.Message;
 
 /**
  * This interface provides methods to display information to the user and retrieve information entered by the user.

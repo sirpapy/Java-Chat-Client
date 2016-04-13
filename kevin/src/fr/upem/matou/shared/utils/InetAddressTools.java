@@ -1,4 +1,4 @@
-package fr.upem.matou.debug.ip;
+package fr.upem.matou.shared.utils;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

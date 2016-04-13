@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
+import fr.upem.matou.shared.utils.ByteBuffers;
+
 @SuppressWarnings("static-method")
 public class ByteBuffersTest {
 

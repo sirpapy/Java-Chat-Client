@@ -10,8 +10,8 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 
-import fr.upem.matou.debug.buffer.ByteBuffers;
 import fr.upem.matou.shared.logger.Logger;
+import fr.upem.matou.shared.utils.ByteBuffers;
 
 /*
  * This class is the core of the server.

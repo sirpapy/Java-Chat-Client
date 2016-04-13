@@ -1,4 +1,4 @@
-package fr.upem.matou.debug.buffer;
+package fr.upem.matou.shared.utils;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
