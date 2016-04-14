@@ -20,7 +20,7 @@ import fr.upem.matou.shared.network.Username;
  * This class is not thread-safe and should not be used by several threads.
  */
 class ServerDataBase {
-	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxServerToClientRequestSize();
+	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxServerOutgoingRequestSize();
 
 	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
 	private final HashMap<SocketChannel, Username> connected = new HashMap<>();
@@ -143,13 +143,13 @@ class ServerDataBase {
 			privateRequests.put(source, set);
 		}
 		boolean added = set.add(target);
-		Logger.debug("SET : " + set);
+		Logger.debug("PV ADD (" + source + " -> " + target + ") : " + set);
 		return added;
 	}
 
 	boolean checkPrivateRequest(Username source, Username target) {
 		HashSet<Username> set = privateRequests.get(target);
-		Logger.debug("CHECK ( " + source + " -> " + target + " ) = " + set);
+		Logger.debug("PV CHECK (" + source + " -> " + target + ") : " + set);
 		if (set == null) {
 			return false;
 		}
@@ -158,7 +158,7 @@ class ServerDataBase {
 
 	boolean removePrivateRequest(Username source, Username target) {
 		HashSet<Username> set = privateRequests.get(target);
-		Logger.debug("CHECK & REMOVE ( " + source + " -> " + target + " ) = " + set);
+		Logger.debug("PV CHECK & REMOVE (" + source + " -> " + target + ") : " + set);
 		if (set == null) {
 			return false;
 		}

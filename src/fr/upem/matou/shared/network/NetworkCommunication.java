@@ -65,7 +65,6 @@ public class NetworkCommunication {
 	public static Optional<ByteBuffer> encodeUsername(String username) {
 		requireNonNull(username);
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(username);
-		Logger.debug("ENCODED USERNAME SIZE : " + encoded.remaining());
 		if (!checkEncodedUsernameValidity(encoded)) {
 			return Optional.empty();
 		}
@@ -75,7 +74,6 @@ public class NetworkCommunication {
 	public static Optional<ByteBuffer> encodeMessage(String message) {
 		requireNonNull(message);
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(message);
-		Logger.debug("ENCODED MESSAGE SIZE : " + encoded.remaining());
 		if (!checkEncodedMessageValidity(encoded)) {
 			return Optional.empty();
 		}

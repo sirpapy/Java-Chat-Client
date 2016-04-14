@@ -1,5 +1,6 @@
 package fr.upem.matou.shared.network;
 
+import static fr.upem.matou.shared.network.NetworkCommunication.FILE_CHUNK_SIZE;
 import static fr.upem.matou.shared.network.NetworkCommunication.LENGTH_SIZE;
 import static fr.upem.matou.shared.network.NetworkCommunication.MESSAGE_MAX_SIZE;
 import static fr.upem.matou.shared.network.NetworkCommunication.USERNAME_MAX_SIZE;
@@ -29,14 +30,11 @@ public enum NetworkProtocol {
 	PVCOREQ(CLIENT, SERVER, "PRIVATE_CONNECTION_REQUEST", LENGTH_SIZE, USERNAME_MAX_SIZE),
 	PVCOREQNOTIF(SERVER, CLIENT, "PRIVATE_CONNECTION_REQUEST_NOTIFICATION", LENGTH_SIZE, USERNAME_MAX_SIZE),
 	PVCOACC(CLIENT, SERVER, "PRIVATE_CONNECTION_ACCEPTATION", LENGTH_SIZE, USERNAME_MAX_SIZE),
-	PVCOPORT(CLIENT, SERVER, "PRIVATE_CONNECTION_PORT_TRANSFER", LENGTH_SIZE, USERNAME_MAX_SIZE, Integer.BYTES,
-			Integer.BYTES),
-	PVCOESTASRC(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_SOURCE", LENGTH_SIZE, USERNAME_MAX_SIZE, LENGTH_SIZE,
-			16),
-	PVCOESTADST(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION", LENGTH_SIZE, USERNAME_MAX_SIZE,
-			LENGTH_SIZE, 16, Integer.BYTES, Integer.BYTES),
+	PVCOPORT(CLIENT, SERVER, "PRIVATE_CONNECTION_PORT_TRANSFER", LENGTH_SIZE, USERNAME_MAX_SIZE, Integer.BYTES, Integer.BYTES),
+	PVCOESTASRC(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_SOURCE", LENGTH_SIZE, USERNAME_MAX_SIZE, LENGTH_SIZE, 16),
+	PVCOESTADST(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION", LENGTH_SIZE, USERNAME_MAX_SIZE, LENGTH_SIZE, 16, Integer.BYTES, Integer.BYTES),
 	PVMSG(CLIENT, CLIENT, "PRIVATE_MESSAGE", LENGTH_SIZE, MESSAGE_MAX_SIZE),
-	PVFILE(CLIENT, CLIENT, "PRIVATE_FILE", LENGTH_SIZE, 4096),
+	PVFILE(CLIENT, CLIENT, "PRIVATE_FILE", LENGTH_SIZE, FILE_CHUNK_SIZE),
 	// PVDISCO("CLIENT_PRIVATE_DISCONNECTION"),
 	;
 
@@ -90,19 +88,21 @@ public enum NetworkProtocol {
 
 	private static int getMaxRequestSize(Communicator source, Communicator target) {
 		NetworkProtocol[] values = values();
-		return Arrays.stream(values).filter(e -> e.source == source && e.target == target)
-				.mapToInt(e -> e.maxRequestSize).max().getAsInt();
+		return Arrays.stream(values)
+				.filter(e -> e.source == source && e.target == target)
+				.mapToInt(e -> e.maxRequestSize)
+				.max().getAsInt();
 	}
 
-	public static int getMaxClientToServerRequestSize() {
-		int x = getMaxRequestSize(CLIENT, SERVER);
-		Logger.debug("MAX CLIENT TO SERVER : " + x);
-		return x;
+	public static int getMaxServerIncomingRequestSize() {
+		int max = getMaxRequestSize(CLIENT, SERVER);
+		Logger.debug("SERVER MAX INCOMING REQUEST SIZE : " + max);
+		return max;
 	}
 
-	public static int getMaxServerToClientRequestSize() {
-		int x = getMaxRequestSize(SERVER, CLIENT);
-		Logger.debug("MAX SERVER TO CLIENT : " + x);
-		return x;
+	public static int getMaxServerOutgoingRequestSize() {
+		int max = getMaxRequestSize(SERVER, CLIENT);
+		Logger.debug("MAX SERVER OUTGOING REQUEST SIZE : " + max);
+		return max;
 	}
 }
