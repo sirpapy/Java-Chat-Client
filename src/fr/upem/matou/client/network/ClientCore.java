@@ -1,7 +1,5 @@
 package fr.upem.matou.client.network;
 
-import static java.util.Objects.requireNonNull;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -331,6 +329,7 @@ public class ClientCore implements Closeable {
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
 				Logger.exception(e);
+				session.closePrivateConnection(username);
 			}
 		}).start();
 
@@ -341,6 +340,7 @@ public class ClientCore implements Closeable {
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
 				Logger.exception(e);
+				session.closePrivateConnection(username);
 			}
 		}).start();
 
@@ -362,6 +362,7 @@ public class ClientCore implements Closeable {
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
 				Logger.exception(e);
+				session.closePrivateConnection(username);
 			}
 		}).start();
 
@@ -371,6 +372,7 @@ public class ClientCore implements Closeable {
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
 				Logger.exception(e);
+				session.closePrivateConnection(username);
 			}
 		}).start();
 	}

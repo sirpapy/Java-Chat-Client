@@ -24,15 +24,7 @@ public class Logger {
 	private Logger() {
 	}
 
-	/*
-	 * TODO : Format
-	 * 
-	 * Prendre l'objet à logger en paramètre afin d'afficher ses informations :
-	 * 
-	 * Object.toString() + " | " + message
-	 * ou
-	 * Loggable.toLogString() + " | " + message
-	 */
+	// TODO : Prendre un objet à logger en paramètre afin d'afficher ses informations
 
 	public static void attachOutput(PrintStream out) {
 		requireNonNull(out);

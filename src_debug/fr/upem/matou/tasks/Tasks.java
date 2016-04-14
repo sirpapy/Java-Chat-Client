@@ -5,7 +5,9 @@ package fr.upem.matou.tasks;
 public class Tasks {
 
 	// FIXME : Tracer les exceptions avec le logger
-
+	// FIXME : Commentaires de code
+	// FIXME : Vérifier qu'il n'y a pas d'appel à System.out hors du Logger/UI + Logger debug
+	
 	// TODO : Logger sur les exceptions -> Logger.warning/Logger.error
 	// TODO : Tests unitaires
 	// TODO : Check warnings et suppress
@@ -15,4 +17,6 @@ public class Tasks {
 	// TODO : Vérifier qu'il n'y a pas de code mort
 	// TODO : Ecrire la javadoc
 	// TODO : Ecrire le rapport + disclaimers (colorator)
+	
+	// TEMP : Retirer les UnsupportedOperationException !
 }

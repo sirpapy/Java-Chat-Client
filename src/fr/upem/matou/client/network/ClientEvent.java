@@ -88,7 +88,7 @@ public interface ClientEvent {
 		}
 
 		@Override
-		public boolean execute(ClientSession session) throws IOException {
+		public boolean execute(ClientSession session) {
 			requireNonNull(session);
 			return session.sendPrivateFile(username, path);
 		}
@@ -107,7 +107,7 @@ public interface ClientEvent {
 		}
 
 		@Override
-		public boolean execute(ClientSession session) throws IOException {
+		public boolean execute(ClientSession session) {
 			requireNonNull(session);
 			return session.sendPrivateMessage(username, message);
 		}

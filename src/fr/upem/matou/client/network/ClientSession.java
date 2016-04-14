@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.logger.Logger.NetworkLogType;
+import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 
@@ -50,24 +51,34 @@ class ClientSession {
 		return ClientCommunication.sendRequestPVCOACC(publicChannel, username.toString());
 	}
 
-	boolean sendPrivateMessage(Username username, String message) throws IOException {
+	boolean sendPrivateMessage(Username username, String message) {
 		SocketChannel sc = privateMessages.get(username);
 		if (sc == null) {
 			return false;
 		}
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVMSG);
 		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + message);
-		return ClientCommunication.sendRequestPVMSG(sc, message);
+		try {
+			return ClientCommunication.sendRequestPVMSG(sc, message);
+		} catch (@SuppressWarnings("unused") IOException __) {
+			closePrivateConnection(username);
+			return false;
+		}
 	}
 
-	boolean sendPrivateFile(Username username, Path path) throws IOException {
+	boolean sendPrivateFile(Username username, Path path) {
 		SocketChannel sc = privateFiles.get(username);
 		if (sc == null) {
 			return false;
 		}
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVFILE);
 		Logger.network(NetworkLogType.WRITE, "PATH : " + path);
-		return ClientCommunication.sendRequestPVFILE(sc, path);
+		try {
+			return ClientCommunication.sendRequestPVFILE(sc, path);
+		} catch (@SuppressWarnings("unused") IOException __) {
+			closePrivateConnection(username);
+			return false;
+		}
 	}
 
 	boolean closePrivateConnection(Username username) {
@@ -75,22 +86,13 @@ class ClientSession {
 		SocketChannel scFile = privateFiles.remove(username);
 		boolean closed = (scMessage != null) || (scFile != null);
 		if (scMessage != null) {
-			try {
-				scMessage.close();
-			} catch (IOException e) {
-				Logger.exception(e);
-			}
+			NetworkCommunication.silentlyClose(scMessage);
 		}
 		if (scFile != null) {
-			try {
-				scFile.close();
-			} catch (IOException e) {
-				Logger.exception(e);
-			}
+			NetworkCommunication.silentlyClose(scFile);
 		}
 		return closed;
 
-		// FIXME : Si la connexion est fermée, l'autre peut encore écrire une fois avant de se manger une IOException
 	}
 
 }

@@ -20,7 +20,6 @@ import fr.upem.matou.shared.utils.ByteBuffers;
 public class ServerCore implements Closeable {
 
 	private static final boolean DELAY_ENABLED = false;
-	private static final long SERVER_DELAY = 100; // in millis (TEMP)
 
 	private final ServerSocketChannel ssc;
 	private final Selector selector;
@@ -108,33 +107,13 @@ public class ServerCore implements Closeable {
 		ByteBuffer bb = session.getWriteBuffer();
 
 		bb.flip();
-		Logger.debug("WRITING BUFFER : " + bb);
-		if (DELAY_ENABLED) {
-			for (int i = 1; bb.hasRemaining(); i++) { // TEMP for cleaner debug
-				ByteBuffer writter = ByteBuffer.allocate(1);
-				byte oneByte = bb.get();
-				writter.put(oneByte);
-				writter.flip();
-				int written = channel.write(writter);
-				if (written == 0) {
-					Logger.debug("/!\\ WRITING NOT FINISHED /!\\");
-					break;
-				}
-				Logger.debug("Byte #" + i + " sent : " + ByteBuffers.toBinaryString(oneByte)
-						+ " (~" + ((i - 1) * SERVER_DELAY) + "ms)");
-				try {
-					Thread.sleep(SERVER_DELAY);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		} else {
+		try {
+			Logger.debug("WRITING BUFFER : " + bb);
 			channel.write(bb);
+		} finally {
+			bb.compact();
 		}
-		bb.compact();
-
-		session.updateStateWrite();
-
+		
 		session.updateKey();
 	}
 

@@ -2,7 +2,9 @@ package fr.upem.matou.shared.network;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
@@ -90,5 +92,14 @@ public class NetworkCommunication {
 
 	public static int getFileChunkSize() {
 		return FILE_CHUNK_SIZE;
+	}
+	
+	public static void silentlyClose(SocketChannel sc) {
+		try {
+			sc.close();
+		} catch (IOException e) {
+			Logger.exception(e);
+			return;
+		}
 	}
 }

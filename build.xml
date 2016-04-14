@@ -6,7 +6,7 @@
 	<property name="dir.classes" value="classes" />
 	<property name="dir.libraries" value="libs" />
 	<property name="dir.documentation" value="docs/api" />
-	<property name="dir.files" value="files/" />
+	<property name="dir.files" value="files" />
 	<property name="file.client.jar" value="client.jar" />
 	<property name="file.server.jar" value="server.jar" />
 	<property name="class.client.main" value="fr.upem.matou.client.ClientMatou" />
@@ -29,8 +29,6 @@
 	<manifestclasspath property="server.MANIFEST.MF" jarfile="${class.server.main}">
 		<classpath refid="project.classpath" />
 	</manifestclasspath>
-
-
 
 	<!-- Default target -->
 	<target name="all" depends="compile,jar,javadoc" description="Default target" />

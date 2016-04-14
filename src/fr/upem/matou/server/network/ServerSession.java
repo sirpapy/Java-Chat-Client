@@ -15,12 +15,11 @@ import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 import fr.upem.matou.shared.utils.ByteBuffers;
 
-// TEMP : Retirer les UnsupportedOperationException !
-
 /*
  * This class represents the state of a client connected to the chat server.
  */
 class ServerSession {
+	
 	private static final int BUFFER_SIZE_INPUT = NetworkProtocol.getMaxClientToServerRequestSize();
 	private static final int BUFFER_SIZE_OUTPUT = NetworkProtocol.getMaxServerToClientRequestSize();
 	private static final int USERNAME_MAX_SIZE = NetworkCommunication.getUsernameMaxSize();
@@ -31,11 +30,12 @@ class ServerSession {
 	private final InetAddress address;
 	private final SelectionKey key;
 
-	private boolean authent = false;
-	private NetworkProtocol protocol = null;
-	private int arg = -1;
 	private final ByteBuffer bbRead = ByteBuffer.allocateDirect(BUFFER_SIZE_INPUT);
 	private final ByteBuffer bbWrite = ByteBuffer.allocateDirect(BUFFER_SIZE_OUTPUT);
+	
+	private boolean authent = false;
+	private NetworkProtocol protocol = null;
+	private int arg = 0;
 	private ClientState clientState = null;
 
 	static interface ClientState {
@@ -112,7 +112,7 @@ class ServerSession {
 
 	private void resetReadState() {
 		clearAndLimit(bbRead, Integer.BYTES);
-		arg = -1;
+		arg = 0;
 		protocol = null;
 	}
 
@@ -133,7 +133,6 @@ class ServerSession {
 		}
 		protocol = optionalProtocol.get();
 		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
-		arg++;
 		return ordinal;
 	}
 
@@ -375,7 +374,7 @@ class ServerSession {
 	}
 
 	private void answerPVCOREQNOTIF(String targetName) {
-		// TEMP : traiter le cas "target == source"
+		// TEMP : Cas où "target == source"
 		Username source = db.usernameOf(sc).get();
 		Username target = new Username(targetName);
 		Optional<ServerSession> optional = db.sessionOf(target);
@@ -594,7 +593,7 @@ class ServerSession {
 
 		if (protocol == null) {
 			int code = processRequestType();
-			if (arg == -1) {
+			if (protocol == null) {
 				Logger.warning("Invalid protocol code : " + code);
 				disconnectClient();
 				return;
@@ -626,16 +625,6 @@ class ServerSession {
 			return;
 		}
 
-	}
-
-	/*
-	 * Updates the state of the current session after writing.
-	 */
-	void updateStateWrite() {
-		if (bbWrite.position() > 0) { // Not finished to write
-			return;
-		}
-		// TEMP
 	}
 
 	int computeInterestOps() {
@@ -683,16 +672,7 @@ class ServerSession {
 			}
 		}
 
-		silentlyClose(sc);
-	}
-
-	private static void silentlyClose(SocketChannel sc) {
-		try {
-			sc.close();
-		} catch (IOException e) {
-			Logger.exception(e);
-			return;
-		}
+		NetworkCommunication.silentlyClose(sc);
 	}
 
 }
