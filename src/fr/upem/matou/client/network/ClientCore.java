@@ -280,7 +280,7 @@ public class ClientCore implements Closeable {
 				Path path = optionalPVFILE.get();
 				Logger.network(NetworkLogType.READ, "USERNAME : " + username);
 				Logger.network(NetworkLogType.READ, "PATH : " + path);
-				ui.displayFile(username.toString(), path);
+				ui.displayNewFileReception(username.toString(), path);
 
 				break;
 			}
@@ -299,11 +299,11 @@ public class ClientCore implements Closeable {
 				pv = ssc.accept();
 				InetAddress connected = ((InetSocketAddress) pv.getRemoteAddress()).getAddress();
 				if (!address.equals(connected)) {
-					Logger.debug("CONNECTION HACK !!!");
-					pv.close();
+					Logger.debug("[SOURCE] CONNECTION HACK !!!");
+					NetworkCommunication.silentlyClose(pv);
 					continue;
 				}
-				Logger.debug("CONNECTION ACCEPTED");
+				Logger.debug("[SOURCE] CONNECTION ACCEPTED");
 				return pv;
 			}
 		} // close the ssc correctly
@@ -317,31 +317,33 @@ public class ClientCore implements Closeable {
 
 		int portMessage = ((InetSocketAddress) sscMessage.getLocalAddress()).getPort();
 		int portFile = ((InetSocketAddress) sscFile.getLocalAddress()).getPort();
-		System.out.println("MESSAGE PORT : " + portMessage);
-		System.out.println("FILE PORT : " + portFile);
+		Logger.debug("[SOURCE] MESSAGE PORT : " + portMessage);
+		Logger.debug("[SOURCE] FILE PORT : " + portFile);
 
 		ClientCommunication.sendRequestPVCOPORT(sc, username.toString(), portMessage, portFile);
 
 		new Thread(() -> {
 			try (SocketChannel scMessage = acceptCommunication(sscMessage, addressDst)) {
-				Logger.debug("CONNECTED (SOURCE MESSAGE)");
+				Logger.debug("[SOURCE] MESSAGE CONNECTED");
 				session.addNewPrivateMessageChannel(username, scMessage);
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			}
+			ui.displayNewPrivateDisconnection(username);
 		}).start();
 
 		new Thread(() -> {
 			try (SocketChannel scFile = acceptCommunication(sscFile, addressDst)) {
-				Logger.debug("CONNECTED (SOURCE FILE)");
+				Logger.debug("[SOURCE] FILE CONNECTED");
 				session.addNewPrivateFileChannel(username, scFile);
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			}
+			ui.displayNewPrivateDisconnection(username);
 		}).start();
 
 	}
@@ -351,10 +353,10 @@ public class ClientCore implements Closeable {
 		SocketChannel scMessage = SocketChannel.open(new InetSocketAddress(addressSrc, portMessage));
 		SocketChannel scFile = SocketChannel.open(new InetSocketAddress(addressSrc, portFile));
 
-		System.out.println("MESSAGE PORT : " + portMessage);
-		System.out.println("FILE PORT : " + portFile);
+		Logger.debug("[DESTINATION] MESSAGE PORT : " + portMessage);
+		Logger.debug("[DESTINATION] FILE PORT : " + portFile);
 
-		Logger.debug("CONNECTED (DESTINATION)");
+		Logger.debug("[DESTINATION] CONNECTED");
 
 		new Thread(() -> {
 			try {
@@ -374,6 +376,7 @@ public class ClientCore implements Closeable {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			}
+			ui.displayNewPrivateDisconnection(username);
 		}).start();
 	}
 
@@ -384,6 +387,7 @@ public class ClientCore implements Closeable {
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
+			ui.displayNewPrivateDisconnection(username);
 		}).start();
 	}
 
@@ -408,13 +412,8 @@ public class ClientCore implements Closeable {
 				if ((delay) > TIMEOUT) {
 					Logger.warning("CLEANER ACTIVATION : delay " + delay + " > " + TIMEOUT);
 					setChrono(false);
-					try {
-						sc.close();
-						break;
-					} catch (IOException e) {
-						Logger.exception(e);
-						return;
-					}
+					NetworkCommunication.silentlyClose(sc);
+					break;
 				}
 				isReceiving = getChrono();
 			}

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import fr.upem.matou.client.network.ClientEvent;
 import fr.upem.matou.client.network.Message;
+import fr.upem.matou.shared.network.Username;
 
 /**
  * This interface provides methods to display information to the user and retrieve information entered by the user.
@@ -32,10 +33,13 @@ public interface UserInterface {
 
 	public void displayNewPrivateAcceptionEvent(String username);
 
-	public void displayFile(String username, Path path);
+	public void displayNewPrivateDisconnection(Username username);
+
+	public void displayNewFileReception(String username, Path path);
 
 	public void warnInvalidUsername(String username);
 
 	public void warnInvalidMessage(ClientEvent event);
+
 
 }

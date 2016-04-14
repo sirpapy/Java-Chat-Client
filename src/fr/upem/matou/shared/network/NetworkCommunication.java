@@ -97,8 +97,7 @@ public class NetworkCommunication {
 	public static void silentlyClose(SocketChannel sc) {
 		try {
 			sc.close();
-		} catch (IOException e) {
-			Logger.exception(e);
+		} catch (@SuppressWarnings("unused") IOException __) {
 			return;
 		}
 	}

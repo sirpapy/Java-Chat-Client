@@ -81,31 +81,29 @@ class ServerDataBase {
 	}
 
 	void updateStateReadAll() {
-		Logger.debug("BROADCAST : " + bbBroadcast);
+		Logger.debug("BROADCAST BUFFER : " + bbBroadcast);
 		if (bbBroadcast.position() == 0) {
 			return;
 		}
 
-		Logger.debug("KEYS NUMBER : " + keys.size());
 		for (SelectionKey key : keys) {
-			Logger.debug("KEY : " + key);
 			if (!key.isValid()) {
-				Logger.debug("\tINVALID");
+				Logger.debug("\tKEY : INVALID");
 				continue;
 			}
 
 			ServerSession session = (ServerSession) key.attachment();
 			if (session == null) {
-				Logger.debug("\tNO SESSION");
+				Logger.debug("\tKEY : NO SESSION");
 				continue;
 			}
 
 			if (!session.isAuthent()) {
-				Logger.debug("\tNOT AUTHENT");
+				Logger.debug("\tKEY : NOT AUTHENT");
 				continue;
 			}
 
-			Logger.debug("\tOK");
+			Logger.debug("\tKEY : OK");
 
 			session.appendWriteBuffer(bbBroadcast);
 

@@ -12,6 +12,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.Optional;
 
 import fr.upem.matou.shared.logger.Logger;
@@ -122,7 +123,7 @@ class ClientCommunication {
 		return request;
 	}
 
-	 static ByteBuffer encodeRequestPVMSG(ByteBuffer encodedMessage) {
+	static ByteBuffer encodeRequestPVMSG(ByteBuffer encodedMessage) {
 		int length = encodedMessage.remaining();
 
 		int capacity = Integer.BYTES + Integer.BYTES + length;
@@ -147,7 +148,7 @@ class ClientCommunication {
 	/*
 	 * Sends a COREQ request.
 	 */
-	 static boolean sendRequestCOREQ(SocketChannel sc, String username) throws IOException {
+	static boolean sendRequestCOREQ(SocketChannel sc, String username) throws IOException {
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
 		if (!optional.isPresent()) {
 			return false;
@@ -160,7 +161,7 @@ class ClientCommunication {
 	/*
 	 * Sends a MSG request.
 	 */
-	 static boolean sendRequestMSG(SocketChannel sc, String message) throws IOException {
+	static boolean sendRequestMSG(SocketChannel sc, String message) throws IOException {
 		if (!NetworkCommunication.checkMessageValidity(message)) {
 			return false;
 		}
@@ -175,12 +176,12 @@ class ClientCommunication {
 		return true;
 	}
 
-	 static void sendRequestDISCO(SocketChannel sc) throws IOException {
+	static void sendRequestDISCO(SocketChannel sc) throws IOException {
 		ByteBuffer bb = encodeRequestDISCO();
 		sendRequest(sc, bb);
 	}
 
-	 static boolean sendRequestPVCOREQ(SocketChannel sc, String username) throws IOException {
+	static boolean sendRequestPVCOREQ(SocketChannel sc, String username) throws IOException {
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
 		if (!optional.isPresent()) {
 			return false;
@@ -190,7 +191,7 @@ class ClientCommunication {
 		return true;
 	}
 
-	 static boolean sendRequestPVCOACC(SocketChannel sc, String username) throws IOException {
+	static boolean sendRequestPVCOACC(SocketChannel sc, String username) throws IOException {
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
 		if (!optional.isPresent()) {
 			return false;
@@ -200,7 +201,7 @@ class ClientCommunication {
 		return true;
 	}
 
-	 static boolean sendRequestPVCOPORT(SocketChannel sc, String username, int portMessage, int portFile)
+	static boolean sendRequestPVCOPORT(SocketChannel sc, String username, int portMessage, int portFile)
 			throws IOException {
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
 		if (!optional.isPresent()) {
@@ -226,23 +227,20 @@ class ClientCommunication {
 		return true;
 	}
 
-	private static void sendFileChunks(SocketChannel sc, Path path, long totalSize) throws IOException {
+	private static void sendFileChunks(SocketChannel sc, Path path) throws IOException {
+		Logger.debug("FILE UPLOADING : START");
 		try (InputStream is = Files.newInputStream(path, StandardOpenOption.READ)) {
 			byte[] chunk = new byte[CHUNK_SIZE];
 			int read = 0;
-			long totalRead = 0;
 			while ((read = is.read(chunk)) != -1) {
-				totalRead += read;
-				long percent = totalRead * 100 / totalSize;
-				System.out.println(
-						"READ LENGTH : " + read + "\n\tTotal : " + totalRead + "/" + totalSize + " [" + percent + "%]");
 				ByteBuffer wrap = ByteBuffer.wrap(chunk, 0, read);
 				sc.write(wrap);
 			}
 		}
+		Logger.debug("FILE UPLOADING : END");
 	}
 
-	 static boolean sendRequestPVFILE(SocketChannel sc, Path path) throws IOException {
+	static boolean sendRequestPVFILE(SocketChannel sc, Path path) throws IOException {
 		try {
 
 			long totalSize = Files.size(path);
@@ -251,7 +249,7 @@ class ClientCommunication {
 
 			new Thread(() -> {
 				try {
-					sendFileChunks(sc, path, totalSize);
+					sendFileChunks(sc, path);
 				} catch (Exception e) {
 					Logger.exception(e);
 				}
@@ -260,7 +258,7 @@ class ClientCommunication {
 			return true;
 
 		} catch (@SuppressWarnings("unused") NoSuchFileException __) {
-			Logger.warning(path + " does not exist");
+			Logger.warning("File \"" + path + "\" does not exist");
 			return false;
 		}
 	}
@@ -268,7 +266,7 @@ class ClientCommunication {
 	/*
 	 * Receives a protocol type request.
 	 */
-	 static Optional<NetworkProtocol> receiveRequestType(SocketChannel sc) throws IOException {
+	static Optional<NetworkProtocol> receiveRequestType(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bb)) {
 			throw new IOException("Connection closed");
@@ -281,7 +279,7 @@ class ClientCommunication {
 	/*
 	 * Receives a CORES request.
 	 */
-	 static Optional<Boolean> receiveRequestCORES(SocketChannel sc) throws IOException {
+	static Optional<Boolean> receiveRequestCORES(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(1);
 		if (!readFully(sc, bb)) {
 			throw new IOException("Connection closed");
@@ -416,13 +414,12 @@ class ClientCommunication {
 		byte[] addr = new byte[sizeAddress];
 		for (int i = 0; i < sizeAddress; i++) {
 			byte b = bbAddress.get();
-			System.out.println("BYTE ADDRESS = " + b);
 			addr[i] = b;
 		}
+		Logger.debug("ADDRESS = " + Arrays.toString(addr));
 		InetAddress address = InetAddress.getByAddress(addr);
-		System.out.println("ADDRESS = " + address);
 
-		return Optional.of(new SourceConnection(username,address));
+		return Optional.of(new SourceConnection(username, address));
 	}
 
 	static Optional<DestinationConnection> receiveRequestPVCOESTADST(SocketChannel sc) throws IOException {
@@ -455,11 +452,10 @@ class ClientCommunication {
 		byte[] addr = new byte[sizeAddress];
 		for (int i = 0; i < sizeAddress; i++) {
 			byte b = bbAddress.get();
-			System.out.println("BYTE ADDRESS = " + b);
 			addr[i] = b;
 		}
+		Logger.debug("ADDRESS = " + Arrays.toString(addr));
 		InetAddress address = InetAddress.getByAddress(addr);
-		System.out.println("ADDRESS = " + address);
 
 		ByteBuffer bbPortMessage = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbPortMessage)) {
@@ -478,7 +474,7 @@ class ClientCommunication {
 		return Optional.of(new DestinationConnection(username, address, portMessage, portFile));
 	}
 
-	 static Optional<Message> receiveRequestPVMSG(SocketChannel sc, String username) throws IOException {
+	static Optional<Message> receiveRequestPVMSG(SocketChannel sc, String username) throws IOException {
 		ByteBuffer bbSizeMessage = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeMessage)) {
 			throw new IOException("Connection closed");
@@ -506,6 +502,7 @@ class ClientCommunication {
 
 		// TODO : Envoyer le nom du fichier ou son extension
 
+		Logger.debug("FILE DOWNLOADING : START");
 		Path path = Files.createTempFile(Paths.get("./files"), username + "_", "");
 		try (OutputStream os = Files.newOutputStream(path, StandardOpenOption.WRITE,
 				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
@@ -521,14 +518,11 @@ class ClientCommunication {
 				byte[] chunk = bbChunk.array();
 				int read = bbChunk.remaining();
 				totalRead += read;
-				long percent = totalRead * 100 / totalSize;
-				System.out.println(
-						"READ LENGTH : " + read + "\n\tTotal : " + totalRead + "/" + totalSize + " [" + percent + "%]");
 				os.write(chunk, 0, read);
 			}
 		}
 
-		Logger.debug("FILE FINISHED");
+		Logger.debug("FILE DOWNLOADING : END");
 		return Optional.of(path);
 	}
 

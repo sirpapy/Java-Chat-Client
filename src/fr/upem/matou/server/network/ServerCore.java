@@ -11,15 +11,13 @@ import java.nio.channels.SocketChannel;
 import java.util.Set;
 
 import fr.upem.matou.shared.logger.Logger;
-import fr.upem.matou.shared.utils.ByteBuffers;
+import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 
 /*
  * This class is the core of the server.
  */
 @SuppressWarnings("resource")
 public class ServerCore implements Closeable {
-
-	private static final boolean DELAY_ENABLED = false;
 
 	private final ServerSocketChannel ssc;
 	private final Selector selector;
@@ -108,7 +106,7 @@ public class ServerCore implements Closeable {
 
 		bb.flip();
 		try {
-			Logger.debug("WRITING BUFFER : " + bb);
+			Logger.network(NetworkLogType.WRITE, "BUFFER = " + bb);
 			channel.write(bb);
 		} finally {
 			bb.compact();

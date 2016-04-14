@@ -57,6 +57,7 @@ class ClientSession {
 			return false;
 		}
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVMSG);
+		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + message);
 		try {
 			return ClientCommunication.sendRequestPVMSG(sc, message);
@@ -72,6 +73,7 @@ class ClientSession {
 			return false;
 		}
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVFILE);
+		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 		Logger.network(NetworkLogType.WRITE, "PATH : " + path);
 		try {
 			return ClientCommunication.sendRequestPVFILE(sc, path);
@@ -86,13 +88,14 @@ class ClientSession {
 		SocketChannel scFile = privateFiles.remove(username);
 		boolean closed = (scMessage != null) || (scFile != null);
 		if (scMessage != null) {
+			Logger.debug("SILENTLY CLOSE OF : " + scMessage);
 			NetworkCommunication.silentlyClose(scMessage);
 		}
 		if (scFile != null) {
+			Logger.debug("SILENTLY CLOSE OF : " + scFile);
 			NetworkCommunication.silentlyClose(scFile);
 		}
 		return closed;
-
 	}
 
 }

@@ -6,7 +6,6 @@ public class Tasks {
 
 	// FIXME : Tracer les exceptions avec le logger
 	// FIXME : Commentaires de code
-	// FIXME : Vérifier qu'il n'y a pas d'appel à System.out hors du Logger/UI + Logger debug
 	
 	// TODO : Logger sur les exceptions -> Logger.warning/Logger.error
 	// TODO : Tests unitaires

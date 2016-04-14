@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import fr.upem.matou.client.network.ClientEvent;
 import fr.upem.matou.client.network.Message;
+import fr.upem.matou.shared.network.Username;
 
 /**
  * This class provides a user interface from a shell.
@@ -97,12 +98,19 @@ public class ShellInterface implements UserInterface {
 		requireNonNull(username);
 		output.println("<" + username + " accepts the private connection>");
 	}
-
+	
 	@Override
-	public void displayFile(String username, Path path) {
+	public void displayNewFileReception(String username, Path path) {
 		requireNonNull(username);
 		requireNonNull(path);
 		output.println("<" + username + " sends a file : " + path + ">");
+	}	
+
+	@Override
+	public void displayNewPrivateDisconnection(Username username) {
+		requireNonNull(username);
+		output.println("<Private connection closed with " + username + ">"); 
+		// FIXME : Affiché en double par le receveur (1 par thread)
 	}
 
 	@Override
