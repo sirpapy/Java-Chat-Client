@@ -75,9 +75,11 @@ public class ServerCore implements Closeable {
 	private void doAccept(SelectionKey key) throws IOException {
 		ServerSocketChannel channel = (ServerSocketChannel) key.channel();
 		SocketChannel acceptedChannel = channel.accept();
+		
 		if (acceptedChannel == null) {
 			return;
 		}
+		
 		acceptedChannel.configureBlocking(false);
 		SelectionKey registeredKey = acceptedChannel.register(selector, SelectionKey.OP_READ);
 		ServerSession session = db.newServerSession(acceptedChannel, registeredKey);

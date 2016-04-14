@@ -509,7 +509,7 @@ class ClientCommunication {
 			long totalRead = 0;
 			while (totalRead < totalSize) {
 				long diff = totalSize - totalRead;
-				long capacity = diff <= CHUNK_SIZE ? diff : CHUNK_SIZE;
+				long capacity = diff <= CHUNK_SIZE ? diff : CHUNK_SIZE; // bytes of the next chunk
 				ByteBuffer bbChunk = ByteBuffer.allocate((int) capacity);
 				if (!readFully(sc, bbChunk)) {
 					throw new IOException("Connection closed");

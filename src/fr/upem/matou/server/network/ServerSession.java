@@ -17,9 +17,11 @@ import fr.upem.matou.shared.utils.ByteBuffers;
 
 /*
  * This class represents the state of a client connected to the chat server.
+ * A ServerSession is always attached to one ServerDataBase and should be created by
+ * ServerDataBase.newServerSession(SocketChannel,SelectionKey).
  */
 class ServerSession {
-	
+
 	private static final int BUFFER_SIZE_INPUT = NetworkProtocol.getMaxServerIncomingRequestSize();
 	private static final int BUFFER_SIZE_OUTPUT = NetworkProtocol.getMaxServerOutgoingRequestSize();
 	private static final int USERNAME_MAX_SIZE = NetworkCommunication.getUsernameMaxSize();
@@ -32,8 +34,8 @@ class ServerSession {
 
 	private final ByteBuffer bbRead = ByteBuffer.allocateDirect(BUFFER_SIZE_INPUT);
 	private final ByteBuffer bbWrite = ByteBuffer.allocateDirect(BUFFER_SIZE_OUTPUT);
-	
-	private boolean authent = false;
+
+	private boolean authent = false; // If the client has a username
 	private NetworkProtocol protocol = null;
 	private int arg = 0;
 	private ClientState clientState = null;
@@ -110,12 +112,18 @@ class ServerSession {
 		}
 	}
 
+	/*
+	 * Resets the read state of this client in order to read another request.
+	 */
 	private void resetReadState() {
 		clearAndLimit(bbRead, Integer.BYTES);
 		arg = 0;
 		protocol = null;
 	}
 
+	/*
+	 * Updates the state of this client in order to read another argument of the current request.
+	 */
 	private void advanceReadState(int size) {
 		clearAndLimit(bbRead, size);
 		arg++;
@@ -174,7 +182,7 @@ class ServerSession {
 	}
 
 	/*
-	 * Process the read buffer to retrieves the first argument of the COREQ request and updates current state.
+	 * Process the read buffer to retrieves the first argument of the COREQ request and updates the current state.
 	 */
 	private void processCOREQarg1(StateCOREQ state) {
 		bbRead.flip();
@@ -190,7 +198,7 @@ class ServerSession {
 	}
 
 	/*
-	 * Process the read buffer to retrieves the second argument of the COREQ request and updates current state.
+	 * Process the read buffer to retrieves the second argument of the COREQ request and updates the current state.
 	 */
 	private void processCOREQarg2(StateCOREQ state) {
 		bbRead.flip();
@@ -573,8 +581,7 @@ class ServerSession {
 		Logger.network(NetworkLogType.WRITE, "PORT MESSAGE : " + portMessage);
 		Logger.network(NetworkLogType.WRITE, "PORT FILE : " + portFile);
 
-		if (!ServerCommunication.addRequestPVCOESTADST(bbTarget, target.toString(), address, portMessage,
-				portFile)) {
+		if (!ServerCommunication.addRequestPVCOESTADST(bbTarget, target.toString(), address, portMessage, portFile)) {
 			Logger.warning("PVCOESTADST lost | Write Buffer cannot hold it");
 			return;
 		}
@@ -591,7 +598,7 @@ class ServerSession {
 			return;
 		}
 
-		if (protocol == null) {
+		if (protocol == null) { // New request
 			int code = processRequestType();
 			if (protocol == null) {
 				Logger.warning("Invalid protocol code : " + code);
@@ -600,6 +607,7 @@ class ServerSession {
 			}
 		}
 
+		// Here : process the request's arguments.		
 		switch (protocol) {
 		case COREQ:
 			processCOREQ();
@@ -620,13 +628,16 @@ class ServerSession {
 			processPVCOPORT();
 			return;
 		default:
-			Logger.warning("Operation not implemented yet : " + protocol); // TEMP
+			Logger.warning("Operation not implemented : " + protocol); // TEMP
 			disconnectClient();
 			return;
 		}
 
 	}
 
+	/*
+	 * Computes the new interest ops of the client.
+	 */
 	int computeInterestOps() {
 		int ops = 0;
 
@@ -641,6 +652,9 @@ class ServerSession {
 		return ops;
 	}
 
+	/*
+	 * Updates the interest ops of the selection key of the client.
+	 */
 	void updateKey() {
 		if (!key.isValid()) {
 			Logger.debug("This key is not valid anymore");
@@ -654,6 +668,9 @@ class ServerSession {
 		key.interestOps(ops);
 	}
 
+	/*
+	 * Disconnects the client.
+	 */
 	void disconnectClient() {
 		Logger.debug("SILENTLY CLOSE OF : " + sc);
 		Optional<Username> disconnected = db.removeClient(sc);

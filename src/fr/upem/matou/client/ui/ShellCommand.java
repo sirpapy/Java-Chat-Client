@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 import fr.upem.matou.client.network.ClientEvent;
 import fr.upem.matou.client.network.ClientEvent.*;
 
+/*
+ * This class is used to convert an input string command to a ClientEvent.
+ */
 class ShellCommand {
 
 	private static final String COMMAND_TOKEN = "/";
@@ -31,7 +34,7 @@ class ShellCommand {
 		switch (command) {
 
 		case "pv": {
-			if(tokens.length < 3) {
+			if (tokens.length < 3) {
 				return Optional.empty();
 			}
 			String username = tokens[1];
@@ -40,7 +43,7 @@ class ShellCommand {
 		}
 
 		case "file": {
-			if(tokens.length != 3) {
+			if (tokens.length != 3) {
 				return Optional.empty();
 			}
 			String username = tokens[1];
@@ -49,7 +52,7 @@ class ShellCommand {
 		}
 
 		case "open": {
-			if(tokens.length != 2) {
+			if (tokens.length != 2) {
 				return Optional.empty();
 			}
 			String username = tokens[1];
@@ -57,7 +60,7 @@ class ShellCommand {
 		}
 
 		case "close": {
-			if(tokens.length != 2) {
+			if (tokens.length != 2) {
 				return Optional.empty();
 			}
 			String username = tokens[1];
@@ -65,7 +68,7 @@ class ShellCommand {
 		}
 
 		case "accept": {
-			if(tokens.length != 2) {
+			if (tokens.length != 2) {
 				return Optional.empty();
 			}
 			String username = tokens[1];

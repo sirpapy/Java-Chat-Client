@@ -11,6 +11,10 @@ import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 
+/*
+ * This class represents the state of the client connected to the chat server.
+ * This class is thread-safe.
+ */
 @SuppressWarnings("resource")
 class ClientSession {
 	private final SocketChannel publicChannel;

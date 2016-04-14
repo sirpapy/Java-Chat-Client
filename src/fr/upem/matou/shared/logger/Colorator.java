@@ -1,10 +1,11 @@
 package fr.upem.matou.shared.logger;
 
-/*
+/**
+ * This class provides static methods to display colored string in a shell using the ANSI escape codes.
+ * 
  * Inspired from :
  * http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
  */
-
 public class Colorator {
 	private static boolean activated = true;
 

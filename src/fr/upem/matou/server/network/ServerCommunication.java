@@ -18,7 +18,8 @@ class ServerCommunication {
 	private ServerCommunication() {
 	}
 
-	// bb should be flipped
+	/* Reads an UTF-8 string.
+	 * The bytebuffer should be flipped before a call to this method. */
 	static String readStringUTF8(ByteBuffer bb) {
 		return PROTOCOL_CHARSET.decode(bb).toString();
 	}
@@ -44,7 +45,7 @@ class ServerCommunication {
 	}
 
 	/*
-	 * Encodes a MSGBC request.
+	 * Adds a MSGBC request to the buffer.
 	 */
 	static boolean addRequestMSGBC(ByteBuffer bbWrite, String username, String message) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
@@ -66,7 +67,7 @@ class ServerCommunication {
 	}
 
 	/*
-	 * Encodes a CONOTIF request.
+	 * Adds a CONOTIF request to the buffer.
 	 */
 	static boolean addRequestCONOTIF(ByteBuffer bbWrite, String username) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
@@ -84,7 +85,7 @@ class ServerCommunication {
 	}
 
 	/*
-	 * Encodes a DISCONOTIF request.
+	 * Adds a DISCONOTIF request to the buffer.
 	 */
 	static boolean addRequestDISCONOTIF(ByteBuffer bbWrite, String username) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);

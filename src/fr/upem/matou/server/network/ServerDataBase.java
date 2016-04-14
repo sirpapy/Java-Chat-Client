@@ -33,6 +33,9 @@ class ServerDataBase {
 		this.keys = keys;
 	}
 
+	/*
+	 * Creates a new ServerSession in this ServerDataBase.
+	 */
 	ServerSession newServerSession(SocketChannel sc, SelectionKey key) throws IOException {
 		ServerSession session = new ServerSession(this, sc, key);
 		sessions.put(sc, session);
@@ -40,8 +43,8 @@ class ServerDataBase {
 	}
 
 	/*
-	 * Add a new client.
-	 * Check if : available & no illegal characters
+	 * Adds a new client.
+	 * Check if the username is available and does not contain any illegal character.
 	 */
 	boolean authentClient(SocketChannel sc, Username username) {
 		if (!(checkAvailability(username))) {
@@ -51,6 +54,9 @@ class ServerDataBase {
 		return true;
 	}
 
+	/*
+	 * Removes a client from the database.
+	 */
 	Optional<Username> removeClient(SocketChannel channel) {
 		sessions.remove(channel);
 		Username disconnected = connected.remove(channel);
@@ -61,6 +67,9 @@ class ServerDataBase {
 		return Optional.ofNullable(disconnected);
 	}
 
+	/*
+	 * Removes all private request of connected clients to a specific client.
+	 */
 	private void removeAllRequestTo(Username disconnected) {
 		for (Entry<Username, HashSet<Username>> entry : privateRequests.entrySet()) {
 			Username key = entry.getKey();
@@ -72,14 +81,26 @@ class ServerDataBase {
 		}
 	}
 
+	/*
+	 * Checks if a username is available.
+	 */
 	private boolean checkAvailability(Username username) {
 		return !names.contains(username);
 	}
 
+	/*
+	 * Returns the common byte buffer of all clients.
+	 */
 	ByteBuffer getBroadcastBuffer() {
 		return bbBroadcast;
 	}
 
+	/*
+	 * Updates the read state of all clients.
+	 * If the broadcast bytebuffer is not empty, then all the client's write bytebuffer are filled by the broadcast
+	 * bytebuffer.
+	 * The broadcast bytebuffer is cleared after this operation.
+	 */
 	void updateStateReadAll() {
 		Logger.debug("BROADCAST BUFFER : " + bbBroadcast);
 		if (bbBroadcast.position() == 0) {
@@ -121,10 +142,16 @@ class ServerDataBase {
 		return Optional.ofNullable(connected.get(sc));
 	}
 
+	/*
+	 * Returns the session associated with this SocketChannel.
+	 */
 	Optional<ServerSession> sessionOf(SocketChannel sc) {
 		return Optional.ofNullable(sessions.get(sc));
 	}
 
+	/*
+	 * Returns the session associated with this username.
+	 */
 	Optional<ServerSession> sessionOf(Username username) {
 		Optional<SocketChannel> sc = connected.entrySet().stream()
 				.filter(e -> e.getValue().equals(username))
@@ -136,6 +163,9 @@ class ServerDataBase {
 		return sessionOf(sc.get());
 	}
 
+	/*
+	 * Adds a new private request.
+	 */
 	boolean addNewPrivateRequest(Username source, Username target) {
 		HashSet<Username> set = privateRequests.get(source);
 		if (set == null) {
@@ -147,6 +177,9 @@ class ServerDataBase {
 		return added;
 	}
 
+	/*
+	 * Checks if source has requested the target for private connection.
+	 */
 	boolean checkPrivateRequest(Username source, Username target) {
 		HashSet<Username> set = privateRequests.get(target);
 		Logger.debug("PV CHECK (" + source + " -> " + target + ") : " + set);
@@ -156,6 +189,9 @@ class ServerDataBase {
 		return set.contains(source);
 	}
 
+	/*
+	 * Removes a private request.
+	 */
 	boolean removePrivateRequest(Username source, Username target) {
 		HashSet<Username> set = privateRequests.get(target);
 		Logger.debug("PV CHECK & REMOVE (" + source + " -> " + target + ") : " + set);

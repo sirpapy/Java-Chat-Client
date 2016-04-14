@@ -2,9 +2,17 @@ package fr.upem.matou.shared.network;
 
 import java.util.Objects;
 
+/**
+ * This object represents a Username. A username is a string where case is ignored.
+ */
 public class Username {
 	private final String name;
 
+	/**
+	 * Returns a new username from a string.
+	 *  
+	 * @param name The username
+	 */
 	public Username(String name) {
 		this.name = Objects.requireNonNull(name);
 	}

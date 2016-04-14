@@ -6,6 +6,9 @@ import java.net.InetAddress;
 
 import fr.upem.matou.shared.network.Username;
 
+/*
+ * This object describes data of an opened private request.
+ */
 class SourceConnection {
 	private final Username username;
 	private final InetAddress address;

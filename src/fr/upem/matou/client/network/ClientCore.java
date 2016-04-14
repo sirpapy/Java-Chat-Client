@@ -107,6 +107,9 @@ public class ClientCore implements Closeable {
 		return false;
 	}
 
+	/*
+	 * Reads requests from the server.
+	 */
 	private void messageReceiver() throws IOException {
 		Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
 		if (!optionalRequestType.isPresent()) {
@@ -227,6 +230,9 @@ public class ClientCore implements Closeable {
 
 	}
 
+	/*
+	 * Reads message requests from a client.
+	 */
 	private void privateCommunicationMessage(SocketChannel pv, Username username) throws IOException {
 		while (true) {
 			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(pv);
@@ -260,6 +266,9 @@ public class ClientCore implements Closeable {
 		}
 	}
 
+	/*
+	 * Reads file requests from a client.
+	 */
 	private void privateCommunicationFile(SocketChannel pv, Username username) throws IOException {
 		while (true) {
 			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(pv);

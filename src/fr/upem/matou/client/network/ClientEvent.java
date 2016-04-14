@@ -7,6 +7,9 @@ import java.nio.file.Path;
 
 import fr.upem.matou.shared.network.Username;
 
+/**
+ * This class provides events requested by a client through the user interface.
+ */
 public interface ClientEvent {
 	static final String COMMAND_TOKEN = "/";
 
@@ -114,6 +117,15 @@ public interface ClientEvent {
 
 	}
 
+	/**
+	 * Executes the event.
+	 * 
+	 * @param session
+	 *            The current client session.
+	 * @return true if the event succeeded, false otherwise.
+	 * @throws IOException
+	 *             If an I/O error occurs.
+	 */
 	public boolean execute(ClientSession session) throws IOException;
 
 }

@@ -15,8 +15,8 @@ import java.util.Optional;
 
 import fr.upem.matou.shared.logger.Logger;
 
-/*
- * This class defines the communication protocol.
+/**
+ * This class defines the communication protocol that both server and client have to meet.
  */
 public enum NetworkProtocol {
 
@@ -61,10 +61,12 @@ public enum NetworkProtocol {
 		maxRequestSize = argumentSizes.stream().mapToInt(Integer::intValue).sum();
 	}
 
+	// TEMP
 	public int getMaxRequestSize() {
 		return maxRequestSize;
 	}
 
+	// TEMP
 	public int getArgumentSize(int arg) {
 		return argumentSizes.get(arg);
 	}
@@ -74,8 +76,12 @@ public enum NetworkProtocol {
 		return "[" + ordinal() + " - " + name() + " - " + source + " => " + target + " - " + description + "]";
 	}
 
-	/*
-	 * Returns the protocol from the ordinal number.
+	/**
+	 * Returns the protocol associated with this ordinal number.
+	 *
+	 * @param ordinal
+	 *            The ordinal number of the protocol
+	 * @return The protocol if the ordinal number is valid
 	 */
 	public static Optional<NetworkProtocol> getProtocol(int ordinal) {
 		NetworkProtocol[] values = values();
@@ -94,12 +100,22 @@ public enum NetworkProtocol {
 				.max().getAsInt();
 	}
 
+	/**
+	 * Returns the maximum size of a request received by the server.
+	 * 
+	 * @return The maximum size of a server incoming request.
+	 */
 	public static int getMaxServerIncomingRequestSize() {
 		int max = getMaxRequestSize(CLIENT, SERVER);
 		Logger.debug("SERVER MAX INCOMING REQUEST SIZE : " + max);
 		return max;
 	}
 
+	/**
+	 * Returns the maximum size of a request sent by the server.
+	 * 
+	 * @return The maximum size of a server outgoing request.
+	 */
 	public static int getMaxServerOutgoingRequestSize() {
 		int max = getMaxRequestSize(SERVER, CLIENT);
 		Logger.debug("MAX SERVER OUTGOING REQUEST SIZE : " + max);

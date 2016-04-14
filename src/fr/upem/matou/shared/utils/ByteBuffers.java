@@ -51,7 +51,7 @@ public class ByteBuffers {
 		requireNonNull(source);
 		source.flip();
 		try {
-			if (source.remaining() > target.remaining()) {
+			if (source.remaining() > target.remaining()) { // insufficient space
 				return false;
 			}
 			target.put(source);
@@ -61,7 +61,7 @@ public class ByteBuffers {
 		}
 		return true;
 	}
-		
+
 	/**
 	 * Merges two buffers in one.
 	 * The two buffers are not modified.
@@ -128,6 +128,13 @@ public class ByteBuffers {
 		return "{" + string + "}";
 	}
 
+	/**
+	 * Returns a string binary representation of a byte.
+	 * 
+	 * @param b
+	 *            The byte
+	 * @return The string representation of the byte.
+	 */
 	public static String toBinaryString(byte b) {
 		return String.format("%8s", Integer.toBinaryString(b)).replace(' ', '0');
 	}

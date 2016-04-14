@@ -11,6 +11,9 @@ import java.util.Set;
 
 import fr.upem.matou.shared.logger.Logger;
 
+/*
+ * This class provides static methods on selectors.
+ */
 class SelectorDebug {
 	static String interestOpsToString(SelectionKey key) {
 		if (!key.isValid()) {
