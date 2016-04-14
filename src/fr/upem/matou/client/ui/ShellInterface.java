@@ -65,7 +65,7 @@ public class ShellInterface implements UserInterface {
 
 		String string;
 		if (isPrivate) {
-			string = "#" + username + "#";
+			string = "{" + username + "}";
 
 		} else {
 			string = "<" + username + ">";
@@ -110,7 +110,7 @@ public class ShellInterface implements UserInterface {
 	public void displayNewPrivateDisconnection(Username username) {
 		requireNonNull(username);
 		output.println("<Private connection closed with " + username + ">"); 
-		// FIXME : Affiché en double par le receveur (1 par thread)
+		// FIXME : Affiché en double (1 par thread)
 	}
 
 	@Override

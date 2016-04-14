@@ -366,6 +366,7 @@ public class ClientCore implements Closeable {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			}
+			ui.displayNewPrivateDisconnection(username);
 		}).start();
 
 		new Thread(() -> {
@@ -387,7 +388,6 @@ public class ClientCore implements Closeable {
 			} catch (IOException e) {
 				Logger.exception(e);
 			}
-			ui.displayNewPrivateDisconnection(username);
 		}).start();
 	}
 
