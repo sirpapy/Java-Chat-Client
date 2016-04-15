@@ -410,6 +410,7 @@ public class ClientCore implements Closeable {
 		}).start();
 	}
 
+	// FIXME : Pas utile
 	private void cleaner() throws InterruptedException {
 		long delay = 0;
 		boolean isReceiving = getChrono();
@@ -493,6 +494,7 @@ public class ClientCore implements Closeable {
 		cleaner.interrupt();
 	}
 
+	// FIXME : Pas utile
 	private void warnDisconnection() throws IOException {
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCO);
 		ClientCommunication.sendRequestDISCO(sc);

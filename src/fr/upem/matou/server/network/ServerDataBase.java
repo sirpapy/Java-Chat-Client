@@ -20,6 +20,8 @@ import fr.upem.matou.shared.network.Username;
  * This class is not thread-safe and should not be used by several threads.
  */
 class ServerDataBase {
+	
+	// FIXME : Nombre maximum de clients
 	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxServerOutgoingRequestSize();
 
 	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
