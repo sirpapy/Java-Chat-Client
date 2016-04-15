@@ -29,24 +29,11 @@ public class ClientCore implements Closeable {
 	private final SocketChannel sc;
 	private final ClientSession session;
 	private final UserInterface ui = new ShellInterface();
-	private boolean isReceiverActivated = false;
 
 	public ClientCore(String hostname, int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(hostname, port);
 		sc = SocketChannel.open(address);
 		session = new ClientSession(sc);
-	}
-
-	private void setChrono(boolean isActivated) {
-		synchronized (monitor) {
-			isReceiverActivated = isActivated;
-		}
-	}
-
-	private boolean getChrono() {
-		synchronized (monitor) {
-			return isReceiverActivated;
-		}
 	}
 
 	private void usernameSender() throws IOException {
@@ -121,9 +108,7 @@ public class ClientCore implements Closeable {
 		switch (protocol) {
 
 		case MSGBC: {
-			setChrono(true);
 			Optional<Message> optionalMSGBC = ClientCommunication.receiveRequestMSGBC(sc);
-			setChrono(false);
 
 			if (!optionalMSGBC.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
@@ -137,9 +122,7 @@ public class ClientCore implements Closeable {
 		}
 
 		case CONOTIF: {
-			setChrono(true);
 			Optional<String> optionalCONOTIF = ClientCommunication.receiveRequestCONOTIF(sc);
-			setChrono(false);
 
 			if (!optionalCONOTIF.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
@@ -152,9 +135,7 @@ public class ClientCore implements Closeable {
 		}
 
 		case DISCONOTIF: {
-			setChrono(true);
 			Optional<String> optionalDISCONOTIF = ClientCommunication.receiveRequestDISCONOTIF(sc);
-			setChrono(false);
 
 			if (!optionalDISCONOTIF.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
@@ -167,9 +148,7 @@ public class ClientCore implements Closeable {
 		}
 
 		case PVCOREQNOTIF: {
-			setChrono(true);
 			Optional<String> optionalPVCOREQNOTIF = ClientCommunication.receiveRequestPVCOREQNOTIF(sc);
-			setChrono(false);
 
 			if (!optionalPVCOREQNOTIF.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
@@ -182,9 +161,7 @@ public class ClientCore implements Closeable {
 		}
 
 		case PVCOESTASRC: {
-			setChrono(true);
 			Optional<SourceConnection> optionalPVCOESTASRC = ClientCommunication.receiveRequestPVCOESTASRC(sc);
-			setChrono(false);
 
 			if (!optionalPVCOESTASRC.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
@@ -201,9 +178,7 @@ public class ClientCore implements Closeable {
 		}
 
 		case PVCOESTADST: {
-			setChrono(true);
 			Optional<DestinationConnection> optionalPVCOESTADST = ClientCommunication.receiveRequestPVCOESTADST(sc);
-			setChrono(false);
 
 			if (!optionalPVCOESTADST.isPresent()) {
 				throw new IOException("Protocol violation : " + protocol);
@@ -410,30 +385,6 @@ public class ClientCore implements Closeable {
 		}).start();
 	}
 
-	// FIXME : Pas utile
-	private void cleaner() throws InterruptedException {
-		long delay = 0;
-		boolean isReceiving = getChrono();
-
-		if (isReceiving) {
-			long begin = System.currentTimeMillis();
-			while (isReceiving) {
-				delay = System.currentTimeMillis() - begin;
-				if ((delay) > TIMEOUT) {
-					Logger.warning("CLEANER ACTIVATION : delay " + delay + " > " + TIMEOUT);
-					setChrono(false);
-					NetworkCommunication.silentlyClose(sc);
-					break;
-				}
-				isReceiving = getChrono();
-			}
-
-		} else {
-			Thread.sleep(TIMEOUT);
-		}
-
-	}
-
 	private void threadMessageSender() {
 		boolean exit = false;
 		while (!Thread.interrupted() && exit == false) {
@@ -459,17 +410,6 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void threadCleaner() {
-		while (!Thread.interrupted()) {
-			try {
-				cleaner();
-			} catch (InterruptedException e) {
-				Logger.warning("INTERRUPTION | " + e.toString());
-				return;
-			}
-		}
-	}
-
 	private void processUsername() throws IOException {
 		boolean isAccepted = false;
 		while (!isAccepted) {
@@ -481,17 +421,14 @@ public class ClientCore implements Closeable {
 	private void processMessages() throws InterruptedException, IOException {
 		Thread sender = new Thread(() -> threadMessageSender());
 		Thread receiver = new Thread(() -> threadMessageReceiver());
-		Thread cleaner = new Thread(() -> threadCleaner());
 
 		sender.start();
 		receiver.start();
-		cleaner.start();
 
 		sender.join();
 		warnDisconnection();
 
 		receiver.interrupt();
-		cleaner.interrupt();
 	}
 
 	// FIXME : Pas utile
