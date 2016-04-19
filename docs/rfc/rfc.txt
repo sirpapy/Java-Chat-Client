@@ -163,24 +163,7 @@ Interactions:
 		| Type |  SizeFile  |  FileChunk  |  ...  |
 		+------+------------+-------------+-------+
 
-	Private sign out
-		[C-C] Sign out
-		The client notifies his interlocutor that he wants to terminate the private connection.
-		+------+
-		| int  |
-		+------+
-		| Type |
-		+------+
-
 	Public sign out
-		[C-S] Sign out
-		The client notifies the server that he wants to terminate the connection.
-		+------+
-		| int  |
-		+------+
-		| Type |
-		+------+
-
 		[S-A] Sign out notification
 		The server notifies all clients that a client has left the chat room.
 		+------+--------------+----------+

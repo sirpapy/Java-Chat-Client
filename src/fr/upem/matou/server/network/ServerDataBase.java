@@ -21,7 +21,6 @@ import fr.upem.matou.shared.network.Username;
  */
 class ServerDataBase {
 	
-	// FIXME : Nombre maximum de clients
 	private static final int MAX_CLIENT = 2;
 	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxServerOutgoingRequestSize();
 

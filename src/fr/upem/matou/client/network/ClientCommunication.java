@@ -500,7 +500,7 @@ class ClientCommunication {
 		bbSizeFile.flip();
 		long totalSize = bbSizeFile.getLong();
 
-		// TODO : Envoyer le nom du fichier ou son extension
+		// FIXME : Envoyer le nom du fichier ou son extension
 
 		Logger.debug("FILE DOWNLOADING : START");
 		Path path = Files.createTempFile(Paths.get("./files"), username + "_", "");
