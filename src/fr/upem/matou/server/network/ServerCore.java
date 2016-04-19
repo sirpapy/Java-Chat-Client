@@ -8,10 +8,12 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Optional;
 import java.util.Set;
 
 import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.logger.Logger.NetworkLogType;
+import fr.upem.matou.shared.network.NetworkCommunication;
 
 /*
  * This class is the core of the server.
@@ -82,7 +84,13 @@ public class ServerCore implements Closeable {
 		
 		acceptedChannel.configureBlocking(false);
 		SelectionKey registeredKey = acceptedChannel.register(selector, SelectionKey.OP_READ);
-		ServerSession session = db.newServerSession(acceptedChannel, registeredKey);
+		Optional<ServerSession> optional = db.newServerSession(acceptedChannel, registeredKey);
+		if(!optional.isPresent()) {
+			Logger.warning("Server is full"); // FIXME : MàJ OP_ACCEPT
+			NetworkCommunication.silentlyClose(acceptedChannel);
+			return;
+		}
+		ServerSession session = optional.get();
 		registeredKey.attach(session);
 	}
 

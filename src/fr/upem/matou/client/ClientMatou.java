@@ -34,10 +34,16 @@ public class ClientMatou {
 //		Logger.attachOutput(out);
 //		Logger.attachError(err);
 		
+		
+		
+		
 		String host = args[0];
 		int port = Integer.parseInt(args[1]);
 		try (ClientCore client = new ClientCore(host, port)) {
 			client.startChat();
+			/* TODO : Connexion en ligne de commande 
+			 * client.startChat(pseudo);
+			 */
 		} catch (IOException e) {
 			Logger.error("CRITICAL ERROR | " + e.toString());
 			Logger.exception(e);

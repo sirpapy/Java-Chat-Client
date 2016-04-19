@@ -22,6 +22,7 @@ import fr.upem.matou.shared.network.Username;
 class ServerDataBase {
 	
 	// FIXME : Nombre maximum de clients
+	private static final int MAX_CLIENT = 2;
 	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxServerOutgoingRequestSize();
 
 	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
@@ -30,7 +31,7 @@ class ServerDataBase {
 	private final Collection<Username> names = connected.values();
 	private final Set<SelectionKey> keys;
 	private final ByteBuffer bbBroadcast = ByteBuffer.allocateDirect(BUFFER_SIZE_BROADCAST);
-
+	
 	ServerDataBase(Set<SelectionKey> keys) {
 		this.keys = keys;
 	}
@@ -38,10 +39,13 @@ class ServerDataBase {
 	/*
 	 * Creates a new ServerSession in this ServerDataBase.
 	 */
-	ServerSession newServerSession(SocketChannel sc, SelectionKey key) throws IOException {
+	Optional<ServerSession> newServerSession(SocketChannel sc, SelectionKey key) throws IOException {
+		if(sessions.size() >= MAX_CLIENT) {
+			return Optional.empty();
+		}
 		ServerSession session = new ServerSession(this, sc, key);
 		sessions.put(sc, session);
-		return session;
+		return Optional.of(session);
 	}
 
 	/*
