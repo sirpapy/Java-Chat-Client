@@ -33,25 +33,29 @@ public class ClientCore implements Closeable {
 		session = new ClientSession(sc);
 	}
 
-	private void usernameSender() throws IOException {
+	private Optional<String> usernameGetter() throws IOException {
 		while (true) {
 			Optional<String> optional = ui.getUsername();
 			if (!optional.isPresent()) {
-				throw new IOException("User exited"); // TEMP
+				return Optional.empty();
 			}
 			String username = optional.get();
 			if (!NetworkCommunication.checkUsernameValidity(username)) {
 				ui.warnInvalidUsername(username);
 				continue;
 			}
-			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
-			Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
-			if (!ClientCommunication.sendRequestCOREQ(sc, username)) {
-				ui.warnInvalidUsername(username);
-				continue;
-			}
-			return;
+			return Optional.of(username);
 		}
+	}
+
+	private boolean usernameSender(String username) throws IOException {
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
+		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
+		if (!ClientCommunication.sendRequestCOREQ(sc, username)) {
+			ui.warnInvalidUsername(username);
+			return false;
+		}
+		return true;
 	}
 
 	private boolean usernameReceiver() throws IOException {
@@ -407,12 +411,8 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void processUsername() throws IOException {
-		boolean isAccepted = false;
-		while (!isAccepted) {
-			usernameSender();
-			isAccepted = usernameReceiver();
-		}
+	private boolean connectUsername(String username) throws IOException {
+		return usernameSender(username) && usernameReceiver();
 	}
 
 	private void processMessages() throws InterruptedException {
@@ -428,11 +428,46 @@ public class ClientCore implements Closeable {
 	}
 
 	public void startChat() throws IOException, InterruptedException {
-		processUsername();
+		while (true) {
+			Optional<String> optional = usernameGetter();
+			if (!optional.isPresent()) {
+				Logger.debug("CONNECTION FAILED");
+				return;
+			}
+			String username = optional.get();
+			if (!usernameSender(username)) {
+				continue;
+			}
+			if (!usernameReceiver()) {
+				continue;
+			}
+			break;
+		}
+
 		processMessages();
+
 		Logger.debug("DISCONNECTION");
 	}
 
+	public void startChat(String username) throws IOException, InterruptedException {
+		if (!connectUsername(username)) {
+			Logger.debug("CONNECTION FAILED");
+			return;
+		}
+
+		processMessages();
+
+		Logger.debug("DISCONNECTION");
+	}
+
+	public void startChat(Optional<String> username) throws IOException, InterruptedException {
+		if(username.isPresent()) {
+			startChat(username.get());
+		} else {
+			startChat();
+		}
+	}
+	
 	@Override
 	public void close() throws IOException {
 		sc.close();

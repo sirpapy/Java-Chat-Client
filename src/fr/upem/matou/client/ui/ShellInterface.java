@@ -19,9 +19,9 @@ public class ShellInterface implements UserInterface {
 	private static final String INPUT_CHARSET = "UTF-8";
 
 	private final InputStream input = System.in;
-	private final Scanner scanner = new Scanner(input, INPUT_CHARSET);
 	private final PrintStream output = System.out;
 	private final PrintStream error = System.err;
+	private final Scanner scanner = new Scanner(input, INPUT_CHARSET);
 
 	private Optional<String> readLine() {
 		if (scanner.hasNextLine()) {

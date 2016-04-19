@@ -38,6 +38,7 @@ public class NetworkCommunication {
 	 * @return true if the username is valid, false otherwise.
 	 */
 	public static boolean checkUsernameValidity(String username) {
+		// FIXME : Centraliser dans EncodedValidity
 		if (username == null) {
 			return false;
 		}
@@ -51,6 +52,7 @@ public class NetworkCommunication {
 	 * @return true if the message is valid, false otherwise.
 	 */
 	public static boolean checkMessageValidity(String message) {
+		// FIXME : Centraliser dans EncodedValidity
 		if (message == null) {
 			return false;
 		}
