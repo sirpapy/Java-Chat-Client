@@ -128,6 +128,11 @@ public class ShellInterface implements UserInterface {
 	}
 
 	@Override
+	public void warnUnavailableUsername(String username) {
+		error.println("This username is not available");
+	}
+	
+	@Override
 	public void warnInvalidMessage(ClientEvent event) {
 		error.println("This message is not valid");
 	}

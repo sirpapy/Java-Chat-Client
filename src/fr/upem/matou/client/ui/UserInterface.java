@@ -77,4 +77,6 @@ public interface UserInterface {
 	 */
 	public void warnInvalidMessage(ClientEvent event);
 
+	public void warnUnavailableUsername(String username);
+
 }

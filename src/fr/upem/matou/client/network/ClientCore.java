@@ -33,15 +33,8 @@ public class ClientCore implements Closeable {
 		session = new ClientSession(sc);
 	}
 
-	private Optional<String> usernameGetter() throws IOException {
-		while (true) {
-			Optional<String> optional = ui.getUsername();
-			if (!optional.isPresent()) {
-				return Optional.empty();
-			}
-			String username = optional.get();
-			return Optional.of(username);
-		}
+	private Optional<String> usernameGetter() {
+		return ui.getUsername();
 	}
 
 	private boolean usernameSender(String username) throws IOException {
@@ -58,7 +51,7 @@ public class ClientCore implements Closeable {
 		return true;
 	}
 
-	private boolean usernameReceiver() throws IOException {
+	private boolean usernameReceiver(String username) throws IOException {
 		Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
 		if (!optionalRequestType.isPresent()) {
 			throw new IOException("Protocol violation");
@@ -74,6 +67,9 @@ public class ClientCore implements Closeable {
 			}
 			boolean acceptation = optionalCORES.get();
 			Logger.network(NetworkLogType.READ, "ACCEPTATION : " + acceptation);
+			if(!acceptation) {
+				ui.warnUnavailableUsername(username);
+			}
 			return acceptation;
 		}
 		default:
@@ -412,7 +408,7 @@ public class ClientCore implements Closeable {
 	}
 
 	private boolean connectUsername(String username) throws IOException {
-		return usernameSender(username) && usernameReceiver();
+		return usernameSender(username) && usernameReceiver(username);
 	}
 
 	private void processMessages() throws InterruptedException {
@@ -438,7 +434,7 @@ public class ClientCore implements Closeable {
 			if (!usernameSender(username)) {
 				continue;
 			}
-			if (!usernameReceiver()) {
+			if (!usernameReceiver(username)) {
 				continue;
 			}
 			break;
