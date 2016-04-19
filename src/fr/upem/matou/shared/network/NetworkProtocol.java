@@ -30,9 +30,12 @@ public enum NetworkProtocol {
 	PVCOREQ(CLIENT, SERVER, "PRIVATE_CONNECTION_REQUEST", LENGTH_SIZE, USERNAME_MAX_SIZE),
 	PVCOREQNOTIF(SERVER, CLIENT, "PRIVATE_CONNECTION_REQUEST_NOTIFICATION", LENGTH_SIZE, USERNAME_MAX_SIZE),
 	PVCOACC(CLIENT, SERVER, "PRIVATE_CONNECTION_ACCEPTATION", LENGTH_SIZE, USERNAME_MAX_SIZE),
-	PVCOPORT(CLIENT, SERVER, "PRIVATE_CONNECTION_PORT_TRANSFER", LENGTH_SIZE, USERNAME_MAX_SIZE, Integer.BYTES, Integer.BYTES),
-	PVCOESTASRC(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_SOURCE", LENGTH_SIZE, USERNAME_MAX_SIZE, LENGTH_SIZE, 16),
-	PVCOESTADST(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION", LENGTH_SIZE, USERNAME_MAX_SIZE, LENGTH_SIZE, 16, Integer.BYTES, Integer.BYTES),
+	PVCOPORT(CLIENT, SERVER, "PRIVATE_CONNECTION_PORT_TRANSFER", LENGTH_SIZE, USERNAME_MAX_SIZE, Integer.BYTES,
+			Integer.BYTES),
+	PVCOESTASRC(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_SOURCE", LENGTH_SIZE, USERNAME_MAX_SIZE, LENGTH_SIZE,
+			16),
+	PVCOESTADST(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION", LENGTH_SIZE, USERNAME_MAX_SIZE,
+			LENGTH_SIZE, 16, Integer.BYTES, Integer.BYTES),
 	PVMSG(CLIENT, CLIENT, "PRIVATE_MESSAGE", LENGTH_SIZE, MESSAGE_MAX_SIZE),
 	PVFILE(CLIENT, CLIENT, "PRIVATE_FILE", LENGTH_SIZE, FILE_CHUNK_SIZE),
 	// PVDISCO("CLIENT_PRIVATE_DISCONNECTION"),
@@ -101,24 +104,35 @@ public enum NetworkProtocol {
 	}
 
 	/**
-	 * Returns the maximum size of a request received by the server.
+	 * Returns the size of a server read buffer.
 	 * 
-	 * @return The maximum size of a server incoming request.
+	 * @return The size of a server read buffer.
 	 */
-	public static int getMaxServerIncomingRequestSize() {
+	public static int getServerReadBufferSize() {
 		int max = getMaxRequestSize(CLIENT, SERVER);
-		Logger.debug("SERVER MAX INCOMING REQUEST SIZE : " + max);
+		Logger.debug("SERVER READ BUFFER SIZE : " + max);
 		return max;
 	}
 
 	/**
-	 * Returns the maximum size of a request sent by the server.
+	 * Returns the size of a server write buffer.
 	 * 
-	 * @return The maximum size of a server outgoing request.
+	 * @return The size of a server write buffer.
 	 */
-	public static int getMaxServerOutgoingRequestSize() {
+	public static int getServerWriteBufferSize() {
+		int max = getMaxRequestSize(SERVER, CLIENT) * NetworkCommunication.BUFFER_MULTIPLIER;
+		Logger.debug("SERVER WRITE BUFFER SIZE : " + max);
+		return max;
+	}
+
+	/**
+	 * Returns the size of the server broadcast buffer.
+	 * 
+	 * @return The size of the server broadcast buffer.
+	 */
+	public static int getServerBroadcastBufferSize() {
 		int max = getMaxRequestSize(SERVER, CLIENT);
-		Logger.debug("MAX SERVER OUTGOING REQUEST SIZE : " + max);
+		Logger.debug("SERVER BROADCAST BUFFER SIZE : " + max);
 		return max;
 	}
 }

@@ -18,6 +18,7 @@ public class NetworkCommunication {
 	static final int USERNAME_MAX_SIZE = 32;
 	static final int MESSAGE_MAX_SIZE = 512;
 	static final int FILE_CHUNK_SIZE = 4096;
+	static final int BUFFER_MULTIPLIER = 10;
 
 	private NetworkCommunication() {
 	}

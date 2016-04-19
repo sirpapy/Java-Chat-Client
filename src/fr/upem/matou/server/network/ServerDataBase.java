@@ -22,7 +22,7 @@ import fr.upem.matou.shared.network.Username;
 class ServerDataBase {
 	
 	private static final int MAX_CLIENT = 2;
-	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getMaxServerOutgoingRequestSize();
+	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getServerBroadcastBufferSize();
 
 	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
 	private final HashMap<SocketChannel, Username> connected = new HashMap<>();
