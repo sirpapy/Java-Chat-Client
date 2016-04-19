@@ -40,10 +40,10 @@ public class ServerCore implements Closeable {
 
 		while (!Thread.interrupted()) {
 
-			SelectorDebug.printKeys(selector);
+			SelectorInfo.printKeys(selector);
 			selector.select();
 
-			SelectorDebug.printSelectedKeys(selectedKeys);
+			SelectorInfo.printSelectedKeys(selectedKeys);
 			processSelectedKeys(selectedKeys);
 
 			selectedKeys.clear();

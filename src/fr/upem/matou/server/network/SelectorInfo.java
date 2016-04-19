@@ -14,8 +14,17 @@ import fr.upem.matou.shared.logger.Logger;
 /*
  * This class provides static methods on selectors.
  */
-class SelectorDebug {
-	static String interestOpsToString(SelectionKey key) {
+class SelectorInfo {
+
+	private static String remoteAddressToString(SocketChannel sc) {
+		try {
+			return sc.getRemoteAddress().toString();
+		} catch (@SuppressWarnings("unused") IOException ignored) {
+			return "???";
+		}
+	}
+
+	private static String interestOpsToString(SelectionKey key) {
 		if (!key.isValid()) {
 			return "CANCELLED";
 		}
@@ -33,7 +42,7 @@ class SelectorDebug {
 		return String.join(" | ", list);
 	}
 
-	static String possibleActionsToString(SelectionKey key) {
+	private static String possibleActionsToString(SelectionKey key) {
 		if (!key.isValid()) {
 			return "CANCELLED";
 		}
@@ -82,17 +91,11 @@ class SelectorDebug {
 				Logger.selectReadyInfo("\tServer can perform : " + possibleActionsToString(key));
 			} else {
 				SocketChannel sc = (SocketChannel) channel;
-				Logger.selectReadyInfo("\tClient " + remoteAddressToString(sc) + " can perform : " + possibleActionsToString(key));
+				Logger.selectReadyInfo(
+						"\tClient " + remoteAddressToString(sc) + " can perform : " + possibleActionsToString(key));
 			}
 
 		}
 	}
 
-	static String remoteAddressToString(SocketChannel sc) {
-		try {
-			return sc.getRemoteAddress().toString();
-		} catch (@SuppressWarnings("unused") IOException ignored) {
-			return "???";
-		}
-	}
 }

@@ -11,6 +11,8 @@ import java.util.Optional;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 
+// TEMP : Crash Test
+
 /*
  * This class is the core of the client.
  */
@@ -84,56 +86,6 @@ public class ClientCoreHack implements Closeable {
 		ClientCommunication.sendRequestMSG(sc, "abra");
 		ClientCommunication.sendRequestCOREQ(sc, "kadabra");
 		ClientCommunication.sendRequestMSG(sc, "kadabra");
-
-		for (int i = 0; i < 6; i++) {
-			Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
-			if (!optionalProtocol.isPresent()) {
-				System.out.println("No protocol");
-				return;
-			}
-			NetworkProtocol protocol = optionalProtocol.get();
-
-			switch (protocol) {
-			case CORES:
-				Optional<Boolean> optionalAcceptation = ClientCommunication.receiveRequestCORES(sc);
-				if (!optionalAcceptation.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				boolean acceptation = optionalAcceptation.get();
-				System.out.println("Acceptation = " + acceptation);
-				break;
-			case CONOTIF:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				if (!optionalPseudo.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				String pseudo = optionalPseudo.get();
-				System.out.println("New connection : " + pseudo);
-				break;
-			case MSGBC:
-				Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
-				if (!optionalMessage.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				Message message = optionalMessage.get();
-				System.out.println(message);
-				break;
-			default:
-				System.out.println("Invalid protocol : " + protocol);
-				return;
-			}
-		}
-	}
-
-	// OK
-	public void startChat_FakeDisconnection() throws IOException {
-		ClientCommunication.sendRequestCOREQ(sc, "abra");
-		ClientCommunication.sendRequestMSG(sc, "abra");
-		ClientCommunication.sendRequestDISCO(sc);
-		ClientCommunication.sendRequestMSG(sc, "abra");
 
 		for (int i = 0; i < 6; i++) {
 			Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);

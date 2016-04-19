@@ -12,6 +12,7 @@ public class Tasks {
 	// TODO : Check warnings et suppress
 	// TODO : Programmation par contrat
 	// TODO : Visibilité minimale
+	// TODO : Crash Test
 	
 	// TODO : Vérifier qu'il n'y a pas de code mort
 	// TODO : Ecrire la javadoc
