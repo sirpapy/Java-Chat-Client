@@ -312,7 +312,7 @@ public class ClientCore implements Closeable {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			}
-			ui.displayNewPrivateDisconnection(username);
+			ui.displayNewPrivateMessageDisconnection(username);
 		}).start();
 
 		new Thread(() -> {
@@ -324,7 +324,7 @@ public class ClientCore implements Closeable {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			}
-			ui.displayNewPrivateDisconnection(username);
+			ui.displayNewPrivateFileDisconnection(username);
 		}).start();
 
 	}
@@ -347,7 +347,7 @@ public class ClientCore implements Closeable {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			}
-			ui.displayNewPrivateDisconnection(username);
+			ui.displayNewPrivateMessageDisconnection(username);
 		}).start();
 
 		new Thread(() -> {
@@ -358,7 +358,7 @@ public class ClientCore implements Closeable {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			}
-			ui.displayNewPrivateDisconnection(username);
+			ui.displayNewPrivateFileDisconnection(username);
 		}).start();
 	}
 

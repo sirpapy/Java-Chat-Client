@@ -106,13 +106,22 @@ public class ShellInterface implements UserInterface {
 		output.println("<" + username + " sends a file : " + path + ">");
 	}	
 
-	@Override
-	public void displayNewPrivateDisconnection(Username username) {
-		requireNonNull(username);
-		output.println("<Private connection closed with " + username + ">"); 
+	private void displayNewPrivateDisconnection(Username username) {
 		// FIXME : Affiché en double (1 par thread)
 	}
 
+	@Override
+	public void displayNewPrivateMessageDisconnection(Username username) {
+		requireNonNull(username);
+		output.println("<" + username + " : private messaging connection closed>"); 
+	}
+
+	@Override
+	public void displayNewPrivateFileDisconnection(Username username) {
+		requireNonNull(username);
+		output.println("<" + username + " : private file exchanging connection closed>"); 
+	}
+	
 	@Override
 	public void warnInvalidUsername(String username) {
 		error.println("This username is not valid");

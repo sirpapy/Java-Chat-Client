@@ -55,7 +55,9 @@ public interface UserInterface {
 
 	public void displayNewPrivateAcceptionEvent(String username);
 
-	public void displayNewPrivateDisconnection(Username username);
+	public void displayNewPrivateMessageDisconnection(Username username);
+	
+	public void displayNewPrivateFileDisconnection(Username username);
 
 	public void displayNewFileReception(String username, Path path);
 
