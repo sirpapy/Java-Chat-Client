@@ -76,15 +76,6 @@ class ClientCommunication {
 		return request;
 	}
 
-	static ByteBuffer encodeRequestDISCO() {
-		int capacity = Integer.BYTES;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
-
-		request.putInt(NetworkProtocol.DISCO.ordinal());
-
-		return request;
-	}
-
 	static ByteBuffer encodeRequestPVCOREQ(ByteBuffer encodedUsername) {
 		int length = encodedUsername.remaining();
 
@@ -174,11 +165,6 @@ class ClientCommunication {
 		ByteBuffer bb = encodeRequestMSG(optional.get());
 		sendRequest(sc, bb);
 		return true;
-	}
-
-	static void sendRequestDISCO(SocketChannel sc) throws IOException {
-		ByteBuffer bb = encodeRequestDISCO();
-		sendRequest(sc, bb);
 	}
 
 	static boolean sendRequestPVCOREQ(SocketChannel sc, String username) throws IOException {

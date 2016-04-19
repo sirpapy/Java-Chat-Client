@@ -313,21 +313,6 @@ class ServerSession {
 		db.updateStateReadAll();
 	}
 
-	private void processDISCO() {
-		if (arg == 0) {
-			processDISCOinit();
-			return;
-		}
-		throw new AssertionError("Argument " + arg + " is not valid for DISCO");
-	}
-
-	private void processDISCOinit() {
-		if (!isAuthent()) {
-			Logger.debug("Client not authenticated");
-		}
-		disconnectClient();
-	}
-
 	private void processPVCOREQ() {
 		if (arg == 0) {
 			processPVCOREQinit();
@@ -614,9 +599,6 @@ class ServerSession {
 			return;
 		case MSG:
 			processMSG();
-			return;
-		case DISCO:
-			processDISCO();
 			return;
 		case PVCOREQ:
 			processPVCOREQ();

@@ -23,9 +23,6 @@ import fr.upem.matou.shared.network.Username;
 @SuppressWarnings("resource")
 public class ClientCore implements Closeable {
 
-	private static final int TIMEOUT = 3000; // in millis
-
-	private final Object monitor = new Object();
 	private final SocketChannel sc;
 	private final ClientSession session;
 	private final UserInterface ui = new ShellInterface();
@@ -418,7 +415,7 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private void processMessages() throws InterruptedException, IOException {
+	private void processMessages() throws InterruptedException {
 		Thread sender = new Thread(() -> threadMessageSender());
 		Thread receiver = new Thread(() -> threadMessageReceiver());
 
@@ -426,15 +423,8 @@ public class ClientCore implements Closeable {
 		receiver.start();
 
 		sender.join();
-		warnDisconnection();
 
 		receiver.interrupt();
-	}
-
-	// FIXME : Pas utile
-	private void warnDisconnection() throws IOException {
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCO);
-		ClientCommunication.sendRequestDISCO(sc);
 	}
 
 	public void startChat() throws IOException, InterruptedException {
