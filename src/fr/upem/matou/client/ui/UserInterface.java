@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import fr.upem.matou.client.network.ClientEvent;
 import fr.upem.matou.client.network.Message;
+import fr.upem.matou.shared.network.ErrorType;
 import fr.upem.matou.shared.network.Username;
 
 /**
@@ -78,5 +79,7 @@ public interface UserInterface {
 	public void warnInvalidMessage(ClientEvent event);
 
 	public void warnUnavailableUsername(String username);
+
+	public void displayError(ErrorType type);
 
 }

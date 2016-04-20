@@ -13,6 +13,7 @@ import fr.upem.matou.client.ui.ShellInterface;
 import fr.upem.matou.client.ui.UserInterface;
 import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.logger.Logger.NetworkLogType;
+import fr.upem.matou.shared.network.ErrorType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
@@ -38,7 +39,7 @@ public class ClientCore implements Closeable {
 	}
 
 	private boolean usernameSender(String username) throws IOException {
-		if(!NetworkCommunication.checkUsernameValidity(username)) {
+		if (!NetworkCommunication.checkUsernameValidity(username)) {
 			ui.warnInvalidUsername(username);
 			return false;
 		}
@@ -67,7 +68,7 @@ public class ClientCore implements Closeable {
 			}
 			boolean acceptation = optionalCORES.get();
 			Logger.network(NetworkLogType.READ, "ACCEPTATION : " + acceptation);
-			if(!acceptation) {
+			if (!acceptation) {
 				ui.warnUnavailableUsername(username);
 			}
 			return acceptation;
@@ -103,6 +104,19 @@ public class ClientCore implements Closeable {
 		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 
 		switch (protocol) {
+
+		case ERROR: {
+			Optional<ErrorType> optionalERROR = ClientCommunication.receiveRequestERROR(sc);
+			
+			if(!optionalERROR.isPresent()) {
+				throw new IOException("Protocol violation : " + protocol);
+			}
+			ErrorType type = optionalERROR.get();
+			Logger.network(NetworkLogType.READ, "ERROR : " + type);
+			ui.displayError(type);
+			
+			break;
+		}
 
 		case MSGBC: {
 			Optional<Message> optionalMSGBC = ClientCommunication.receiveRequestMSGBC(sc);
@@ -381,6 +395,8 @@ public class ClientCore implements Closeable {
 			}
 		}).start();
 	}
+	
+	// FIXME : Déconnexion publique => Déconnexion privée ?
 
 	private void threadMessageSender() {
 		boolean exit = false;
@@ -457,13 +473,13 @@ public class ClientCore implements Closeable {
 	}
 
 	public void startChat(Optional<String> username) throws IOException, InterruptedException {
-		if(username.isPresent()) {
+		if (username.isPresent()) {
 			startChat(username.get());
 		} else {
 			startChat();
 		}
 	}
-	
+
 	@Override
 	public void close() throws IOException {
 		sc.close();

@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
+import fr.upem.matou.shared.network.ErrorType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 
@@ -22,6 +23,18 @@ class ServerCommunication {
 	 * The bytebuffer should be flipped before a call to this method. */
 	static String readStringUTF8(ByteBuffer bb) {
 		return PROTOCOL_CHARSET.decode(bb).toString();
+	}
+	
+	static boolean addRequestERROR(ByteBuffer bbWrite, ErrorType type) {
+		int length = Integer.BYTES + Integer.BYTES;
+		if(bbWrite.remaining() < length) {
+			return false;
+		}
+		
+		bbWrite.putInt(NetworkProtocol.ERROR.ordinal());
+		bbWrite.putInt(type.ordinal());
+		
+		return true;
 	}
 
 	/*
@@ -164,4 +177,5 @@ class ServerCommunication {
 
 		return true;
 	}
+	
 }

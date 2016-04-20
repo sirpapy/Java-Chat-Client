@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import fr.upem.matou.client.network.ClientEvent;
 import fr.upem.matou.client.network.Message;
+import fr.upem.matou.shared.network.ErrorType;
 import fr.upem.matou.shared.network.Username;
 
 /**
@@ -58,7 +59,7 @@ public class ShellInterface implements UserInterface {
 	@Override
 	public void displayMessage(Message message) {
 		requireNonNull(message);
-		
+
 		boolean isPrivate = message.isPrivate();
 		String username = message.getUsername();
 		String content = message.getContent();
@@ -98,13 +99,13 @@ public class ShellInterface implements UserInterface {
 		requireNonNull(username);
 		output.println("<" + username + " accepts the private connection>");
 	}
-	
+
 	@Override
 	public void displayNewFileReception(String username, Path path) {
 		requireNonNull(username);
 		requireNonNull(path);
 		output.println("<" + username + " sends a file : " + path + ">");
-	}	
+	}
 
 	private void displayNewPrivateDisconnection(Username username) {
 		// FIXME : Affiché en double (1 par thread)
@@ -113,15 +114,15 @@ public class ShellInterface implements UserInterface {
 	@Override
 	public void displayNewPrivateMessageDisconnection(Username username) {
 		requireNonNull(username);
-		output.println("<" + username + " : private messaging connection closed>"); 
+		output.println("<" + username + " : private messaging connection closed>");
 	}
 
 	@Override
 	public void displayNewPrivateFileDisconnection(Username username) {
 		requireNonNull(username);
-		output.println("<" + username + " : private file exchanging connection closed>"); 
+		output.println("<" + username + " : private file exchanging connection closed>");
 	}
-	
+
 	@Override
 	public void warnInvalidUsername(String username) {
 		error.println("This username is not valid");
@@ -131,7 +132,7 @@ public class ShellInterface implements UserInterface {
 	public void warnUnavailableUsername(String username) {
 		error.println("This username is not available");
 	}
-	
+
 	@Override
 	public void warnInvalidMessage(ClientEvent event) {
 		error.println("This message is not valid");
@@ -139,6 +140,26 @@ public class ShellInterface implements UserInterface {
 
 	private void warnInvalidCommand() {
 		error.println("Invalid command");
+	}
+
+	@Override
+	public void displayError(ErrorType type) {
+		switch (type) {
+
+		case USRNOTCO:
+			error.println("This user is not connected");
+			break;
+
+		case USRNOTPVREQ:
+			error.println("This user did not send a private connection request");
+			break;
+
+		case UNK:
+		default:
+			error.println("Unknown error");
+			break;
+
+		}
 	}
 
 }

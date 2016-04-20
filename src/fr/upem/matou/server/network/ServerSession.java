@@ -3,13 +3,16 @@ package fr.upem.matou.server.network;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.Enumeration;
 import java.util.Optional;
 
 import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.logger.Logger.NetworkLogType;
+import fr.upem.matou.shared.network.ErrorType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
@@ -43,6 +46,8 @@ class ServerSession {
 	static interface ClientState {
 		// Marker interface
 	}
+	
+	// FIXME : Remplacer tous les String par des Username
 
 	/* State of a COREQ request */
 	static class StateCOREQ implements ClientState {
@@ -53,7 +58,7 @@ class ServerSession {
 	/* State of a MSG request */
 	static class StateMSG implements ClientState {
 		int sizeMessage;
-		String message;
+		String message; 
 	}
 
 	/* State of a PVCOREQ request */
@@ -144,6 +149,16 @@ class ServerSession {
 		return ordinal;
 	}
 
+	private void answerERROR(ErrorType type) {
+		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.ERROR);
+		Logger.network(NetworkLogType.WRITE, "ERROR : " + type);
+		
+		if(!ServerCommunication.addRequestERROR(bbWrite, type)) {
+			Logger.warning("ERROR lost | Write Buffer cannot hold it");
+			return;
+		}
+	}
+	
 	/*
 	 * Process a COREQ request.
 	 */
@@ -373,6 +388,7 @@ class ServerSession {
 		Optional<ServerSession> optional = db.sessionOf(target);
 		if (!optional.isPresent()) {
 			Logger.debug("Target " + target + " is not connected");
+			answerERROR(ErrorType.USRNOTCO);
 			return;
 		}
 
@@ -455,6 +471,7 @@ class ServerSession {
 		Logger.debug("PRIVATE REQUEST ACCEPTATION : " + valid);
 
 		if (!valid) {
+			answerERROR(ErrorType.USRNOTPVREQ);
 			return;
 		}
 

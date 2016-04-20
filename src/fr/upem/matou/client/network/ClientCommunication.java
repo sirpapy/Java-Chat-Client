@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import fr.upem.matou.shared.logger.Logger;
+import fr.upem.matou.shared.network.ErrorType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 
@@ -262,6 +263,16 @@ class ClientCommunication {
 		return NetworkProtocol.getProtocol(ordinal);
 	}
 
+	static Optional<ErrorType> receiveRequestERROR(SocketChannel sc) throws IOException {
+		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bb)) {
+			throw new IOException("Connection closed");
+		}
+		bb.flip();
+		int ordinal = bb.getInt();
+		return ErrorType.getError(ordinal);
+	}
+	
 	/*
 	 * Receives a CORES request.
 	 */
