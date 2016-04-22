@@ -28,6 +28,7 @@ Requirements:
 
 
 Specifications:
+	* Each type of interaction (detailed below) is identified by a unique code in 4 bytes.
 	* Numbers are in Big Endian format.
 	* String are encoded into UTF-8 charset.
 	* The transport protocol used is TCP (with limit size specified in 4 bytes).
@@ -54,6 +55,7 @@ Acronym formats:
 
 
 Interactions:
+
 	Request for public connection
 		[C-S] Request connection to Server
 		The client requests a connection to the server with a specified username.
@@ -171,3 +173,12 @@ Interactions:
 		+------+--------------+----------+
 		| Type | SizeUsername | Username |
 		+------+--------------+----------+
+
+	Errors
+		[S-C] Error notification
+		The server notifies a client that an error occurs.
+		+------+---------+
+		| int  |   int   |
+		+------+---------+
+		| Type | ErrorID |
+		+------+---------+
