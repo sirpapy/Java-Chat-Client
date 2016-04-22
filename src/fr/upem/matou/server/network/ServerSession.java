@@ -47,8 +47,6 @@ class ServerSession {
 		// Marker interface
 	}
 	
-	// FIXME : Remplacer tous les String par des Username
-
 	/* State of a COREQ request */
 	static class StateCOREQ implements ClientState {
 		int sizeUsername;
@@ -64,19 +62,19 @@ class ServerSession {
 	/* State of a PVCOREQ request */
 	static class StatePVCOREQ implements ClientState {
 		int sizeUsername;
-		String username;
+		Username username;
 	}
 
 	/* State of a PVCOACC request */
 	static class StatePVCOACC implements ClientState {
 		int sizeUsername;
-		String username;
+		Username username;
 	}
 
 	/* State of a PVCOPORT request */
 	static class StatePVCOPORT implements ClientState {
 		int sizeUsername;
-		String username;
+		Username username;
 		int portMessage;
 		int portFile;
 	}
@@ -375,16 +373,16 @@ class ServerSession {
 
 	private void processPVCOREQarg2(StatePVCOREQ state) {
 		bbRead.flip();
-		state.username = ServerCommunication.readStringUTF8(bbRead);
+		String string = ServerCommunication.readStringUTF8(bbRead);
+		state.username = new Username(string);
 		Logger.network(NetworkLogType.READ, "USERNAME : " + state.username);
 
 		resetReadState();
 	}
 
-	private void answerPVCOREQNOTIF(String targetName) {
+	private void answerPVCOREQNOTIF(Username target) {
 		// TEMP : Cas où "target == source"
 		Username source = db.usernameOf(sc).get();
-		Username target = new Username(targetName);
 		Optional<ServerSession> optional = db.sessionOf(target);
 		if (!optional.isPresent()) {
 			Logger.debug("Target " + target + " is not connected");
@@ -458,15 +456,15 @@ class ServerSession {
 
 	private void processPVCOACCarg2(StatePVCOACC state) {
 		bbRead.flip();
-		state.username = ServerCommunication.readStringUTF8(bbRead);
+		String string = ServerCommunication.readStringUTF8(bbRead);
+		state.username = new Username(string);
 		Logger.network(NetworkLogType.READ, "USERNAME : " + state.username);
 
 		resetReadState();
 	}
 
-	private void answerPVCOESTASRC(String targetName) {
+	private void answerPVCOESTASRC(Username target) {
 		Username source = db.usernameOf(sc).get();
-		Username target = new Username(targetName);
 		boolean valid = db.checkPrivateRequest(source, target);
 		Logger.debug("PRIVATE REQUEST ACCEPTATION : " + valid);
 
@@ -543,7 +541,8 @@ class ServerSession {
 
 	private void processPVCOPORTarg2(StatePVCOPORT state) {
 		bbRead.flip();
-		state.username = ServerCommunication.readStringUTF8(bbRead);
+		String string = ServerCommunication.readStringUTF8(bbRead);
+		state.username = new Username(string);
 		Logger.network(NetworkLogType.READ, "USERNAME : " + state.username);
 
 		advanceReadState(Integer.BYTES);
@@ -563,9 +562,8 @@ class ServerSession {
 		resetReadState();
 	}
 
-	private void answerPVCOESTADST(String sourceName, int portMessage, int portFile) {
+	private void answerPVCOESTADST(Username source, int portMessage, int portFile) {
 		Username target = db.usernameOf(sc).get();
-		Username source = new Username(sourceName);
 		boolean valid = db.removePrivateRequest(source, target);
 		Logger.debug("PRIVATE REQUEST ESTABLISHMENT : " + valid);
 
