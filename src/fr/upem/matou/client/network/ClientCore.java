@@ -7,7 +7,14 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import fr.upem.matou.client.ui.ShellInterface;
 import fr.upem.matou.client.ui.UserInterface;
@@ -24,14 +31,58 @@ import fr.upem.matou.shared.network.Username;
 @SuppressWarnings("resource")
 public class ClientCore implements Closeable {
 
+	private final Object monitor = new Object();
+	private boolean exit = false;
 	private final SocketChannel sc;
 	private final ClientSession session;
 	private final UserInterface ui = new ShellInterface();
+	private final List<Thread> threads = Collections.synchronizedList(new ArrayList<>());
 
 	public ClientCore(String hostname, int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(hostname, port);
 		sc = SocketChannel.open(address);
 		session = new ClientSession(sc);
+	}
+
+	private void registerThread() {
+		Thread thread = Thread.currentThread();
+		Logger.debug("Register Thread : " + thread);
+		threads.add(thread);
+	}
+
+	private void unregisterThread() {
+		Thread thread = Thread.currentThread();
+		Logger.debug("Unregister Thread : " + thread);
+		threads.remove(thread);
+	}
+
+	private void setExit() {
+		Logger.debug("EXIT !!!");
+		synchronized (monitor) {
+			exit = true;
+			monitor.notify();
+		}
+	}
+
+	private void waitForTerminaison() throws InterruptedException {
+		synchronized (monitor) {
+			while (!exit) {
+				monitor.wait();
+			}
+		}
+	}
+
+	private void interruptAllThreads() {
+		ArrayList<Thread> privates = new ArrayList<>(threads);
+		Set<Thread> before = Thread.getAllStackTraces().keySet();
+		Logger.debug("Working BEFORE : " + before);
+		// for (Thread thread : privates) {
+		// Logger.debug("Interrupt thread : " + thread);
+		// thread.interrupt();
+		// }
+		Thread.currentThread().getThreadGroup().interrupt();
+		Set<Thread> after = Thread.getAllStackTraces().keySet();
+		Logger.debug("Working AFTER : " + after);
 	}
 
 	private Optional<String> usernameGetter() {
@@ -268,6 +319,7 @@ public class ClientCore implements Closeable {
 		ClientCommunication.sendRequestPVCOPORT(sc, username.toString(), portMessage, portFile);
 
 		new Thread(() -> {
+			registerThread();
 			try (SocketChannel scMessage = acceptCommunication(sscMessage, addressDst)) {
 				Logger.debug("[SOURCE] MESSAGE CONNECTED");
 				session.addNewPrivateMessageChannel(username, scMessage);
@@ -275,11 +327,14 @@ public class ClientCore implements Closeable {
 			} catch (IOException e) {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
+			} finally {
+				ui.displayNewPrivateMessageDisconnection(username);
+				unregisterThread();
 			}
-			ui.displayNewPrivateMessageDisconnection(username);
-		}).start();
+		}, "Private messages : " + username).start();
 
 		new Thread(() -> {
+			registerThread();
 			try (SocketChannel scFile = acceptCommunication(sscFile, addressDst)) {
 				Logger.debug("[SOURCE] FILE CONNECTED");
 				session.addNewPrivateFileChannel(username, scFile);
@@ -287,9 +342,11 @@ public class ClientCore implements Closeable {
 			} catch (IOException e) {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
+			} finally {
+				ui.displayNewPrivateFileDisconnection(username);
+				unregisterThread();
 			}
-			ui.displayNewPrivateFileDisconnection(username);
-		}).start();
+		}, "Private files : " + username).start();
 
 	}
 
@@ -304,72 +361,96 @@ public class ClientCore implements Closeable {
 		Logger.debug("[DESTINATION] CONNECTED");
 
 		new Thread(() -> {
+			registerThread();
 			try {
 				session.addNewPrivateMessageChannel(username, scMessage);
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
+			} finally {
+				ui.displayNewPrivateMessageDisconnection(username);
+				unregisterThread();
 			}
-			ui.displayNewPrivateMessageDisconnection(username);
-		}).start();
+		}, "Private messages : " + username).start();
 
 		new Thread(() -> {
+			registerThread();
 			try {
 				session.addNewPrivateFileChannel(username, scFile);
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
 				Logger.exception(e);
 				session.closePrivateConnection(username);
+			} finally {
+				ui.displayNewPrivateFileDisconnection(username);
+				unregisterThread();
 			}
-			ui.displayNewPrivateFileDisconnection(username);
-		}).start();
+		}, "Private files : " + username).start();
 	}
 
 	private void launchPrivateConnection(Username username, InetAddress addressDst) {
 		new Thread(() -> {
+			registerThread();
 			try {
 				privateCommunicationSource(username, addressDst);
 			} catch (IOException e) {
 				Logger.exception(e);
+			} finally {
+				unregisterThread();
 			}
-		}).start();
+		}, "Private source connection : " + username).start();
 	}
 
 	private void launchPrivateConnection(Username username, InetAddress addressSrc, int portMessage, int portFile) {
 		new Thread(() -> {
+			registerThread();
 			try {
 				privateCommunicationDestination(username, addressSrc, portMessage, portFile);
 			} catch (IOException e) {
 				Logger.exception(e);
+			} finally {
+				unregisterThread();
 			}
-		}).start();
+		}, "Private destination connection : " + username).start();
 	}
 
 	// FIXME : Déconnexion publique => Déconnexion privée ?
 
 	private void threadMessageSender() {
-		boolean exit = false;
-		while (!Thread.interrupted() && exit == false) {
-			try {
-				exit = messageSender();
-			} catch (IOException e) {
-				Logger.warning("WARNING | " + e.toString());
-				Logger.exception(e);
-				return;
+		registerThread();
+		try {
+			boolean stop = false;
+			while (!Thread.interrupted() && stop == false) {
+				try {
+					stop = messageSender();
+				} catch (IOException e) {
+					Logger.warning("WARNING | " + e.toString());
+					Logger.exception(e);
+					return;
+				}
 			}
+		} finally {
+			unregisterThread();
+			setExit();
 		}
 	}
 
 	private void threadMessageReceiver() {
-		while (!Thread.interrupted()) {
-			try {
-				messageReceiver();
-			} catch (IOException e) {
-				Logger.warning("WARNING | " + e.toString());
-				Logger.exception(e);
-				return;
+		registerThread();
+		try {
+			while (!Thread.interrupted()) {
+				try {
+					messageReceiver();
+				} catch (IOException e) {
+					Logger.warning("WARNING | " + e.toString());
+					Logger.exception(e);
+					return;
+				}
 			}
+		} finally {
+			unregisterThread();
+			setExit();
 		}
 	}
 
@@ -378,15 +459,15 @@ public class ClientCore implements Closeable {
 	}
 
 	private void processMessages() throws InterruptedException {
-		Thread sender = new Thread(() -> threadMessageSender());
-		Thread receiver = new Thread(() -> threadMessageReceiver());
+		Thread sender = new Thread(() -> threadMessageSender(), "Public sender");
+		Thread receiver = new Thread(() -> threadMessageReceiver(), "Public receiver");
 
 		sender.start();
 		receiver.start();
 
-		sender.join();
+		waitForTerminaison();
 
-		receiver.interrupt();
+		interruptAllThreads();
 	}
 
 	public void startChat() throws IOException, InterruptedException {
@@ -432,6 +513,8 @@ public class ClientCore implements Closeable {
 
 	@Override
 	public void close() throws IOException {
+		Logger.debug("CLOSING");
+		ui.close();
 		sc.close();
 	}
 

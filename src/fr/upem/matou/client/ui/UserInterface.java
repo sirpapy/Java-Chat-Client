@@ -1,5 +1,6 @@
 package fr.upem.matou.client.ui;
 
+import java.io.Closeable;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -12,7 +13,7 @@ import fr.upem.matou.shared.network.Username;
  * This interface provides methods to display information to the user and retrieve information entered by the user.
  * All implementations of this interface should be transparent.
  */
-public interface UserInterface {
+public interface UserInterface extends Closeable {
 
 	/**
 	 * Retrieves the username given by the user.

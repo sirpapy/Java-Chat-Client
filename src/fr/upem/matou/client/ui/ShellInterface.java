@@ -2,6 +2,7 @@ package fr.upem.matou.client.ui;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Path;
@@ -161,6 +162,11 @@ public class ShellInterface implements UserInterface {
 			break;
 
 		}
+	}
+
+	@Override
+	public void close() throws IOException {
+		scanner.close();
 	}
 
 }
