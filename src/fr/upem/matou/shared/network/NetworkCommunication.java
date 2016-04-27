@@ -14,7 +14,6 @@ import java.util.Optional;
 public class NetworkCommunication {
 	private static final Charset PROTOCOL_CHARSET = Charset.forName("UTF-8");
 
-	static final int LENGTH_SIZE = Integer.BYTES;
 	static final int USERNAME_MAX_SIZE = 32;
 	static final int MESSAGE_MAX_SIZE = 512;
 	static final int FILE_CHUNK_SIZE = 4096;
