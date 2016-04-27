@@ -154,10 +154,6 @@ class ClientCommunication {
 	 * Sends a MSG request.
 	 */
 	static boolean sendRequestMSG(SocketChannel sc, String message) throws IOException {
-		if (!NetworkCommunication.checkMessageValidity(message)) {
-			return false;
-		}
-
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeMessage(message);
 		if (!optional.isPresent()) {
 			return false;
@@ -200,10 +196,6 @@ class ClientCommunication {
 	}
 
 	static boolean sendRequestPVMSG(SocketChannel sc, String message) throws IOException {
-		if (!NetworkCommunication.checkMessageValidity(message)) {
-			return false;
-		}
-
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeMessage(message);
 		if (!optional.isPresent()) {
 			return false;

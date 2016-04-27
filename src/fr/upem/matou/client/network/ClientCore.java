@@ -39,10 +39,6 @@ public class ClientCore implements Closeable {
 	}
 
 	private boolean usernameSender(String username) throws IOException {
-		if (!NetworkCommunication.checkUsernameValidity(username)) {
-			ui.warnInvalidUsername(username);
-			return false;
-		}
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
 		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
 		if (!ClientCommunication.sendRequestCOREQ(sc, username)) {

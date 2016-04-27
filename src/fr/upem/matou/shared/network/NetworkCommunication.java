@@ -64,7 +64,7 @@ public class NetworkCommunication {
 	 * @param username The encoded username to test (in write mode)
 	 * @return true if the username is valid, false otherwise.
 	 */
-	public static boolean checkEncodedUsernameValidity(ByteBuffer username) {
+	private static boolean checkEncodedUsernameValidity(ByteBuffer username) {
 		requireNonNull(username);
 		int size = username.remaining();
 		return size <= USERNAME_MAX_SIZE && size > 0;
@@ -77,7 +77,7 @@ public class NetworkCommunication {
 	 * @param username The encoded message to test (in write mode)
 	 * @return true if the message is valid, false otherwise.
 	 */
-	public static boolean checkEncodedMessageValidity(ByteBuffer message) {
+	private static boolean checkEncodedMessageValidity(ByteBuffer message) {
 		requireNonNull(message);
 		int size = message.remaining();
 		return size <= MESSAGE_MAX_SIZE && size > 0;
@@ -100,6 +100,9 @@ public class NetworkCommunication {
 	 */
 	public static Optional<ByteBuffer> encodeUsername(String username) {
 		requireNonNull(username);
+		if(!checkUsernameValidity(username)) {
+			return Optional.empty();
+		}
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(username);
 		if (!checkEncodedUsernameValidity(encoded)) {
 			return Optional.empty();
@@ -115,6 +118,9 @@ public class NetworkCommunication {
 	 */
 	public static Optional<ByteBuffer> encodeMessage(String message) {
 		requireNonNull(message);
+		if(!checkMessageValidity(message)) {
+			return Optional.empty();
+		}
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(message);
 		if (!checkEncodedMessageValidity(encoded)) {
 			return Optional.empty();
