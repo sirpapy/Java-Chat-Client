@@ -103,6 +103,14 @@ public enum NetworkProtocol {
 				.mapToInt(e -> e.maxRequestSize)
 				.max().getAsInt();
 	}
+	
+	private static int getMaxArgumentSize(Communicator source, Communicator target) {
+		NetworkProtocol[] values = values();
+		return Arrays.stream(values)
+				.filter(e -> e.source == source && e.target == target)
+				.mapToInt(e -> e.argumentSizes.stream().mapToInt(Integer::intValue).max().getAsInt())
+				.max().getAsInt();
+	}
 
 	/**
 	 * Returns the size of a server read buffer.
@@ -110,7 +118,7 @@ public enum NetworkProtocol {
 	 * @return The size of a server read buffer.
 	 */
 	public static int getServerReadBufferSize() {
-		int max = getMaxRequestSize(CLIENT, SERVER);
+		int max = getMaxArgumentSize(CLIENT, SERVER);
 		Logger.debug("SERVER READ BUFFER SIZE : " + max);
 		return max;
 	}

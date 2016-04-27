@@ -105,6 +105,7 @@ class ServerSession {
 		clearAndLimit(bbRead, Integer.BYTES);
 		arg = 0;
 		protocol = null;
+		serverReader = null;
 	}
 
 	/*
