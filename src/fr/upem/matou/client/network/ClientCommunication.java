@@ -213,20 +213,7 @@ class ClientCommunication {
 		sendRequest(sc, bb);
 		return true;
 	}
-
-	private static void sendFileChunks(SocketChannel sc, Path path) throws IOException {
-		Logger.debug("FILE UPLOADING : START");
-		try (InputStream is = Files.newInputStream(path, StandardOpenOption.READ)) {
-			byte[] chunk = new byte[CHUNK_SIZE];
-			int read = 0;
-			while ((read = is.read(chunk)) != -1) {
-				ByteBuffer wrap = ByteBuffer.wrap(chunk, 0, read);
-				sc.write(wrap);
-			}
-		}
-		Logger.debug("FILE UPLOADING : END");
-	}
-
+	
 	static boolean sendRequestPVFILE(SocketChannel sc, Path path) throws IOException {
 		try {
 
@@ -250,6 +237,19 @@ class ClientCommunication {
 		}
 	}
 
+	private static void sendFileChunks(SocketChannel sc, Path path) throws IOException {
+		Logger.debug("FILE UPLOADING : START");
+		try (InputStream is = Files.newInputStream(path, StandardOpenOption.READ)) {
+			byte[] chunk = new byte[CHUNK_SIZE];
+			int read = 0;
+			while ((read = is.read(chunk)) != -1) {
+				ByteBuffer wrap = ByteBuffer.wrap(chunk, 0, read);
+				sc.write(wrap);
+			}
+		}
+		Logger.debug("FILE UPLOADING : END");
+	}
+	
 	/*
 	 * Receives a protocol type request.
 	 */
@@ -276,20 +276,20 @@ class ClientCommunication {
 	/*
 	 * Receives a CORES request.
 	 */
-	static Optional<Boolean> receiveRequestCORES(SocketChannel sc) throws IOException {
+	static boolean receiveRequestCORES(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(1);
 		if (!readFully(sc, bb)) {
 			throw new IOException("Connection closed");
 		}
 		bb.flip();
 		byte acceptation = bb.get();
-		return Optional.of(acceptation != 0);
+		return acceptation != 0;
 	}
 
 	/*
 	 * Receives a MSGBG request.
 	 */
-	static Optional<Message> receiveRequestMSGBC(SocketChannel sc) throws IOException {
+	static Message receiveRequestMSGBC(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
@@ -318,13 +318,13 @@ class ClientCommunication {
 		bbMessage.flip();
 		String message = PROTOCOL_CHARSET.decode(bbMessage).toString();
 
-		return Optional.of(new Message(username, message));
+		return new Message(username, message);
 	}
 
 	/*
 	 * Receives a CONOTIF request.
 	 */
-	static Optional<String> receiveRequestCONOTIF(SocketChannel sc) throws IOException {
+	static String receiveRequestCONOTIF(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
@@ -339,13 +339,13 @@ class ClientCommunication {
 		bbUsername.flip();
 		String username = PROTOCOL_CHARSET.decode(bbUsername).toString();
 
-		return Optional.of(username);
+		return username;
 	}
 
 	/*
 	 * Receives a DISCONOTIF request.
 	 */
-	static Optional<String> receiveRequestDISCONOTIF(SocketChannel sc) throws IOException {
+	static String receiveRequestDISCONOTIF(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
@@ -360,10 +360,10 @@ class ClientCommunication {
 		bbUsername.flip();
 		String username = PROTOCOL_CHARSET.decode(bbUsername).toString();
 
-		return Optional.of(username);
+		return username;
 	}
 
-	static Optional<String> receiveRequestPVCOREQNOTIF(SocketChannel sc) throws IOException {
+	static String receiveRequestPVCOREQNOTIF(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
@@ -378,10 +378,10 @@ class ClientCommunication {
 		bbUsername.flip();
 		String username = PROTOCOL_CHARSET.decode(bbUsername).toString();
 
-		return Optional.of(username);
+		return username;
 	}
 
-	static Optional<SourceConnection> receiveRequestPVCOESTASRC(SocketChannel sc) throws IOException {
+	static SourceConnection receiveRequestPVCOESTASRC(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
@@ -416,10 +416,10 @@ class ClientCommunication {
 		Logger.debug("ADDRESS = " + Arrays.toString(addr));
 		InetAddress address = InetAddress.getByAddress(addr);
 
-		return Optional.of(new SourceConnection(username, address));
+		return new SourceConnection(username, address);
 	}
 
-	static Optional<DestinationConnection> receiveRequestPVCOESTADST(SocketChannel sc) throws IOException {
+	static DestinationConnection receiveRequestPVCOESTADST(SocketChannel sc) throws IOException {
 		ByteBuffer bbSizeUsername = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeUsername)) {
 			throw new IOException("Connection closed");
@@ -468,10 +468,10 @@ class ClientCommunication {
 		bbPortFile.flip();
 		int portFile = bbPortFile.getInt();
 
-		return Optional.of(new DestinationConnection(username, address, portMessage, portFile));
+		return new DestinationConnection(username, address, portMessage, portFile);
 	}
 
-	static Optional<Message> receiveRequestPVMSG(SocketChannel sc, String username) throws IOException {
+	static Message receiveRequestPVMSG(SocketChannel sc, String username) throws IOException {
 		ByteBuffer bbSizeMessage = ByteBuffer.allocate(Integer.BYTES);
 		if (!readFully(sc, bbSizeMessage)) {
 			throw new IOException("Connection closed");
@@ -486,10 +486,10 @@ class ClientCommunication {
 		bbMessage.flip();
 		String message = PROTOCOL_CHARSET.decode(bbMessage).toString();
 
-		return Optional.of(new Message(username, message, true));
+		return new Message(username, message, true);
 	}
 
-	static Optional<Path> receiveRequestPVFILE(SocketChannel sc, String username) throws IOException {
+	static Path receiveRequestPVFILE(SocketChannel sc, String username) throws IOException {
 		ByteBuffer bbSizeFile = ByteBuffer.allocate(Long.BYTES);
 		if (!readFully(sc, bbSizeFile)) {
 			throw new IOException("Connection closed");
@@ -520,7 +520,7 @@ class ClientCommunication {
 		}
 
 		Logger.debug("FILE DOWNLOADING : END");
-		return Optional.of(path);
+		return path;
 	}
 
 }
