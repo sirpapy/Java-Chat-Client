@@ -107,10 +107,6 @@ public class ShellInterface implements UserInterface {
 		output.println("<" + username + " sends a file : " + path + ">");
 	}
 
-	private void displayNewPrivateDisconnection(Username username) {
-		// TEMP : Affiché en double (1 par thread)
-	}
-
 	@Override
 	public void displayNewPrivateMessageDisconnection(Username username) {
 		requireNonNull(username);
@@ -139,7 +135,12 @@ public class ShellInterface implements UserInterface {
 	}
 
 	private void warnInvalidCommand() {
-		error.println("Invalid command");
+		error.println("Invalid command" 
+				+ "\n<message> : send a public message"
+				+ "\n/open <username> : ask for a private connection"
+				+ "\n/accept <username> : accept a private connection"
+				+ "\n/pv <username> <message> : send a private message"
+				+ "\n/file <username> <filepath> : send a private file");
 	}
 
 	@Override
