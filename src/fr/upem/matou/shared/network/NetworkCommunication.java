@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.Optional;
 
 /**
@@ -18,6 +19,7 @@ public class NetworkCommunication {
 	static final int MESSAGE_MAX_SIZE = 512;
 	static final int FILE_CHUNK_SIZE = 4096;
 	static final int BUFFER_MULTIPLIER = 10;
+	static final int FILE_NAME_MAX_SIZE = 64;
 
 	private NetworkCommunication() {
 	}
@@ -64,7 +66,6 @@ public class NetworkCommunication {
 	 * @return true if the username is valid, false otherwise.
 	 */
 	private static boolean checkEncodedUsernameValidity(ByteBuffer username) {
-		requireNonNull(username);
 		int size = username.remaining();
 		return size <= USERNAME_MAX_SIZE && size > 0;
 	}
@@ -77,9 +78,13 @@ public class NetworkCommunication {
 	 * @return true if the message is valid, false otherwise.
 	 */
 	private static boolean checkEncodedMessageValidity(ByteBuffer message) {
-		requireNonNull(message);
 		int size = message.remaining();
 		return size <= MESSAGE_MAX_SIZE && size > 0;
+	}
+	
+	private static boolean checkEncodedPathValidity(ByteBuffer path) {
+		int size = path.remaining();
+		return size <= FILE_NAME_MAX_SIZE && size > 0;
 	}
 
 	/**
@@ -122,6 +127,15 @@ public class NetworkCommunication {
 		}
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(message);
 		if (!checkEncodedMessageValidity(encoded)) {
+			return Optional.empty();
+		}
+		return Optional.of(encoded);
+	}
+	
+	public static Optional<ByteBuffer> encodePath(Path path) {
+		requireNonNull(path);
+		ByteBuffer encoded = PROTOCOL_CHARSET.encode(path.toString());
+		if (!checkEncodedPathValidity(encoded)) {
 			return Optional.empty();
 		}
 		return Optional.of(encoded);

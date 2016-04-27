@@ -127,11 +127,14 @@ class ClientCommunication {
 		return request;
 	}
 
-	static ByteBuffer encodeRequestPVFILE(long totalSize) {
-		int capacity = Integer.BYTES + Long.BYTES;
+	static ByteBuffer encodeRequestPVFILE(ByteBuffer encodedPath, long totalSize) {
+		int length = encodedPath.remaining();
+		
+		int capacity = Integer.BYTES + Integer.BYTES + length + Long.BYTES;
 		ByteBuffer request = ByteBuffer.allocate(capacity);
 
 		request.putInt(NetworkProtocol.PVFILE.ordinal());
+		request.putInt(length).put(encodedPath);
 		request.putLong(totalSize);
 
 		return request;
@@ -210,7 +213,11 @@ class ClientCommunication {
 		try {
 
 			long totalSize = Files.size(path);
-			ByteBuffer bb = encodeRequestPVFILE(totalSize);
+			Optional<ByteBuffer> optional = NetworkCommunication.encodePath(path.getFileName());
+			if(!optional.isPresent()) {
+				return false;
+			}
+			ByteBuffer bb = encodeRequestPVFILE(optional.get(),totalSize);
 			sendRequest(sc, bb);
 
 			new Thread(() -> {
@@ -482,17 +489,29 @@ class ClientCommunication {
 	}
 
 	static Path receiveRequestPVFILE(SocketChannel sc, String username) throws IOException {
+		ByteBuffer bbSizeName = ByteBuffer.allocate(Integer.BYTES);
+		if (!readFully(sc, bbSizeName)) {
+			throw new IOException("Connection closed");
+		}
+		bbSizeName.flip();
+		int sizeName = bbSizeName.getInt();
+		
+		ByteBuffer bbName = ByteBuffer.allocate(sizeName);
+		if (!readFully(sc, bbName)) {
+			throw new IOException("Connection closed");
+		}
+		bbName.flip();
+		String filename = PROTOCOL_CHARSET.decode(bbName).toString();
+
 		ByteBuffer bbSizeFile = ByteBuffer.allocate(Long.BYTES);
 		if (!readFully(sc, bbSizeFile)) {
 			throw new IOException("Connection closed");
 		}
 		bbSizeFile.flip();
 		long totalSize = bbSizeFile.getLong();
-
-		// FIXME : Envoyer le nom du fichier ou son extension
-
+		
 		Logger.debug("FILE DOWNLOADING : START");
-		Path path = Files.createTempFile(Paths.get("./files"), username + "_", "");
+		Path path = Files.createTempFile(Paths.get("./files"), username + "_", "_" + filename);
 		try (OutputStream os = Files.newOutputStream(path, StandardOpenOption.WRITE,
 				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
 			long totalRead = 0;

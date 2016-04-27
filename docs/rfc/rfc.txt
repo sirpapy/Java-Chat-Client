@@ -34,6 +34,7 @@ Specifications:
 	* The transport protocol used is TCP (with limit size specified in 4 bytes).
 	* The maximum size of an encoded username is 32 bytes.
 	* The maximum size of an encoded message is 512 bytes.
+	* The maximum size of an encoded file name is 64 bytes.
 	* A username can only contain alphanumeric characters.
 	* A message cannot contain any control character (\n, \r, \t, ...).
 	* The size of a chunk of file is 4096 bytes.
@@ -159,11 +160,11 @@ Interactions:
 	Sending file in private
 		[C-C] Sending file between Src and Dst		
 		The client Src sends a file to client Dst. The file is segmented into chunk with a fixed size (only the last part can be smaller).
-		+------+------------+-------------+-------+
-		| int  |    long    |    bytes    | bytes |
-		+------+------------+-------------+-------+
-		| Type |  SizeFile  |  FileChunk  |  ...  |
-		+------+------------+-------------+-------+
+		+------+----------+----------+----------+-----------+-------+
+		| int  |   int    |  String  |   long   |   bytes   | bytes |
+		+------+----------+----------+----------+-----------+-------+
+		| Type | SizeName | FileName | SizeFile | FileChunk |  ...  |
+		+------+----------+----------+----------+-----------+-------+
 
 	Public sign out
 		[S-A] Sign out notification

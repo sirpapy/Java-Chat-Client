@@ -1,6 +1,6 @@
 package fr.upem.matou.shared.network;
 
-import static fr.upem.matou.shared.network.NetworkCommunication.FILE_CHUNK_SIZE;
+import static fr.upem.matou.shared.network.NetworkCommunication.FILE_NAME_MAX_SIZE;
 import static fr.upem.matou.shared.network.NetworkCommunication.MESSAGE_MAX_SIZE;
 import static fr.upem.matou.shared.network.NetworkCommunication.USERNAME_MAX_SIZE;
 import static fr.upem.matou.shared.network.NetworkProtocol.Communicator.CLIENT;
@@ -37,7 +37,8 @@ public enum NetworkProtocol {
 	PVCOESTADST(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION", Integer.BYTES, USERNAME_MAX_SIZE,
 			Integer.BYTES, 16, Integer.BYTES, Integer.BYTES),
 	PVMSG(CLIENT, CLIENT, "PRIVATE_MESSAGE", Integer.BYTES, MESSAGE_MAX_SIZE),
-	PVFILE(CLIENT, CLIENT, "PRIVATE_FILE", Integer.BYTES, FILE_CHUNK_SIZE),;
+	PVFILE(CLIENT, CLIENT, "PRIVATE_FILE", Integer.BYTES, FILE_NAME_MAX_SIZE, Long.BYTES),
+	;
 
 	static enum Communicator {
 		CLIENT, SERVER;
@@ -47,7 +48,6 @@ public enum NetworkProtocol {
 	private final Communicator target;
 	private final String description;
 	private final List<Integer> argumentSizes;
-	private final int maxRequestSize;
 
 	private NetworkProtocol(Communicator source, Communicator target, String description, Integer... sizes) {
 		this.source = source;
@@ -59,17 +59,6 @@ public enum NetworkProtocol {
 			args.add(size);
 		}
 		argumentSizes = Collections.unmodifiableList(args);
-		maxRequestSize = argumentSizes.stream().mapToInt(Integer::intValue).sum();
-	}
-
-	// TEMP
-	public int getMaxRequestSize() {
-		return maxRequestSize;
-	}
-
-	// TEMP
-	public int getArgumentSize(int arg) {
-		return argumentSizes.get(arg);
 	}
 
 	@Override
@@ -96,7 +85,7 @@ public enum NetworkProtocol {
 	private static int getMaxRequestSize(Communicator source, Communicator target) {
 		NetworkProtocol[] values = values();
 		return Arrays.stream(values).filter(e -> e.source == source && e.target == target)
-				.mapToInt(e -> e.maxRequestSize).max().getAsInt();
+				.mapToInt(e -> e.argumentSizes.stream().mapToInt(Integer::intValue).sum()).max().getAsInt();
 	}
 
 	private static int getMaxArgumentSize(Communicator source, Communicator target) {
