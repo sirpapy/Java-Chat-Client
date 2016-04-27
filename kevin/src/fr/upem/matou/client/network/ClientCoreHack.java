@@ -66,12 +66,7 @@ public class ClientCoreHack implements Closeable {
 
 		switch (protocol) {
 		case MSGBC:
-			Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
-			if (!optionalMessage.isPresent()) {
-				System.out.println("No message");
-				return;
-			}
-			Message message = optionalMessage.get();
+			Message message = ClientCommunication.receiveRequestMSGBC(sc);
 			System.out.println(message);
 			break;
 		default:
@@ -97,30 +92,15 @@ public class ClientCoreHack implements Closeable {
 
 			switch (protocol) {
 			case CORES:
-				Optional<Boolean> optionalAcceptation = ClientCommunication.receiveRequestCORES(sc);
-				if (!optionalAcceptation.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				boolean acceptation = optionalAcceptation.get();
+				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				if (!optionalPseudo.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				String pseudo = optionalPseudo.get();
+				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:
-				Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
-				if (!optionalMessage.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				Message message = optionalMessage.get();
+				Message message = ClientCommunication.receiveRequestMSGBC(sc);
 				System.out.println(message);
 				break;
 			default:
@@ -144,30 +124,15 @@ public class ClientCoreHack implements Closeable {
 
 			switch (protocol) {
 			case CORES:
-				Optional<Boolean> optionalAcceptation = ClientCommunication.receiveRequestCORES(sc);
-				if (!optionalAcceptation.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				boolean acceptation = optionalAcceptation.get();
+				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				if (!optionalPseudo.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				String pseudo = optionalPseudo.get();
+				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:
-				Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
-				if (!optionalMessage.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				Message message = optionalMessage.get();
+				Message message = ClientCommunication.receiveRequestMSGBC(sc);
 				System.out.println(message);
 				break;
 			default:
@@ -192,30 +157,15 @@ public class ClientCoreHack implements Closeable {
 
 			switch (protocol) {
 			case CORES:
-				Optional<Boolean> optionalAcceptation = ClientCommunication.receiveRequestCORES(sc);
-				if (!optionalAcceptation.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				boolean acceptation = optionalAcceptation.get();
+				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				if (!optionalPseudo.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				String pseudo = optionalPseudo.get();
+				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:
-				Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
-				if (!optionalMessage.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				Message message = optionalMessage.get();
+				Message message = ClientCommunication.receiveRequestMSGBC(sc);
 				System.out.println(message);
 				break;
 			default:
@@ -242,30 +192,15 @@ public class ClientCoreHack implements Closeable {
 
 			switch (protocol) {
 			case CORES:
-				Optional<Boolean> optionalAcceptation = ClientCommunication.receiveRequestCORES(sc);
-				if (!optionalAcceptation.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				boolean acceptation = optionalAcceptation.get();
+				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				if (!optionalPseudo.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				String pseudo = optionalPseudo.get();
+				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:
-				Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
-				if (!optionalMessage.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				Message message = optionalMessage.get();
+				Message message = ClientCommunication.receiveRequestMSGBC(sc);
 				System.out.println(message);
 				break;
 			default:
@@ -291,21 +226,11 @@ public class ClientCoreHack implements Closeable {
 
 			switch (protocol) {
 			case CORES:
-				Optional<Boolean> optionalAcceptation = ClientCommunication.receiveRequestCORES(sc);
-				if (!optionalAcceptation.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				boolean acceptation = optionalAcceptation.get();
+				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				if (!optionalPseudo.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				String pseudo = optionalPseudo.get();
+				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			default:
@@ -331,30 +256,15 @@ public class ClientCoreHack implements Closeable {
 
 			switch (protocol) {
 			case CORES:
-				Optional<Boolean> optionalAcceptation = ClientCommunication.receiveRequestCORES(sc);
-				if (!optionalAcceptation.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				boolean acceptation = optionalAcceptation.get();
+				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				if (!optionalPseudo.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				String pseudo = optionalPseudo.get();
+				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:
-				Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
-				if (!optionalMessage.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				Message message = optionalMessage.get();
+				Message message = ClientCommunication.receiveRequestMSGBC(sc);
 				System.out.println(message);
 				break;
 			default:
@@ -385,30 +295,15 @@ public class ClientCoreHack implements Closeable {
 
 			switch (protocol) {
 			case CORES:
-				Optional<Boolean> optionalAcceptation = ClientCommunication.receiveRequestCORES(sc);
-				if (!optionalAcceptation.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				boolean acceptation = optionalAcceptation.get();
+				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				Optional<String> optionalPseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				if (!optionalPseudo.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				String pseudo = optionalPseudo.get();
+				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:
-				Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
-				if (!optionalMessage.isPresent()) {
-					System.out.println("No message");
-					return;
-				}
-				Message message = optionalMessage.get();
+				Message message = ClientCommunication.receiveRequestMSGBC(sc);
 				System.out.println(message);
 				break;
 			default:
@@ -433,12 +328,7 @@ public class ClientCoreHack implements Closeable {
 
 		switch (protocol) {
 		case MSGBC:
-			Optional<Message> optionalMessage = ClientCommunication.receiveRequestMSGBC(sc);
-			if (!optionalMessage.isPresent()) {
-				System.out.println("No message");
-				return;
-			}
-			Message message = optionalMessage.get();
+			Message message = ClientCommunication.receiveRequestMSGBC(sc);
 			System.out.println(message);
 			break;
 		default:
