@@ -76,9 +76,9 @@ class ShellCommand {
 		}
 
 		default:
-			// TODO : Commande "Help" pour afficher la liste des commandes disponibles
 			return Optional.empty();
 
 		}
+
 	}
 }

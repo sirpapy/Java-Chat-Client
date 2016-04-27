@@ -108,7 +108,7 @@ public class ShellInterface implements UserInterface {
 	}
 
 	private void displayNewPrivateDisconnection(Username username) {
-		// FIXME : Affiché en double (1 par thread)
+		// TEMP : Affiché en double (1 par thread)
 	}
 
 	@Override

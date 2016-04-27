@@ -46,6 +46,13 @@ class ServerDataBase {
 		sessions.put(sc, session);
 		return Optional.of(session);
 	}
+	
+	/*
+	 * Checks if a username is available.
+	 */
+	private boolean checkAvailability(Username username) {
+		return !names.contains(username);
+	}
 
 	/*
 	 * Adds a new client.
@@ -57,19 +64,6 @@ class ServerDataBase {
 		}
 		connected.put(sc, username);
 		return true;
-	}
-
-	/*
-	 * Removes a client from the database.
-	 */
-	Optional<Username> removeClient(SocketChannel channel) {
-		sessions.remove(channel);
-		Username disconnected = connected.remove(channel);
-		if (disconnected != null) {
-			privateRequests.remove(disconnected);
-			removeAllRequestTo(disconnected);
-		}
-		return Optional.ofNullable(disconnected);
 	}
 
 	/*
@@ -85,12 +79,18 @@ class ServerDataBase {
 			}
 		}
 	}
-
+	
 	/*
-	 * Checks if a username is available.
+	 * Removes a client from the database.
 	 */
-	private boolean checkAvailability(Username username) {
-		return !names.contains(username);
+	Optional<Username> removeClient(SocketChannel channel) {
+		sessions.remove(channel);
+		Username disconnected = connected.remove(channel);
+		if (disconnected != null) {
+			privateRequests.remove(disconnected);
+			removeAllRequestTo(disconnected);
+		}
+		return Optional.ofNullable(disconnected);
 	}
 
 	/*

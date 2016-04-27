@@ -47,9 +47,6 @@ public class ClientMatou {
 		
 		try (ClientCore client = new ClientCore(host, port)) {
 			client.startChat(Optional.ofNullable(username));
-			/*
-			 * TODO : Connexion en ligne de commande client.startChat(pseudo);
-			 */
 		} catch (IOException e) {
 			Logger.error("CRITICAL ERROR | " + e.toString());
 			Logger.exception(e);
