@@ -17,7 +17,8 @@ import java.util.Set;
  */
 class ServerLogger {
 
-	private static final PrintStream STREAM_OUT = System.out;
+	private static final PrintStream OUTPUT = System.out;
+	
 	private static final boolean LOG_SELECT = true;
 
 	private static String remoteAddressToString(SocketChannel sc) {
@@ -65,13 +66,13 @@ class ServerLogger {
 
 	private static void printLogSelector(String message) {
 		if (LOG_SELECT) {
-			STREAM_OUT.println(colorBlue(message));
+			OUTPUT.println(colorBlue(message));
 		}
 	}
 
 	private static void printLogSelectedKeys(String message) {
 		if (LOG_SELECT) {
-			STREAM_OUT.println(colorCyan(message));
+			OUTPUT.println(colorCyan(message));
 		}
 	}
 

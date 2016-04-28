@@ -32,8 +32,7 @@ public class Logger {
 
 	}
 
-	private static PrintStream STREAM_OUT = System.out;
-	private static PrintStream STREAM_ERR = System.err;
+	private static PrintStream OUTPUT = System.err;
 
 	private static final boolean LOG_DEBUG = true;
 	private static final boolean LOG_NETWORK = true;
@@ -56,18 +55,7 @@ public class Logger {
 	 */
 	public static void attachOutput(PrintStream out) {
 		requireNonNull(out);
-		STREAM_OUT = out;
-	}
-
-	/**
-	 * Changes the error output of the logger.
-	 * 
-	 * @param err
-	 *            The new error output.
-	 */
-	public static void attachError(PrintStream err) {
-		requireNonNull(err);
-		STREAM_ERR = err;
+		OUTPUT = out;
 	}
 
 	private static String formatLog(String level, String message) {
@@ -128,7 +116,7 @@ public class Logger {
 	 */
 	public static void debug(String message) {
 		if (LOG_DEBUG) {
-			STREAM_ERR.println(colorPurple(formatLog("DEBUG", message)));
+			OUTPUT.println(colorPurple(formatLog("DEBUG", message)));
 		}
 	}
 
@@ -140,7 +128,7 @@ public class Logger {
 	 */
 	public static void info(String message) {
 		if (LOG_NETWORK) {
-			STREAM_OUT.println(colorGreen(formatLog("INFO", message)));
+			OUTPUT.println(colorGreen(formatLog("INFO", message)));
 		}
 	}
 
@@ -152,7 +140,7 @@ public class Logger {
 	 */
 	public static void warning(String message) {
 		if (LOG_WARNING) {
-			STREAM_ERR.println(colorYellow(formatLog("WARNING", message)));
+			OUTPUT.println(colorYellow(formatLog("WARNING", message)));
 		}
 	}
 
@@ -164,7 +152,7 @@ public class Logger {
 	 */
 	public static void error(String message) {
 		if (LOG_ERROR) {
-			STREAM_ERR.println(colorRed(formatLog("ERROR", message)));
+			OUTPUT.println(colorRed(formatLog("ERROR", message)));
 		}
 	}
 
@@ -176,7 +164,7 @@ public class Logger {
 	 */
 	public static void exception(Exception exception) {
 		if (LOG_EXCEPTION) {
-			exception.printStackTrace(STREAM_ERR);
+			exception.printStackTrace(OUTPUT);
 		}
 	}
 
