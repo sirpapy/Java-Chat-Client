@@ -39,11 +39,37 @@ class ClientCommunication {
 	private ClientCommunication() {
 	}
 
-	private static void sendRequest(SocketChannel sc, ByteBuffer bb) throws IOException {
+	private static void writeFully(SocketChannel sc, ByteBuffer bb) throws IOException {
 		bb.flip();
 		sc.write(bb);
 	}
 	
+	private static void writeProtocol(SocketChannel sc, NetworkProtocol protocol) throws IOException {
+		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
+		bb.putInt(protocol.ordinal());
+		writeFully(sc, bb);
+	}
+	
+	private static void writeInt(SocketChannel sc, int value) throws IOException {
+		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
+		bb.putInt(value);
+		writeFully(sc, bb);
+	}
+	
+	private static void writeLong(SocketChannel sc, long value) throws IOException {
+		ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
+		bb.putLong(value);
+		writeFully(sc, bb);
+	}
+	
+	private static void writeString(SocketChannel sc, ByteBuffer encoded) throws IOException {
+		int size = encoded.remaining();
+		writeInt(sc, size);
+		System.out.println("ENCODED : " + encoded);
+		encoded.compact();
+		writeFully(sc, encoded);
+	}
+		
 	private static void sendFileChunks(SocketChannel sc, Path path) throws IOException {
 		Logger.debug("FILE UPLOADING : START");
 		try (InputStream is = Files.newInputStream(path, StandardOpenOption.READ)) {
@@ -56,99 +82,7 @@ class ClientCommunication {
 		}
 		Logger.debug("FILE UPLOADING : END");
 	}
-
-	/*
-	 * Encodes a COREQ request.
-	 */
-	static ByteBuffer encodeRequestCOREQ(ByteBuffer encodedUsername) {
-		int length = encodedUsername.remaining();
-
-		int capacity = Integer.BYTES + Integer.BYTES + length;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
-
-		request.putInt(NetworkProtocol.COREQ.ordinal());
-		request.putInt(length).put(encodedUsername);
-
-		return request;
-	}
-
-	/*
-	 * Encodes a MSG request.
-	 */
-	static ByteBuffer encodeRequestMSG(ByteBuffer encodedMessage) {
-		int length = encodedMessage.remaining();
-
-		int capacity = Integer.BYTES + Integer.BYTES + length;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
-
-		request.putInt(NetworkProtocol.MSG.ordinal());
-		request.putInt(length).put(encodedMessage);
-
-		return request;
-	}
-
-	static ByteBuffer encodeRequestPVCOREQ(ByteBuffer encodedUsername) {
-		int length = encodedUsername.remaining();
-
-		int capacity = Integer.BYTES + Integer.BYTES + length;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
-
-		request.putInt(NetworkProtocol.PVCOREQ.ordinal());
-		request.putInt(length).put(encodedUsername);
-
-		return request;
-	}
-
-	static ByteBuffer encodeRequestPVCOACC(ByteBuffer encodedUsername) {
-		int length = encodedUsername.remaining();
-
-		int capacity = Integer.BYTES + Integer.BYTES + length;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
-
-		request.putInt(NetworkProtocol.PVCOACC.ordinal());
-		request.putInt(length).put(encodedUsername);
-
-		return request;
-	}
-
-	static ByteBuffer encodeRequestPVCOPORT(ByteBuffer encodedUsername, int portMessage, int portFile) {
-		int length = encodedUsername.remaining();
-
-		int capacity = Integer.BYTES + Integer.BYTES + length + (2 * Integer.BYTES);
-		ByteBuffer request = ByteBuffer.allocate(capacity);
-
-		request.putInt(NetworkProtocol.PVCOPORT.ordinal());
-		request.putInt(length).put(encodedUsername);
-		request.putInt(portMessage).putInt(portFile);
-
-		return request;
-	}
-
-	static ByteBuffer encodeRequestPVMSG(ByteBuffer encodedMessage) {
-		int length = encodedMessage.remaining();
-
-		int capacity = Integer.BYTES + Integer.BYTES + length;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
-
-		request.putInt(NetworkProtocol.PVMSG.ordinal());
-		request.putInt(length).put(encodedMessage);
-
-		return request;
-	}
-
-	static ByteBuffer encodeRequestPVFILE(ByteBuffer encodedPath, long totalSize) {
-		int length = encodedPath.remaining();
-
-		int capacity = Integer.BYTES + Integer.BYTES + length + Long.BYTES;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
-
-		request.putInt(NetworkProtocol.PVFILE.ordinal());
-		request.putInt(length).put(encodedPath);
-		request.putLong(totalSize);
-
-		return request;
-	}
-
+	
 	/*
 	 * Sends a COREQ request.
 	 */
@@ -157,8 +91,9 @@ class ClientCommunication {
 		if (!optional.isPresent()) {
 			return false;
 		}
-		ByteBuffer bb = encodeRequestCOREQ(optional.get());
-		sendRequest(sc, bb);
+		writeProtocol(sc, NetworkProtocol.COREQ);
+		writeString(sc, optional.get());
+		System.out.println("true");
 		return true;
 	}
 
@@ -170,8 +105,8 @@ class ClientCommunication {
 		if (!optional.isPresent()) {
 			return false;
 		}
-		ByteBuffer bb = encodeRequestMSG(optional.get());
-		sendRequest(sc, bb);
+		writeProtocol(sc, NetworkProtocol.MSG);
+		writeString(sc, optional.get());
 		return true;
 	}
 
@@ -180,8 +115,8 @@ class ClientCommunication {
 		if (!optional.isPresent()) {
 			return false;
 		}
-		ByteBuffer bb = encodeRequestPVCOREQ(optional.get());
-		sendRequest(sc, bb);
+		writeProtocol(sc, NetworkProtocol.PVCOREQ);
+		writeString(sc, optional.get());
 		return true;
 	}
 
@@ -190,8 +125,8 @@ class ClientCommunication {
 		if (!optional.isPresent()) {
 			return false;
 		}
-		ByteBuffer bb = encodeRequestPVCOACC(optional.get());
-		sendRequest(sc, bb);
+		writeProtocol(sc, NetworkProtocol.PVCOACC);
+		writeString(sc, optional.get());
 		return true;
 	}
 
@@ -201,8 +136,10 @@ class ClientCommunication {
 		if (!optional.isPresent()) {
 			return false;
 		}
-		ByteBuffer bb = encodeRequestPVCOPORT(optional.get(), portMessage, portFile);
-		sendRequest(sc, bb);
+		writeProtocol(sc, NetworkProtocol.PVCOPORT);
+		writeString(sc, optional.get());
+		writeInt(sc, portMessage);
+		writeInt(sc, portFile);
 		return true;
 	}
 
@@ -211,8 +148,8 @@ class ClientCommunication {
 		if (!optional.isPresent()) {
 			return false;
 		}
-		ByteBuffer bb = encodeRequestPVMSG(optional.get());
-		sendRequest(sc, bb);
+		writeProtocol(sc, NetworkProtocol.PVMSG);
+		writeString(sc, optional.get());
 		return true;
 	}
 
@@ -224,8 +161,9 @@ class ClientCommunication {
 			if (!optional.isPresent()) {
 				return false;
 			}
-			ByteBuffer bb = encodeRequestPVFILE(optional.get(), totalSize);
-			sendRequest(sc, bb);
+			writeProtocol(sc, NetworkProtocol.PVFILE);
+			writeString(sc, optional.get());
+			writeLong(sc, totalSize);
 
 			new Thread(() -> {
 				try {
