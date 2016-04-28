@@ -10,8 +10,8 @@ import fr.upem.matou.shared.network.ErrorType;
 import fr.upem.matou.shared.network.Username;
 
 /**
- * This interface provides methods to display information to the user and retrieve information entered by the user.
- * All implementations of this interface should be transparent.
+ * This interface provides methods to display information to the user and retrieve information entered by the user. All
+ * implementations of this interface should be transparent.
  */
 public interface UserInterface extends Closeable {
 
@@ -41,33 +41,65 @@ public interface UserInterface extends Closeable {
 	 * Displays a new connection event to the user.
 	 * 
 	 * @param username
-	 *            The new connected
+	 *            The connected username.
 	 */
 	public void displayNewConnectionEvent(Username username);
 
 	/**
-	 * Display a new disconnection event to the user.
+	 * Displays a new disconnection event to the user.
 	 * 
 	 * @param username
-	 *            The new disconnected
+	 *            The disconnected username
 	 */
 	public void displayNewDisconnectionEvent(Username username);
 
+	/**
+	 * Displays a new private connection request event to the user.
+	 * 
+	 * @param username
+	 *            The requesting username.
+	 */
 	public void displayNewPrivateRequestEvent(Username username);
 
+	/**
+	 * Displays a new private connection acceptation event to the user.
+	 * 
+	 * @param username
+	 *            The accepting username.
+	 */
 	public void displayNewPrivateAcceptionEvent(Username username);
 
+	/**
+	 * Displays a new private disconnection event (message channel) to the user.
+	 * 
+	 * @param username
+	 *            The disconnected username
+	 */
 	public void displayNewPrivateMessageDisconnection(Username username);
-	
+
+	/**
+	 * Displays a new private disconnection event (file channel) to the user.
+	 * 
+	 * @param username
+	 *            The disconnected username
+	 */
 	public void displayNewPrivateFileDisconnection(Username username);
 
+	/**
+	 * Displays a new private file reception event to the user.
+	 * 
+	 * @param username
+	 *            The sender username.
+	 * @param path
+	 *            The path to the saved file.
+	 */
 	public void displayNewFileReception(String username, Path path);
 
 	/**
 	 * Warns the user that this username is not valid.
 	 * 
 	 * @param username
-	 *            The username
+	 *            The username.
 	 */
 	public void warnInvalidUsername(String username);
 
@@ -75,12 +107,24 @@ public interface UserInterface extends Closeable {
 	 * Warns the user that this event is not valid.
 	 * 
 	 * @param event
-	 *            The event
+	 *            The event.
 	 */
-	public void warnInvalidMessage(ClientEvent event);
+	public void warnInvalidEvent(ClientEvent event);
 
+	/**
+	 * Warns the user that this username is not valid
+	 * 
+	 * @param username
+	 *            The username.
+	 */
 	public void warnUnavailableUsername(String username);
 
+	/**
+	 * Displays an error message to the user.
+	 * 
+	 * @param type
+	 *            The error.
+	 */
 	public void displayError(ErrorType type);
 
 }

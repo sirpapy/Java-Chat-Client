@@ -11,15 +11,19 @@ import fr.upem.matou.shared.network.Username;
  * This class provides events requested by a client through the user interface.
  */
 public interface ClientEvent {
-	static final String COMMAND_TOKEN = "/";
 
-	public static enum ClientEventType {
-		SEND_MESSAGE, OPEN_PRIVATE, ACCEPT_PRIVATE, SEND_PRIVATE_MESSAGE, SEND_PRIVATE_FILE, CLOSE_PRIVATE;
-	}
-
+	/**
+	 * Send a public message.
+	 */
 	public static class ClientEventSendMessage implements ClientEvent {
 		private final String message;
 
+		/**
+		 * Public message event.
+		 * 
+		 * @param message
+		 *            The message.
+		 */
 		public ClientEventSendMessage(String message) {
 			requireNonNull(message);
 			this.message = message;
@@ -32,9 +36,18 @@ public interface ClientEvent {
 		}
 	}
 
+	/**
+	 * Close a private connection.
+	 */
 	public static class ClientEventClosePrivate implements ClientEvent {
 		private final Username username;
 
+		/**
+		 * Private connection close event.
+		 * 
+		 * @param username
+		 *            The target username.
+		 */
 		public ClientEventClosePrivate(String username) {
 			requireNonNull(username);
 			this.username = new Username(username);
@@ -48,9 +61,18 @@ public interface ClientEvent {
 
 	}
 
+	/**
+	 * Send a private connection request.
+	 */
 	public static class ClientEventOpenPrivate implements ClientEvent {
 		private final Username username;
 
+		/**
+		 * Private connection request event.
+		 * 
+		 * @param username
+		 *            The target username.
+		 */
 		public ClientEventOpenPrivate(String username) {
 			requireNonNull(username);
 			this.username = new Username(username);
@@ -64,9 +86,18 @@ public interface ClientEvent {
 
 	}
 
+	/**
+	 * Send a private connection acceptation.
+	 */
 	public static class ClientEventAcceptPrivate implements ClientEvent {
 		private final Username username;
 
+		/**
+		 * Private connection request event.
+		 * 
+		 * @param username
+		 *            The target username.
+		 */
 		public ClientEventAcceptPrivate(String username) {
 			requireNonNull(username);
 			this.username = new Username(username);
@@ -79,10 +110,21 @@ public interface ClientEvent {
 		}
 	}
 
+	/**
+	 * Send a private file.
+	 */
 	public static class ClientEventSendPrivateFile implements ClientEvent {
 		private final Username username;
 		private final Path path;
 
+		/**
+		 * Private file event.
+		 * 
+		 * @param username
+		 *            The target username.
+		 * @param path
+		 *            The path of the file to send.
+		 */
 		public ClientEventSendPrivateFile(String username, Path path) {
 			requireNonNull(username);
 			requireNonNull(path);
@@ -98,10 +140,21 @@ public interface ClientEvent {
 
 	}
 
+	/**
+	 * Send a private message.
+	 */
 	public static class ClientEventSendPrivateMessage implements ClientEvent {
 		private final Username username;
 		private final String message;
 
+		/**
+		 * Private message event.
+		 * 
+		 * @param username
+		 *            The target username.
+		 * @param message
+		 *            The message to send.
+		 */
 		public ClientEventSendPrivateMessage(String username, String message) {
 			requireNonNull(username);
 			requireNonNull(message);
@@ -118,7 +171,7 @@ public interface ClientEvent {
 	}
 
 	/**
-	 * Executes the event.
+	 * Executes this event on a session.
 	 * 
 	 * @param session
 	 *            The current client session.

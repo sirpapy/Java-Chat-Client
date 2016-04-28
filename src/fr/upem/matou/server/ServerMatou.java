@@ -18,7 +18,7 @@ public class ServerMatou {
 	}
 
 	/**
-	 * Main method of the server program.
+	 * Main method of the chat server program.
 	 * 
 	 * @param args
 	 *            Command line arguments
@@ -38,7 +38,7 @@ public class ServerMatou {
 		try (ServerCore server = new ServerCore(port)) {
 			server.launch();
 		} catch (IOException e) {
-			Logger.error("CRITICAL ERROR | " + e.toString());
+			Logger.error(e.toString());
 			Logger.exception(e);
 		}
 	}

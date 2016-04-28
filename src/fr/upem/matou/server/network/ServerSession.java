@@ -1,5 +1,8 @@
 package fr.upem.matou.server.network;
 
+import static fr.upem.matou.shared.logger.Logger.formatNetworkRequest;
+import static fr.upem.matou.shared.logger.Logger.formatNetworkData;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -93,7 +96,7 @@ class ServerSession {
 	void appendWriteBuffer(ByteBuffer bb) {
 		boolean succeeded = ByteBuffers.append(bbWrite, bb);
 		if (!succeeded) {
-			Logger.warning("REQUEST LOST | WRITE BUFFER CANNOT HOLD IT");
+			Logger.warning(formatNetworkData(sc,"Unknown request lost : Write Buffer cannot hold it"));
 		}
 	}
 
@@ -126,7 +129,7 @@ class ServerSession {
 	private void readUsernameArg1(ReaderUsername reader) {
 		bbRead.flip();
 		reader.sizeUsername = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername));
 		if (reader.sizeUsername > USERNAME_MAX_SIZE || reader.sizeUsername == 0) {
 			Logger.debug("Invalid size username");
 			disconnectClient();
@@ -143,7 +146,7 @@ class ServerSession {
 		bbRead.flip();
 		String string = ServerCommunication.readStringUTF8(bbRead);
 		reader.username = new Username(string);
-		Logger.network(NetworkLogType.READ, "USERNAME : " + reader.username);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + reader.username));
 
 		resetReadState();
 	}
@@ -156,7 +159,7 @@ class ServerSession {
 	private void readMessageArg1(ReaderMessage reader) {
 		bbRead.flip();
 		reader.sizeMessage = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE MESSAGE : " + reader.sizeMessage);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "SIZE MESSAGE : " + reader.sizeMessage));
 		if (reader.sizeMessage > MESSAGE_MAX_SIZE || reader.sizeMessage == 0) {
 			Logger.debug("Invalid size message");
 			disconnectClient();
@@ -169,7 +172,7 @@ class ServerSession {
 	private void readMessageArg2(ReaderMessage reader) {
 		bbRead.flip();
 		reader.message = ServerCommunication.readStringUTF8(bbRead);
-		Logger.network(NetworkLogType.READ, "MESSAGE : " + reader.message);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "MESSAGE : " + reader.message));
 
 		resetReadState();
 	}
@@ -182,7 +185,7 @@ class ServerSession {
 	private void readPortArg1(ReaderPort reader) {
 		bbRead.flip();
 		reader.sizeUsername = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername));
 		if (reader.sizeUsername > USERNAME_MAX_SIZE || reader.sizeUsername == 0) {
 			Logger.debug("Invalid size username");
 			disconnectClient();
@@ -196,7 +199,7 @@ class ServerSession {
 		bbRead.flip();
 		String string = ServerCommunication.readStringUTF8(bbRead);
 		reader.username = new Username(string);
-		Logger.network(NetworkLogType.READ, "USERNAME : " + reader.username);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + reader.username));
 
 		advanceReadState(Integer.BYTES);
 	}
@@ -226,16 +229,16 @@ class ServerSession {
 			return ordinal;
 		}
 		protocol = optionalProtocol.get();
-		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PROTOCOL : " + protocol));
 		return ordinal;
 	}
 
 	private void answerERROR(ErrorType type) {
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.ERROR);
-		Logger.network(NetworkLogType.WRITE, "ERROR : " + type);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.ERROR));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "ERROR : " + type));
 
 		if (!ServerCommunication.addRequestERROR(bbWrite, type)) {
-			Logger.warning("ERROR lost | Write Buffer cannot hold it");
+			Logger.warning(formatNetworkData(sc,"ERROR lost : Write Buffer cannot hold it"));
 			return;
 		}
 	}
@@ -284,22 +287,22 @@ class ServerSession {
 		}
 
 		boolean acceptation = db.authentClient(sc, username);
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES);
-		Logger.network(NetworkLogType.WRITE, "ACCEPTATION : " + acceptation);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CORES));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "ACCEPTATION : " + acceptation));
 
 		if (!ServerCommunication.addRequestCORES(bbWrite, acceptation)) {
-			Logger.warning("CORES lost | Write Buffer cannot hold it");
+			Logger.warning(formatNetworkData(sc,"CORES lost : Write Buffer cannot hold it"));
 		}
 
 		if (acceptation) {
 			setAuthent();
 
-			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CONOTIF);
-			Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.CONOTIF));
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + username));
 
 			ByteBuffer bbWriteAll = db.getBroadcastBuffer();
 			if (!ServerCommunication.addRequestCONOTIF(bbWriteAll, username.toString())) {
-				Logger.warning("CONOTIF lost | Broadcast Buffer cannot hold it");
+				Logger.warning(formatNetworkData(sc,"CONOTIF lost : Broadcast Buffer cannot hold it"));
 				return;
 			}
 			db.updateStateReadAll();
@@ -343,13 +346,13 @@ class ServerSession {
 			return;
 		}
 		Username username = db.usernameOf(sc).get();
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSGBC);
-		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
-		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + message);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSGBC));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + username));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "MESSAGE : " + message));
 
 		ByteBuffer bbWriteAll = db.getBroadcastBuffer();
 		if (!ServerCommunication.addRequestMSGBC(bbWriteAll, username.toString(), message)) {
-			Logger.warning("MSGBC lost | Broadcast Buffer cannot hold it");
+			Logger.warning(formatNetworkData(sc,"MSGBC lost : Broadcast Buffer cannot hold it"));
 			return;
 		}
 		db.updateStateReadAll();
@@ -403,11 +406,11 @@ class ServerSession {
 
 		ServerSession session = optional.get();
 		ByteBuffer bbTarget = session.getWriteBuffer();
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOREQNOTIF);
-		Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOREQNOTIF));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + source));
 
 		if (!ServerCommunication.addRequestPVCOREQNOTIF(bbTarget, source.toString())) {
-			Logger.warning("PVCOREQNOTIF lost | Write Buffer cannot hold it");
+			Logger.warning(formatNetworkData(sc,"PVCOREQNOTIF lost : Write Buffer cannot hold it"));
 			return;
 		}
 
@@ -456,12 +459,12 @@ class ServerSession {
 
 		ServerSession session = db.sessionOf(target).get(); // Checked by checkPrivateRequest
 		ByteBuffer bbTarget = session.getWriteBuffer();
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTASRC);
-		Logger.network(NetworkLogType.WRITE, "USERNAME : " + source);
-		Logger.network(NetworkLogType.WRITE, "ADDRESS : " + address);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTASRC));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + source));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "ADDRESS : " + address));
 
 		if (!ServerCommunication.addRequestPVCOESTASRC(bbTarget, source.toString(), address)) {
-			Logger.warning("PVCOESTASRC lost | Write Buffer cannot hold it");
+			Logger.warning(formatNetworkData(sc,"PVCOESTASRC lost : Write Buffer cannot hold it")); // FIXME : wrong channel
 			return;
 		}
 
@@ -510,21 +513,21 @@ class ServerSession {
 		Logger.debug("PRIVATE REQUEST ESTABLISHMENT : " + valid);
 
 		if (!valid) {
-			Logger.warning("Invalid private connection establishment of " + source + " to " + target);
+			Logger.warning(formatNetworkData(sc,"Invalid private connection establishment of " + source + " to " + target));
 			disconnectClient();
 			return;
 		}
 
 		ServerSession session = db.sessionOf(source).get(); // Checked by removePrivateRequest
 		ByteBuffer bbTarget = session.getWriteBuffer();
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTADST);
-		Logger.network(NetworkLogType.WRITE, "USERNAME : " + target);
-		Logger.network(NetworkLogType.WRITE, "ADDRESS : " + address);
-		Logger.network(NetworkLogType.WRITE, "PORT MESSAGE : " + portMessage);
-		Logger.network(NetworkLogType.WRITE, "PORT FILE : " + portFile);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOESTADST));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + target));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "ADDRESS : " + address));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PORT MESSAGE : " + portMessage));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PORT FILE : " + portFile));
 
 		if (!ServerCommunication.addRequestPVCOESTADST(bbTarget, target.toString(), address, portMessage, portFile)) {
-			Logger.warning("PVCOESTADST lost | Write Buffer cannot hold it");
+			Logger.warning(formatNetworkData(sc,"PVCOESTADST lost : Write Buffer cannot hold it"));
 			return;
 		}
 
@@ -535,7 +538,7 @@ class ServerSession {
 	 * Updates the state of the current session after reading.
 	 */
 	void updateStateRead() {
-		Logger.network(NetworkLogType.READ, "BUFFER = " + bbRead);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "BUFFER = " + bbRead));
 		if (bbRead.hasRemaining()) { // Not finished to read
 			return;
 		}
@@ -543,7 +546,7 @@ class ServerSession {
 		if (protocol == null) { // New request
 			int code = processRequestType();
 			if (protocol == null) {
-				Logger.warning("Invalid protocol code : " + code);
+				Logger.warning(formatNetworkData(sc,"Invalid protocol code : " + code));
 				disconnectClient();
 				return;
 			}
@@ -567,7 +570,7 @@ class ServerSession {
 			processPVCOPORT();
 			return;
 		default:
-			Logger.warning("Operation not implemented : " + protocol); // TEMP
+			Logger.warning(formatNetworkData(sc,"Operation not implemented : " + protocol)); // TEMP
 			disconnectClient();
 			return;
 		}
@@ -618,11 +621,11 @@ class ServerSession {
 		} else {
 			Logger.debug("DISCONNECTION : " + disconnected);
 			String username = disconnected.get().toString();
-			Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCONOTIF);
-			Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCONOTIF));
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + username));
 			ByteBuffer bbWriteAll = db.getBroadcastBuffer();
 			if (!ServerCommunication.addRequestDISCONOTIF(bbWriteAll, username)) {
-				Logger.warning("DISCONOTIF lost | Broadcast Buffer cannot hold it");
+				Logger.warning(formatNetworkData(sc,"DISCONOTIF lost : Broadcast Buffer cannot hold it"));
 			} else {
 				db.updateStateReadAll();
 			}

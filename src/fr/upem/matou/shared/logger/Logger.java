@@ -1,9 +1,14 @@
 package fr.upem.matou.shared.logger;
 
-import static fr.upem.matou.shared.logger.Colorator.*;
+import static fr.upem.matou.shared.logger.Colorator.colorGreen;
+import static fr.upem.matou.shared.logger.Colorator.colorPurple;
+import static fr.upem.matou.shared.logger.Colorator.colorRed;
+import static fr.upem.matou.shared.logger.Colorator.colorYellow;
 import static java.util.Objects.requireNonNull;
 
 import java.io.PrintStream;
+import java.nio.channels.SocketChannel;
+import java.text.DateFormat;
 
 /**
  * This class provides static methods in order to log events by priority.
@@ -14,7 +19,17 @@ public class Logger {
 	 * This enum describes the direction of a network event (incoming or outgoing).
 	 */
 	public static enum NetworkLogType {
-		READ, WRITE;
+
+		/**
+		 * Incoming event.
+		 */
+		READ,
+
+		/**
+		 * Outgoing event.
+		 */
+		WRITE;
+
 	}
 
 	private static PrintStream STREAM_OUT = System.out;
@@ -22,10 +37,11 @@ public class Logger {
 
 	private static final boolean LOG_DEBUG = true;
 	private static final boolean LOG_NETWORK = true;
-	private static final boolean LOG_SELECT = true;
 	private static final boolean LOG_WARNING = true;
 	private static final boolean LOG_ERROR = true;
 	private static final boolean LOG_EXCEPTION = true;
+
+	private static final String SEPARATOR = " | ";
 
 	private Logger() {
 	}
@@ -54,6 +70,56 @@ public class Logger {
 		STREAM_ERR = err;
 	}
 
+	private static String formatLog(String level, String message) {
+		long now = System.currentTimeMillis();
+		String time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(now);
+
+		String thread = Thread.currentThread().getName();
+
+		return String.join(SEPARATOR, level, time, thread, message);
+	}
+
+	private static String localAddressToString(SocketChannel sc) {
+		try {
+			return sc.getLocalAddress().toString();
+		} catch (@SuppressWarnings("unused") Exception __) {
+			return "???";
+		}
+	}
+
+	private static String remoteAddressToString(SocketChannel sc) {
+		try {
+			return sc.getRemoteAddress().toString();
+		} catch (@SuppressWarnings("unused") Exception __) {
+			return "???";
+		}
+	}
+
+	public static String formatNetworkData(SocketChannel sc, String message) {
+		String local = localAddressToString(sc);
+		String remote = remoteAddressToString(sc);
+		return String.join(SEPARATOR, local + " -> " + remote, message);
+	}
+
+	public static String formatNetworkRequest(SocketChannel sc, NetworkLogType type, String message) {
+		String local = localAddressToString(sc);
+		String remote = remoteAddressToString(sc);
+
+		String direction = "";
+		switch (type) {
+		case READ:
+			direction = "R";
+			break;
+		case WRITE:
+			direction = "W";
+			break;
+		default:
+			break;
+		}
+		
+		return String.join(SEPARATOR, local + " -> " + remote, direction, message);
+	}
+
 	/**
 	 * Logs a debug message to the error output.
 	 * 
@@ -62,57 +128,19 @@ public class Logger {
 	 */
 	public static void debug(String message) {
 		if (LOG_DEBUG) {
-			STREAM_ERR.println(colorPurple(message));
+			STREAM_ERR.println(colorPurple(formatLog("DEBUG", message)));
 		}
 	}
 
 	/**
 	 * Logs a network event to the normal output.
 	 * 
-	 * @param type
-	 *            The type of event
 	 * @param message
 	 *            The message
 	 */
-	public static void network(NetworkLogType type, String message) {
+	public static void info(String message) {
 		if (LOG_NETWORK) {
-			String string = "";
-			switch (type) {
-			case READ:
-				string = "[R]";
-				break;
-			case WRITE:
-				string = "[W]";
-				break;
-			default:
-				break;
-			}
-			string = string + " " + message;
-			STREAM_OUT.println(colorGreen(string));
-		}
-	}
-
-	/**
-	 * Logs info of selection keys to the normal output.
-	 * 
-	 * @param message
-	 *            The message
-	 */
-	public static void selectInfo(String message) {
-		if (LOG_SELECT) {
-			STREAM_OUT.println(colorBlue(message));
-		}
-	}
-
-	/**
-	 * Logs info of selected keys to the normal output.
-	 * 
-	 * @param message
-	 *            The message
-	 */
-	public static void selectReadyInfo(String message) {
-		if (LOG_SELECT) {
-			STREAM_OUT.println(colorCyan(message));
+			STREAM_OUT.println(colorGreen(formatLog("INFO", message)));
 		}
 	}
 
@@ -124,7 +152,7 @@ public class Logger {
 	 */
 	public static void warning(String message) {
 		if (LOG_WARNING) {
-			STREAM_ERR.println(colorYellow(message));
+			STREAM_ERR.println(colorYellow(formatLog("WARNING", message)));
 		}
 	}
 
@@ -136,7 +164,7 @@ public class Logger {
 	 */
 	public static void error(String message) {
 		if (LOG_ERROR) {
-			STREAM_ERR.println(colorRed(message));
+			STREAM_ERR.println(colorRed(formatLog("ERROR", message)));
 		}
 	}
 
@@ -151,4 +179,5 @@ public class Logger {
 			exception.printStackTrace(STREAM_ERR);
 		}
 	}
+
 }

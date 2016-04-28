@@ -19,7 +19,7 @@ public class ClientMatou {
 	}
 
 	/**
-	 * Main method of the client program.
+	 * Main method of the chat client program.
 	 * 
 	 * @param args
 	 *            Command line arguments
@@ -48,10 +48,10 @@ public class ClientMatou {
 		try (ClientCore client = new ClientCore(host, port)) {
 			client.startChat(Optional.ofNullable(username));
 		} catch (IOException e) {
-			Logger.error("CRITICAL ERROR | " + e.toString());
+			Logger.error(e.toString());
 			Logger.exception(e);
 		} catch (InterruptedException e) {
-			Logger.warning("INTERRUPTION | " + e.toString());
+			Logger.warning(e.toString());
 		}
 	}
 }

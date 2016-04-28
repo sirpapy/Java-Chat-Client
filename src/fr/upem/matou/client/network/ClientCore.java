@@ -1,5 +1,7 @@
 package fr.upem.matou.client.network;
 
+import static fr.upem.matou.shared.logger.Logger.formatNetworkRequest;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -18,8 +20,8 @@ import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 
-/*
- * This class is the core of the client.
+/**
+ * This class is the core of the chat client.
  */
 @SuppressWarnings("resource")
 public class ClientCore implements Closeable {
@@ -30,6 +32,16 @@ public class ClientCore implements Closeable {
 	private final ClientSession session;
 	private final UserInterface ui = new ShellInterface();
 
+	/**
+	 * Constructs a new client core.
+	 * 
+	 * @param hostname
+	 *            The server hostname.
+	 * @param port
+	 *            The serveur pore.
+	 * @throws IOException
+	 *             If an I/O error occurs.
+	 */
 	public ClientCore(String hostname, int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(hostname, port);
 		sc = SocketChannel.open(address);
@@ -61,8 +73,8 @@ public class ClientCore implements Closeable {
 	}
 
 	private boolean usernameSender(String username) throws IOException {
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ);
-		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + username));
 		if (!ClientCommunication.sendRequestCOREQ(sc, username)) {
 			ui.warnInvalidUsername(username);
 			return false;
@@ -72,11 +84,11 @@ public class ClientCore implements Closeable {
 
 	private boolean usernameReceiver(String username) throws IOException {
 		NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
-		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PROTOCOL : " + protocol));
 		switch (protocol) {
 		case CORES: {
 			boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
-			Logger.network(NetworkLogType.READ, "ACCEPTATION : " + acceptation);
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "ACCEPTATION : " + acceptation));
 			if (!acceptation) {
 				ui.warnUnavailableUsername(username);
 			}
@@ -95,7 +107,7 @@ public class ClientCore implements Closeable {
 		ClientEvent event = optional.get();
 
 		if (!event.execute(session)) {
-			ui.warnInvalidMessage(event);
+			ui.warnInvalidEvent(event);
 			return false;
 		}
 		return false;
@@ -106,13 +118,13 @@ public class ClientCore implements Closeable {
 	 */
 	private void messageReceiver() throws IOException {
 		NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
-		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PROTOCOL : " + protocol));
 
 		switch (protocol) {
 
 		case ERROR: {
 			ErrorType type = ClientCommunication.receiveRequestERROR(sc);
-			Logger.network(NetworkLogType.READ, "ERROR : " + type);
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "ERROR : " + type));
 			ui.displayError(type);
 
 			break;
@@ -120,8 +132,8 @@ public class ClientCore implements Closeable {
 
 		case MSGBC: {
 			Message message = ClientCommunication.receiveRequestMSGBC(sc);
-			Logger.network(NetworkLogType.READ, "USERNAME : " + message.getUsername());
-			Logger.network(NetworkLogType.READ, "MESSAGE : " + message.getContent());
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + message.getUsername()));
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "MESSAGE : " + message.getContent()));
 			ui.displayMessage(message);
 
 			break;
@@ -129,7 +141,7 @@ public class ClientCore implements Closeable {
 
 		case CONOTIF: {
 			Username connected = ClientCommunication.receiveRequestCONOTIF(sc);
-			Logger.network(NetworkLogType.READ, "USERNAME : " + connected);
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + connected));
 			ui.displayNewConnectionEvent(connected);
 
 			break;
@@ -137,7 +149,7 @@ public class ClientCore implements Closeable {
 
 		case DISCONOTIF: {
 			Username disconnected = ClientCommunication.receiveRequestDISCONOTIF(sc);
-			Logger.network(NetworkLogType.READ, "USERNAME : " + disconnected);
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + disconnected));
 			ui.displayNewDisconnectionEvent(disconnected);
 
 			break;
@@ -145,7 +157,7 @@ public class ClientCore implements Closeable {
 
 		case PVCOREQNOTIF: {
 			Username requester = ClientCommunication.receiveRequestPVCOREQNOTIF(sc);
-			Logger.network(NetworkLogType.READ, "USERNAME : " + requester);
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + requester));
 			ui.displayNewPrivateRequestEvent(requester);
 
 			break;
@@ -155,8 +167,8 @@ public class ClientCore implements Closeable {
 			SourceConnection sourceInfo = ClientCommunication.receiveRequestPVCOESTASRC(sc);
 			Username username = sourceInfo.getUsername();
 			InetAddress address = sourceInfo.getAddress();
-			Logger.network(NetworkLogType.READ, "USERNAME : " + username);
-			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + username));
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "ADDRESS : " + address));
 			ui.displayNewPrivateAcceptionEvent(username);
 			launchPrivateConnection(username, address);
 
@@ -169,10 +181,10 @@ public class ClientCore implements Closeable {
 			InetAddress address = destinationInfo.getAddress();
 			int portMessage = destinationInfo.getPortMessage();
 			int portFile = destinationInfo.getPortFile();
-			Logger.network(NetworkLogType.READ, "USERNAME : " + username);
-			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
-			Logger.network(NetworkLogType.READ, "PORT MESSAGE : " + portMessage);
-			Logger.network(NetworkLogType.READ, "PORT FILE : " + portFile);
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + username));
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "ADDRESS : " + address));
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PORT MESSAGE : " + portMessage));
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PORT FILE : " + portFile));
 			ui.displayNewPrivateAcceptionEvent(username);
 			launchPrivateConnection(username, address, portMessage, portFile);
 
@@ -192,14 +204,14 @@ public class ClientCore implements Closeable {
 	private void privateCommunicationMessage(SocketChannel pv, Username username) throws IOException {
 		while (true) {
 			NetworkProtocol protocol = ClientCommunication.receiveRequestType(pv);
-			Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PROTOCOL : " + protocol));
 
 			switch (protocol) {
 
 			case PVMSG: {
 				Message message = ClientCommunication.receiveRequestPVMSG(pv, username);
-				Logger.network(NetworkLogType.READ, "USERNAME : " + message.getUsername());
-				Logger.network(NetworkLogType.READ, "MESSAGE : " + message.getContent());
+				Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + message.getUsername()));
+				Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "MESSAGE : " + message.getContent()));
 				ui.displayMessage(message);
 
 				break;
@@ -218,14 +230,14 @@ public class ClientCore implements Closeable {
 	private void privateCommunicationFile(SocketChannel pv, Username username) throws IOException {
 		while (true) {
 			NetworkProtocol protocol = ClientCommunication.receiveRequestType(pv);
-			Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
+			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PROTOCOL : " + protocol));
 
 			switch (protocol) {
 
 			case PVFILE: {
 				Path path = ClientCommunication.receiveRequestPVFILE(pv, username.toString());
-				Logger.network(NetworkLogType.READ, "USERNAME : " + username);
-				Logger.network(NetworkLogType.READ, "PATH : " + path);
+				Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + username));
+				Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PATH : " + path));
 				ui.displayNewFileReception(username.toString(), path);
 
 				break;
@@ -360,7 +372,7 @@ public class ClientCore implements Closeable {
 				try {
 					stop = messageSender();
 				} catch (IOException e) {
-					Logger.warning("WARNING | " + e.toString());
+					Logger.warning(e.toString());
 					Logger.exception(e);
 					return;
 				}
@@ -376,7 +388,7 @@ public class ClientCore implements Closeable {
 				try {
 					messageReceiver();
 				} catch (IOException e) {
-					Logger.warning("WARNING | " + e.toString());
+					Logger.warning(e.toString());
 					Logger.exception(e);
 					return;
 				}
@@ -402,6 +414,14 @@ public class ClientCore implements Closeable {
 		interruptAllThreads();
 	}
 
+	/**
+	 * Starts a chat without a predefined username. User will have to choose a username manually.
+	 * 
+	 * @throws IOException
+	 *             If an I/O error occurs.
+	 * @throws InterruptedException
+	 *             If an interruption occurs.
+	 */
 	public void startChat() throws IOException, InterruptedException {
 		while (true) {
 			Optional<String> optional = usernameGetter();
@@ -424,6 +444,16 @@ public class ClientCore implements Closeable {
 		Logger.debug("DISCONNECTION");
 	}
 
+	/**
+	 * Starts a chat with a predefined username.
+	 * 
+	 * @param username
+	 *            The choosen username.
+	 * @throws IOException
+	 *             If an I/O error occurs.
+	 * @throws InterruptedException
+	 *             If an interruption occurs.
+	 */
 	public void startChat(String username) throws IOException, InterruptedException {
 		if (!connectUsername(username)) {
 			Logger.debug("CONNECTION FAILED");
@@ -435,6 +465,16 @@ public class ClientCore implements Closeable {
 		Logger.debug("DISCONNECTION");
 	}
 
+	/**
+	 * Starts a chat with a predefined username.
+	 * 
+	 * @param username
+	 *            An optional describing a username.
+	 * @throws IOException
+	 *             If an I/O error occurs.
+	 * @throws InterruptedException
+	 *             If an interruption occurs.
+	 */
 	public void startChat(Optional<String> username) throws IOException, InterruptedException {
 		if (username.isPresent()) {
 			startChat(username.get());
@@ -442,6 +482,8 @@ public class ClientCore implements Closeable {
 			startChat();
 		}
 	}
+
+	// FIXME : Utiliser plusieurs fois startChat ?
 
 	@Override
 	public void close() throws IOException {

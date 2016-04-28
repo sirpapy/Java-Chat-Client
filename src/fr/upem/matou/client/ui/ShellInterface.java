@@ -131,7 +131,7 @@ public class ShellInterface implements UserInterface {
 	}
 
 	@Override
-	public void warnInvalidMessage(ClientEvent event) {
+	public void warnInvalidEvent(ClientEvent event) {
 		error.println("This message is not valid");
 	}
 

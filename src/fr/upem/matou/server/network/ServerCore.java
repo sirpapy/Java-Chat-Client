@@ -1,5 +1,7 @@
 package fr.upem.matou.server.network;
 
+import static fr.upem.matou.shared.logger.Logger.formatNetworkRequest;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,8 +17,8 @@ import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 
-/*
- * This class is the core of the server.
+/**
+ * This class is the core of the chat server.
  */
 @SuppressWarnings("resource")
 public class ServerCore implements Closeable {
@@ -25,6 +27,14 @@ public class ServerCore implements Closeable {
 	private final Selector selector;
 	private final ServerDataBase db;
 
+	/**
+	 * Constructs a new server core.
+	 * 
+	 * @param port
+	 *            The port to listen.
+	 * @throws IOException
+	 *             If an I/O error occurs.
+	 */
 	public ServerCore(int port) throws IOException {
 		InetSocketAddress address = new InetSocketAddress(port);
 		ssc = ServerSocketChannel.open();
@@ -35,21 +45,24 @@ public class ServerCore implements Closeable {
 		db = new ServerDataBase(selector.keys());
 	}
 
+	/**
+	 * Starts a server chat.
+	 * 
+	 * @throws IOException
+	 *             If an I/O error occurs.
+	 */
 	public void launch() throws IOException {
 		Set<SelectionKey> selectedKeys = selector.selectedKeys();
 
 		while (!Thread.interrupted()) {
 
-			SelectorInfo.printKeys(selector);
+			ServerLogger.logSelector(selector);
 			selector.select();
 
-			SelectorInfo.printSelectedKeys(selectedKeys);
+			ServerLogger.logSelectedKeys(selectedKeys);
 			processSelectedKeys(selectedKeys);
 
 			selectedKeys.clear();
-
-			Logger.selectInfo("");
-
 		}
 	}
 
@@ -77,15 +90,15 @@ public class ServerCore implements Closeable {
 	private void doAccept(SelectionKey key) throws IOException {
 		ServerSocketChannel channel = (ServerSocketChannel) key.channel();
 		SocketChannel acceptedChannel = channel.accept();
-		
+
 		if (acceptedChannel == null) {
 			return;
 		}
-		
+
 		acceptedChannel.configureBlocking(false);
 		SelectionKey registeredKey = acceptedChannel.register(selector, SelectionKey.OP_READ);
 		Optional<ServerSession> optional = db.newServerSession(acceptedChannel, registeredKey);
-		if(!optional.isPresent()) {
+		if (!optional.isPresent()) {
 			Logger.warning("Server is full"); // FIXME : MàJ OP_ACCEPT
 			NetworkCommunication.silentlyClose(acceptedChannel);
 			return;
@@ -116,12 +129,12 @@ public class ServerCore implements Closeable {
 
 		bb.flip();
 		try {
-			Logger.network(NetworkLogType.WRITE, "BUFFER = " + bb);
+			Logger.info(formatNetworkRequest(channel, NetworkLogType.WRITE, "BUFFER = " + bb));
 			channel.write(bb);
 		} finally {
 			bb.compact();
 		}
-		
+
 		session.updateKey();
 	}
 

@@ -3,11 +3,10 @@ package fr.upem.matou.shared.logger;
 /**
  * This class provides static methods to display colored string in a shell using the ANSI escape codes.
  * 
- * Inspired from :
- * http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
+ * Inspired from : http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
  */
 public class Colorator {
-	private static boolean activated = true;
+	private static boolean enabled = true;
 
 	private static final String ANSI_RESET = "\u001B[0m";
 	private static final String ANSI_BLACK = "\u001B[30m";
@@ -19,62 +18,128 @@ public class Colorator {
 	private static final String ANSI_CYAN = "\u001B[36m";
 	private static final String ANSI_WHITE = "\u001B[37m";
 
+	/**
+	 * Returns the given string colored in black. If the colorator is disabled, the string is returned without any
+	 * change.
+	 * 
+	 * @param string
+	 *            The original string.
+	 * @return The colored string.
+	 */
 	public static String colorBlack(String string) {
-		if (!activated) {
+		if (!enabled) {
 			return string;
 		}
 		return ANSI_BLACK + string + ANSI_RESET;
 	}
 
+	/**
+	 * Returns the given string colored in red. If the colorator is disabled, the string is returned without any change.
+	 * 
+	 * @param string
+	 *            The original string.
+	 * @return The colored string.
+	 */
 	public static String colorRed(String string) {
-		if (!activated) {
+		if (!enabled) {
 			return string;
 		}
 		return ANSI_RED + string + ANSI_RESET;
 	}
 
+	/**
+	 * Returns the given string colored in green. If the colorator is disabled, the string is returned without any
+	 * change.
+	 * 
+	 * @param string
+	 *            The original string.
+	 * @return The colored string.
+	 */
 	public static String colorGreen(String string) {
-		if (!activated) {
+		if (!enabled) {
 			return string;
 		}
 		return ANSI_GREEN + string + ANSI_RESET;
 	}
 
+	/**
+	 * Returns the given string colored in yellow. If the colorator is disabled, the string is returned without any
+	 * change.
+	 * 
+	 * @param string
+	 *            The original string.
+	 * @return The colored string.
+	 */
 	public static String colorYellow(String string) {
-		if (!activated) {
+		if (!enabled) {
 			return string;
 		}
 		return ANSI_YELLOW + string + ANSI_RESET;
 	}
 
+	/**
+	 * Returns the given string colored in blue. If the colorator is disabled, the string is returned without any
+	 * change.
+	 * 
+	 * @param string
+	 *            The original string.
+	 * @return The colored string.
+	 */
 	public static String colorBlue(String string) {
-		if (!activated) {
+		if (!enabled) {
 			return string;
 		}
 		return ANSI_BLUE + string + ANSI_RESET;
 	}
 
+	/**
+	 * Returns the given string colored in purple. If the colorator is disabled, the string is returned without any
+	 * change.
+	 * 
+	 * @param string
+	 *            The original string.
+	 * @return The colored string.
+	 */
 	public static String colorPurple(String string) {
-		if (!activated) {
+		if (!enabled) {
 			return string;
 		}
 		return ANSI_PURPLE + string + ANSI_RESET;
 	}
 
+	/**
+	 * Returns the given string colored in cyan. If the colorator is disabled, the string is returned without any
+	 * change.
+	 * 
+	 * @param string
+	 *            The original string.
+	 * @return The colored string.
+	 */
 	public static String colorCyan(String string) {
-		if (!activated) {
+		if (!enabled) {
 			return string;
 		}
 		return ANSI_CYAN + string + ANSI_RESET;
 	}
 
+	/**
+	 * Returns the given string colored in white. If the colorator is disabled, the string is returned without any
+	 * change.
+	 * 
+	 * @param string
+	 *            The original string.
+	 * @return The colored string.
+	 */
 	public static String colorWhite(String string) {
-		if (!activated) {
+		if (!enabled) {
 			return string;
 		}
 		return ANSI_WHITE + string + ANSI_RESET;
 	}
 
+	/**
+	 * Print all colors.
+	 */
 	public static void printColors() {
 		System.out.println(Colorator.colorBlack("BLACK"));
 		System.out.println(Colorator.colorBlue("BLUE"));
@@ -86,6 +151,12 @@ public class Colorator {
 		System.out.println(Colorator.colorYellow("YELLOW"));
 	}
 
+	/**
+	 * Main of the colorated test program.
+	 * 
+	 * @param args
+	 *            Command-line arguments (ignored)
+	 */
 	public static void main(String[] args) {
 		printColors();
 	}

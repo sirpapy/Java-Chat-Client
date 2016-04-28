@@ -1,6 +1,9 @@
 package fr.upem.matou.server.network;
 
+import static fr.upem.matou.shared.logger.Colorator.*;
+
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -9,12 +12,13 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Set;
 
-import fr.upem.matou.shared.logger.Logger;
-
 /*
  * This class provides static methods on selectors.
  */
-class SelectorInfo {
+class ServerLogger {
+
+	private static final PrintStream STREAM_OUT = System.out;
+	private static final boolean LOG_SELECT = true;
 
 	private static String remoteAddressToString(SocketChannel sc) {
 		try {
@@ -22,6 +26,23 @@ class SelectorInfo {
 		} catch (@SuppressWarnings("unused") IOException ignored) {
 			return "???";
 		}
+	}
+
+	private static String possibleActionsToString(SelectionKey key) {
+		if (!key.isValid()) {
+			return "CANCELLED";
+		}
+		ArrayList<String> list = new ArrayList<>();
+		if (key.isAcceptable()) {
+			list.add("ACCEPT");
+		}
+		if (key.isReadable()) {
+			list.add("READ");
+		}
+		if (key.isWritable()) {
+			list.add("WRITE");
+		}
+		return String.join(" & ", list);
 	}
 
 	private static String interestOpsToString(SelectionKey key) {
@@ -42,56 +63,51 @@ class SelectorInfo {
 		return String.join(" | ", list);
 	}
 
-	private static String possibleActionsToString(SelectionKey key) {
-		if (!key.isValid()) {
-			return "CANCELLED";
+	private static void printLogSelector(String message) {
+		if (LOG_SELECT) {
+			STREAM_OUT.println(colorBlue(message));
 		}
-		ArrayList<String> list = new ArrayList<>();
-		if (key.isAcceptable()) {
-			list.add("ACCEPT");
+	}
+
+	private static void printLogSelectedKeys(String message) {
+		if (LOG_SELECT) {
+			STREAM_OUT.println(colorCyan(message));
 		}
-		if (key.isReadable()) {
-			list.add("READ");
-		}
-		if (key.isWritable()) {
-			list.add("WRITE");
-		}
-		return String.join(" & ", list);
 	}
 
 	@SuppressWarnings("resource")
-	static void printKeys(Selector selector) {
+	static void logSelector(Selector selector) {
 		Set<SelectionKey> keys = selector.keys();
 		if (keys.isEmpty()) {
-			Logger.selectInfo("The selector contains no key : this should not happen!");
+			printLogSelector("The selector contains no key : this should not happen!");
 			return;
 		}
-		Logger.selectInfo("The selector contains:");
+		printLogSelector("The selector contains:");
 		for (SelectionKey key : keys) {
 			SelectableChannel channel = key.channel();
 			if (channel instanceof ServerSocketChannel) {
-				Logger.selectInfo("\tKey for Server : " + interestOpsToString(key));
+				printLogSelector("\tKey for Server : " + interestOpsToString(key));
 			} else {
 				SocketChannel sc = (SocketChannel) channel;
-				Logger.selectInfo("\tKey for Client " + remoteAddressToString(sc) + " : " + interestOpsToString(key));
+				printLogSelector("\tKey for Client " + remoteAddressToString(sc) + " : " + interestOpsToString(key));
 			}
 		}
 	}
 
 	@SuppressWarnings("resource")
-	static void printSelectedKeys(Set<SelectionKey> selectedKeys) {
+	static void logSelectedKeys(Set<SelectionKey> selectedKeys) {
 		if (selectedKeys.isEmpty()) {
-			Logger.selectReadyInfo("There were no selected keys.");
+			printLogSelectedKeys("There were no selected keys.");
 			return;
 		}
-		Logger.selectReadyInfo("The selected keys are :");
+		printLogSelectedKeys("The selected keys are :");
 		for (SelectionKey key : selectedKeys) {
 			SelectableChannel channel = key.channel();
 			if (channel instanceof ServerSocketChannel) {
-				Logger.selectReadyInfo("\tServer can perform : " + possibleActionsToString(key));
+				printLogSelectedKeys("\tServer can perform : " + possibleActionsToString(key));
 			} else {
 				SocketChannel sc = (SocketChannel) channel;
-				Logger.selectReadyInfo(
+				printLogSelectedKeys(
 						"\tClient " + remoteAddressToString(sc) + " can perform : " + possibleActionsToString(key));
 			}
 

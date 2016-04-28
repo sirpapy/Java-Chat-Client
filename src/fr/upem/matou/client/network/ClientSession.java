@@ -1,5 +1,7 @@
 package fr.upem.matou.client.network;
 
+import static fr.upem.matou.shared.logger.Logger.formatNetworkRequest;
+
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Path;
@@ -38,20 +40,20 @@ class ClientSession {
 	}
 
 	boolean sendMessage(String message) throws IOException {
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSG);
-		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + message);
+		Logger.info(formatNetworkRequest(publicChannel, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSG));
+		Logger.info(formatNetworkRequest(publicChannel, NetworkLogType.WRITE, "MESSAGE : " + message));
 		return ClientCommunication.sendRequestMSG(publicChannel, message);
 	}
 
 	boolean openPrivateConnection(Username username) throws IOException {
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOREQ);
-		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
+		Logger.info(formatNetworkRequest(publicChannel, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOREQ));
+		Logger.info(formatNetworkRequest(publicChannel, NetworkLogType.WRITE, "USERNAME : " + username));
 		return ClientCommunication.sendRequestPVCOREQ(publicChannel, username.toString());
 	}
 
 	boolean acceptPrivateConnection(Username username) throws IOException {
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOACC);
-		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
+		Logger.info(formatNetworkRequest(publicChannel, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVCOACC));
+		Logger.info(formatNetworkRequest(publicChannel, NetworkLogType.WRITE, "USERNAME : " + username));
 		return ClientCommunication.sendRequestPVCOACC(publicChannel, username.toString());
 	}
 
@@ -60,9 +62,9 @@ class ClientSession {
 		if (sc == null) {
 			return false;
 		}
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVMSG);
-		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
-		Logger.network(NetworkLogType.WRITE, "MESSAGE : " + message);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVMSG));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + username));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "MESSAGE : " + message));
 		try {
 			return ClientCommunication.sendRequestPVMSG(sc, message);
 		} catch (@SuppressWarnings("unused") IOException __) {
@@ -76,9 +78,9 @@ class ClientSession {
 		if (sc == null) {
 			return false;
 		}
-		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVFILE);
-		Logger.network(NetworkLogType.WRITE, "USERNAME : " + username);
-		Logger.network(NetworkLogType.WRITE, "PATH : " + path);
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVFILE));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + username));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PATH : " + path));
 		try {
 			return ClientCommunication.sendRequestPVFILE(sc, path);
 		} catch (@SuppressWarnings("unused") IOException __) {
