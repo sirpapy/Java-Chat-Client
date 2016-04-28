@@ -72,6 +72,7 @@ public class ClientCore implements Closeable {
 		}
 	}
 
+	// FIXME : ExecutorService OR ThreadGroup
 	private void interruptAllThreads() {
 		ArrayList<Thread> privates = new ArrayList<>(threads);
 		Set<Thread> before = Thread.getAllStackTraces().keySet();

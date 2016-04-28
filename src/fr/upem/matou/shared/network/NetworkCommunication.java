@@ -19,7 +19,7 @@ public class NetworkCommunication {
 	static final int MESSAGE_MAX_SIZE = 512;
 	static final int FILE_CHUNK_SIZE = 4096;
 	static final int BUFFER_MULTIPLIER = 10;
-	static final int FILE_NAME_MAX_SIZE = 64;
+	static final int FILENAME_MAX_SIZE = 64;
 
 	private NetworkCommunication() {
 	}
@@ -84,7 +84,7 @@ public class NetworkCommunication {
 	
 	private static boolean checkEncodedPathValidity(ByteBuffer path) {
 		int size = path.remaining();
-		return size <= FILE_NAME_MAX_SIZE && size > 0;
+		return size <= FILENAME_MAX_SIZE && size > 0;
 	}
 
 	/**
@@ -157,6 +157,10 @@ public class NetworkCommunication {
 	 */
 	public static int getMessageMaxSize() {
 		return MESSAGE_MAX_SIZE;
+	}
+	
+	public static int getFilenameMaxSize() {
+		return FILENAME_MAX_SIZE;
 	}
 
 	/**

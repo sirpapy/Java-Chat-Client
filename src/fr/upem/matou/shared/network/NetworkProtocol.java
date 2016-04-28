@@ -1,6 +1,6 @@
 package fr.upem.matou.shared.network;
 
-import static fr.upem.matou.shared.network.NetworkCommunication.FILE_NAME_MAX_SIZE;
+import static fr.upem.matou.shared.network.NetworkCommunication.FILENAME_MAX_SIZE;
 import static fr.upem.matou.shared.network.NetworkCommunication.MESSAGE_MAX_SIZE;
 import static fr.upem.matou.shared.network.NetworkCommunication.USERNAME_MAX_SIZE;
 import static fr.upem.matou.shared.network.NetworkProtocol.Communicator.CLIENT;
@@ -37,7 +37,7 @@ public enum NetworkProtocol {
 	PVCOESTADST(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION", Integer.BYTES, USERNAME_MAX_SIZE,
 			Integer.BYTES, 16, Integer.BYTES, Integer.BYTES),
 	PVMSG(CLIENT, CLIENT, "PRIVATE_MESSAGE", Integer.BYTES, MESSAGE_MAX_SIZE),
-	PVFILE(CLIENT, CLIENT, "PRIVATE_FILE", Integer.BYTES, FILE_NAME_MAX_SIZE, Long.BYTES),
+	PVFILE(CLIENT, CLIENT, "PRIVATE_FILE", Integer.BYTES, FILENAME_MAX_SIZE, Long.BYTES),
 	;
 
 	static enum Communicator {
