@@ -43,7 +43,7 @@ public interface UserInterface extends Closeable {
 	 * @param username
 	 *            The new connected
 	 */
-	public void displayNewConnectionEvent(String username);
+	public void displayNewConnectionEvent(Username username);
 
 	/**
 	 * Display a new disconnection event to the user.
@@ -51,11 +51,11 @@ public interface UserInterface extends Closeable {
 	 * @param username
 	 *            The new disconnected
 	 */
-	public void displayNewDisconnectionEvent(String username);
+	public void displayNewDisconnectionEvent(Username username);
 
-	public void displayNewPrivateRequestEvent(String username);
+	public void displayNewPrivateRequestEvent(Username username);
 
-	public void displayNewPrivateAcceptionEvent(String username);
+	public void displayNewPrivateAcceptionEvent(Username username);
 
 	public void displayNewPrivateMessageDisconnection(Username username);
 	

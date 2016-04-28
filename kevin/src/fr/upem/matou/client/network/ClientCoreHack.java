@@ -6,10 +6,10 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
-import java.util.Optional;
 
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
+import fr.upem.matou.shared.network.Username;
 
 // TEMP : Crash Test
 
@@ -86,7 +86,7 @@ public class ClientCoreHack implements Closeable {
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
+				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:
@@ -113,7 +113,7 @@ public class ClientCoreHack implements Closeable {
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
+				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:
@@ -141,7 +141,7 @@ public class ClientCoreHack implements Closeable {
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
+				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:
@@ -171,7 +171,7 @@ public class ClientCoreHack implements Closeable {
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
+				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:
@@ -200,7 +200,7 @@ public class ClientCoreHack implements Closeable {
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
+				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			default:
@@ -225,7 +225,7 @@ public class ClientCoreHack implements Closeable {
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
+				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:
@@ -259,7 +259,7 @@ public class ClientCoreHack implements Closeable {
 				System.out.println("Acceptation = " + acceptation);
 				break;
 			case CONOTIF:
-				String pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
+				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
 				System.out.println("New connection : " + pseudo);
 				break;
 			case MSGBC:

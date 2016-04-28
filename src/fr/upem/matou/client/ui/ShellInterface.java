@@ -62,7 +62,7 @@ public class ShellInterface implements UserInterface {
 		requireNonNull(message);
 
 		boolean isPrivate = message.isPrivate();
-		String username = message.getUsername();
+		Username username = message.getUsername();
 		String content = message.getContent();
 
 		String string;
@@ -78,25 +78,25 @@ public class ShellInterface implements UserInterface {
 	}
 
 	@Override
-	public void displayNewConnectionEvent(String username) {
+	public void displayNewConnectionEvent(Username username) {
 		requireNonNull(username);
 		output.println("<" + username + " joins the chat>");
 	}
 
 	@Override
-	public void displayNewDisconnectionEvent(String username) {
+	public void displayNewDisconnectionEvent(Username username) {
 		requireNonNull(username);
 		output.println("<" + username + " left the chat>");
 	}
 
 	@Override
-	public void displayNewPrivateRequestEvent(String username) {
+	public void displayNewPrivateRequestEvent(Username username) {
 		requireNonNull(username);
 		output.println("<" + username + " asks for a private connection>");
 	}
 
 	@Override
-	public void displayNewPrivateAcceptionEvent(String username) {
+	public void displayNewPrivateAcceptionEvent(Username username) {
 		requireNonNull(username);
 		output.println("<" + username + " accepts the private connection>");
 	}

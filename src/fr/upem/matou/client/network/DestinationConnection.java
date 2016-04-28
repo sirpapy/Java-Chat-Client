@@ -15,10 +15,10 @@ class DestinationConnection {
 	private final int portMessage;
 	private final int portFile;
 
-	DestinationConnection(String username, InetAddress address, int portMessage, int portFile) {
+	DestinationConnection(Username username, InetAddress address, int portMessage, int portFile) {
 		requireNonNull(username);
 		requireNonNull(address);
-		this.username = new Username(username);
+		this.username = username;
 		this.address = address;
 		this.portMessage = portMessage;
 		this.portFile = portFile;

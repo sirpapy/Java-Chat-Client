@@ -13,10 +13,10 @@ class SourceConnection {
 	private final Username username;
 	private final InetAddress address;
 
-	SourceConnection(String username, InetAddress address) {
+	SourceConnection(Username username, InetAddress address) {
 		requireNonNull(username);
 		requireNonNull(address);
-		this.username = new Username(username);
+		this.username = username;
 		this.address = address;
 	}
 

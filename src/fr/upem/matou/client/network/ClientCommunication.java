@@ -23,6 +23,7 @@ import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.network.ErrorType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
+import fr.upem.matou.shared.network.Username;
 
 /*
  * This class consists only of static methods. These methods are used by the client to ensure that communications meet
@@ -216,12 +217,12 @@ class ClientCommunication {
 		return PROTOCOL_CHARSET.decode(bb).toString();
 	}
 	
-	private static String readUsername(SocketChannel sc) throws IOException {
+	private static Username readUsername(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
 		if(size > USERNAME_MAX_SIZE) {
 			throw new IOException("Protocol violation - Invalid username size : " + size);
 		}
-		return readString(sc, size);
+		return new Username(readString(sc, size));
 	}
 	
 	private static String readMessage(SocketChannel sc) throws IOException {
@@ -304,7 +305,7 @@ class ClientCommunication {
 	 * Receives a MSGBG request.
 	 */
 	static Message receiveRequestMSGBC(SocketChannel sc) throws IOException {
-		String username = readUsername(sc);
+		Username username = readUsername(sc);
 		String message = readMessage(sc);
 		return new Message(username, message);
 	}
@@ -312,39 +313,39 @@ class ClientCommunication {
 	/*
 	 * Receives a CONOTIF request.
 	 */
-	static String receiveRequestCONOTIF(SocketChannel sc) throws IOException {
-		String username = readUsername(sc);
+	static Username receiveRequestCONOTIF(SocketChannel sc) throws IOException {
+		Username username = readUsername(sc);
 		return username;
 	}
 
 	/*
 	 * Receives a DISCONOTIF request.
 	 */
-	static String receiveRequestDISCONOTIF(SocketChannel sc) throws IOException {
-		String username = readUsername(sc);
+	static Username receiveRequestDISCONOTIF(SocketChannel sc) throws IOException {
+		Username username = readUsername(sc);
 		return username;
 	}
 
-	static String receiveRequestPVCOREQNOTIF(SocketChannel sc) throws IOException {
-		String username = readUsername(sc);
+	static Username receiveRequestPVCOREQNOTIF(SocketChannel sc) throws IOException {
+		Username username = readUsername(sc);
 		return username;
 	}
 
 	static SourceConnection receiveRequestPVCOESTASRC(SocketChannel sc) throws IOException {
-		String username = readUsername(sc);
+		Username username = readUsername(sc);
 		InetAddress address = readAddress(sc);
 		return new SourceConnection(username, address);
 	}
 
 	static DestinationConnection receiveRequestPVCOESTADST(SocketChannel sc) throws IOException {
-		String username = readUsername(sc);
+		Username username = readUsername(sc);
 		InetAddress address = readAddress(sc);
 		int portMessage = readInt(sc);
 		int portFile = readInt(sc);
 		return new DestinationConnection(username, address, portMessage, portFile);
 	}
 
-	static Message receiveRequestPVMSG(SocketChannel sc, String username) throws IOException {
+	static Message receiveRequestPVMSG(SocketChannel sc, Username username) throws IOException {
 		String message = readMessage(sc);
 		return new Message(username, message, true);
 	}

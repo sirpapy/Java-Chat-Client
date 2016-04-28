@@ -155,7 +155,7 @@ public class ClientCore implements Closeable {
 		}
 
 		case CONOTIF: {
-			String connected = ClientCommunication.receiveRequestCONOTIF(sc);
+			Username connected = ClientCommunication.receiveRequestCONOTIF(sc);
 			Logger.network(NetworkLogType.READ, "USERNAME : " + connected);
 			ui.displayNewConnectionEvent(connected);
 
@@ -163,7 +163,7 @@ public class ClientCore implements Closeable {
 		}
 
 		case DISCONOTIF: {
-			String disconnected = ClientCommunication.receiveRequestDISCONOTIF(sc);
+			Username disconnected = ClientCommunication.receiveRequestDISCONOTIF(sc);
 			Logger.network(NetworkLogType.READ, "USERNAME : " + disconnected);
 			ui.displayNewDisconnectionEvent(disconnected);
 
@@ -171,7 +171,7 @@ public class ClientCore implements Closeable {
 		}
 
 		case PVCOREQNOTIF: {
-			String requester = ClientCommunication.receiveRequestPVCOREQNOTIF(sc);
+			Username requester = ClientCommunication.receiveRequestPVCOREQNOTIF(sc);
 			Logger.network(NetworkLogType.READ, "USERNAME : " + requester);
 			ui.displayNewPrivateRequestEvent(requester);
 
@@ -184,7 +184,7 @@ public class ClientCore implements Closeable {
 			InetAddress address = sourceInfo.getAddress();
 			Logger.network(NetworkLogType.READ, "USERNAME : " + username);
 			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
-			ui.displayNewPrivateAcceptionEvent(username.toString());
+			ui.displayNewPrivateAcceptionEvent(username);
 			launchPrivateConnection(username, address);
 
 			break;
@@ -200,7 +200,7 @@ public class ClientCore implements Closeable {
 			Logger.network(NetworkLogType.READ, "ADDRESS : " + address);
 			Logger.network(NetworkLogType.READ, "PORT MESSAGE : " + portMessage);
 			Logger.network(NetworkLogType.READ, "PORT FILE : " + portFile);
-			ui.displayNewPrivateAcceptionEvent(username.toString());
+			ui.displayNewPrivateAcceptionEvent(username);
 			launchPrivateConnection(username, address, portMessage, portFile);
 
 			break;
@@ -224,7 +224,7 @@ public class ClientCore implements Closeable {
 			switch (protocol) {
 
 			case PVMSG: {
-				Message message = ClientCommunication.receiveRequestPVMSG(pv, username.toString());
+				Message message = ClientCommunication.receiveRequestPVMSG(pv, username);
 				Logger.network(NetworkLogType.READ, "USERNAME : " + message.getUsername());
 				Logger.network(NetworkLogType.READ, "MESSAGE : " + message.getContent());
 				ui.displayMessage(message);

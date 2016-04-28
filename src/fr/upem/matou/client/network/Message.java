@@ -2,11 +2,13 @@ package fr.upem.matou.client.network;
 
 import static java.util.Objects.requireNonNull;
 
+import fr.upem.matou.shared.network.Username;
+
 /**
  * This class represents a chat message.
  */
 public class Message {
-	private final String username;
+	private final Username username;
 	private final String content;
 	private final boolean isPrivate;
 
@@ -18,7 +20,7 @@ public class Message {
 	 * @param content
 	 *            The content of the message.
 	 */
-	public Message(String username, String content) {
+	public Message(Username username, String content) {
 		this(username, content, false);
 	}
 
@@ -32,7 +34,7 @@ public class Message {
 	 * @param isPrivate
 	 *            true if the message is private, false otherwise.
 	 */
-	public Message(String username, String content, boolean isPrivate) {
+	public Message(Username username, String content, boolean isPrivate) {
 		this.username = requireNonNull(username);
 		this.content = requireNonNull(content);
 		this.isPrivate = isPrivate;
@@ -43,7 +45,7 @@ public class Message {
 	 * 
 	 * @return The username of the speaker.
 	 */
-	public String getUsername() {
+	public Username getUsername() {
 		return username;
 	}
 
