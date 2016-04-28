@@ -17,9 +17,8 @@ import fr.upem.matou.shared.network.Username;
 import fr.upem.matou.shared.utils.ByteBuffers;
 
 /*
- * This class represents the state of a client connected to the chat server.
- * A ServerSession is always attached to one ServerDataBase and should be created by
- * ServerDataBase.newServerSession(SocketChannel,SelectionKey).
+ * This class represents the state of a client connected to the chat server. A ServerSession is always attached to one
+ * ServerDataBase and should be created by ServerDataBase.newServerSession(SocketChannel,SelectionKey).
  */
 class ServerSession {
 
@@ -44,7 +43,7 @@ class ServerSession {
 	static interface ServerReader {
 		// Marker interface
 	}
-	
+
 	static class ReaderUsername implements ServerReader {
 		int sizeUsername;
 		Username username;
@@ -52,7 +51,7 @@ class ServerSession {
 
 	static class ReaderMessage implements ServerReader {
 		int sizeMessage;
-		String message; 
+		String message;
 	}
 
 	static class ReaderPort implements ServerReader {
@@ -116,6 +115,106 @@ class ServerSession {
 		arg++;
 	}
 
+	private void setReaderUsername() {
+		serverReader = new ReaderUsername();
+		advanceReadState(Integer.BYTES);
+	}
+
+	/*
+	 * Process the read buffer to retrieves the first argument of the COREQ request and updates the current state.
+	 */
+	private void readUsernameArg1(ReaderUsername reader) {
+		bbRead.flip();
+		reader.sizeUsername = bbRead.getInt();
+		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername);
+		if (reader.sizeUsername > USERNAME_MAX_SIZE || reader.sizeUsername == 0) {
+			Logger.debug("Invalid size username");
+			disconnectClient();
+			return;
+		}
+
+		advanceReadState(reader.sizeUsername);
+	}
+
+	/*
+	 * Process the read buffer to retrieves the second argument of the COREQ request and updates the current state.
+	 */
+	private void readUsernameArg2(ReaderUsername reader) {
+		bbRead.flip();
+		String string = ServerCommunication.readStringUTF8(bbRead);
+		reader.username = new Username(string);
+		Logger.network(NetworkLogType.READ, "USERNAME : " + reader.username);
+
+		resetReadState();
+	}
+
+	private void setReaderMessage() {
+		serverReader = new ReaderMessage();
+		advanceReadState(Integer.BYTES);
+	}
+
+	private void readMessageArg1(ReaderMessage reader) {
+		bbRead.flip();
+		reader.sizeMessage = bbRead.getInt();
+		Logger.network(NetworkLogType.READ, "SIZE MESSAGE : " + reader.sizeMessage);
+		if (reader.sizeMessage > MESSAGE_MAX_SIZE || reader.sizeMessage == 0) {
+			Logger.debug("Invalid size message");
+			disconnectClient();
+			return;
+		}
+
+		advanceReadState(reader.sizeMessage);
+	}
+
+	private void readMessageArg2(ReaderMessage reader) {
+		bbRead.flip();
+		reader.message = ServerCommunication.readStringUTF8(bbRead);
+		Logger.network(NetworkLogType.READ, "MESSAGE : " + reader.message);
+
+		resetReadState();
+	}
+
+	private void setReaderPort() {
+		serverReader = new ReaderPort();
+		advanceReadState(Integer.BYTES);
+	}
+
+	private void readPortArg1(ReaderPort reader) {
+		bbRead.flip();
+		reader.sizeUsername = bbRead.getInt();
+		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername);
+		if (reader.sizeUsername > USERNAME_MAX_SIZE || reader.sizeUsername == 0) {
+			Logger.debug("Invalid size username");
+			disconnectClient();
+			return;
+		}
+
+		advanceReadState(reader.sizeUsername);
+	}
+
+	private void readPortArg2(ReaderPort reader) {
+		bbRead.flip();
+		String string = ServerCommunication.readStringUTF8(bbRead);
+		reader.username = new Username(string);
+		Logger.network(NetworkLogType.READ, "USERNAME : " + reader.username);
+
+		advanceReadState(Integer.BYTES);
+	}
+
+	private void readPortArg3(ReaderPort reader) {
+		bbRead.flip();
+		reader.portMessage = bbRead.getInt();
+
+		advanceReadState(Integer.BYTES);
+	}
+
+	private void readPortArg4(ReaderPort reader) {
+		bbRead.flip();
+		reader.portFile = bbRead.getInt();
+
+		resetReadState();
+	}
+
 	/*
 	 * Retrives the protocol request type from the read buffer and updates current state.
 	 */
@@ -134,19 +233,28 @@ class ServerSession {
 	private void answerERROR(ErrorType type) {
 		Logger.network(NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.ERROR);
 		Logger.network(NetworkLogType.WRITE, "ERROR : " + type);
-		
-		if(!ServerCommunication.addRequestERROR(bbWrite, type)) {
+
+		if (!ServerCommunication.addRequestERROR(bbWrite, type)) {
 			Logger.warning("ERROR lost | Write Buffer cannot hold it");
 			return;
 		}
 	}
-	
+
+	private boolean checkCOREQ() {
+		return !isAuthent();
+	}
+
 	/*
 	 * Process a COREQ request.
 	 */
 	private void processCOREQ() {
 		if (arg == 0) {
-			processCOREQinit();
+			if (!checkCOREQ()) {
+				Logger.debug("Client already authenticated");
+				disconnectClient();
+				return;
+			}
+			setReaderUsername();
 			return;
 		}
 
@@ -154,56 +262,15 @@ class ServerSession {
 
 		switch (arg) {
 		case 1:
-			processCOREQarg1(reader);
+			readUsernameArg1(reader);
 			return;
 		case 2:
-			processCOREQarg2(reader);
+			readUsernameArg2(reader);
 			answerCORES(reader.username);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for COREQ");
 		}
-	}
-
-	/*
-	 * Initializes the COREQ state.
-	 */
-	private void processCOREQinit() {
-		if (isAuthent()) {
-			Logger.debug("Client already authenticated");
-			disconnectClient();
-			return;
-		}
-		serverReader = new ReaderUsername();
-		advanceReadState(Integer.BYTES);
-	}
-
-	/*
-	 * Process the read buffer to retrieves the first argument of the COREQ request and updates the current state.
-	 */
-	private void processCOREQarg1(ReaderUsername reader) {
-		bbRead.flip();
-		reader.sizeUsername = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername);
-		if (reader.sizeUsername > USERNAME_MAX_SIZE || reader.sizeUsername == 0) {
-			Logger.debug("Invalid size username");
-			disconnectClient();
-			return;
-		}
-
-		advanceReadState(reader.sizeUsername);
-	}
-
-	/*
-	 * Process the read buffer to retrieves the second argument of the COREQ request and updates the current state.
-	 */
-	private void processCOREQarg2(ReaderUsername reader) {
-		bbRead.flip();
-		String string = ServerCommunication.readStringUTF8(bbRead);
-		reader.username = new Username(string);
-		Logger.network(NetworkLogType.READ, "USERNAME : " + reader.username);
-
-		resetReadState();
 	}
 
 	/*
@@ -239,9 +306,18 @@ class ServerSession {
 		}
 	}
 
+	private boolean checkMSG() {
+		return isAuthent();
+	}
+
 	private void processMSG() {
 		if (arg == 0) {
-			processMSGinit();
+			if (!checkMSG()) {
+				Logger.debug("Client not authenticated");
+				disconnectClient();
+				return;
+			}
+			setReaderMessage();
 			return;
 		}
 
@@ -249,47 +325,15 @@ class ServerSession {
 
 		switch (arg) {
 		case 1:
-			processMSGarg1(reader);
+			readMessageArg1(reader);
 			return;
 		case 2:
-			processMSGarg2(reader);
+			readMessageArg2(reader);
 			answerMSGBC(reader.message);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for MSG");
 		}
-	}
-
-	private void processMSGinit() {
-		if (!isAuthent()) {
-			Logger.debug("Client not authenticated");
-			disconnectClient();
-			return;
-		}
-
-		serverReader = new ReaderMessage();
-		advanceReadState(Integer.BYTES);
-	}
-
-	private void processMSGarg1(ReaderMessage reader) {
-		bbRead.flip();
-		reader.sizeMessage = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE MESSAGE : " + reader.sizeMessage);
-		if (reader.sizeMessage > MESSAGE_MAX_SIZE || reader.sizeMessage == 0) {
-			Logger.debug("Invalid size message");
-			disconnectClient();
-			return;
-		}
-
-		advanceReadState(reader.sizeMessage);
-	}
-
-	private void processMSGarg2(ReaderMessage reader) {
-		bbRead.flip();
-		reader.message = ServerCommunication.readStringUTF8(bbRead);
-		Logger.network(NetworkLogType.READ, "MESSAGE : " + reader.message);
-
-		resetReadState();
 	}
 
 	private void answerMSGBC(String message) {
@@ -311,9 +355,18 @@ class ServerSession {
 		db.updateStateReadAll();
 	}
 
+	private boolean checkPVCOREQ() {
+		return isAuthent();
+	}
+
 	private void processPVCOREQ() {
 		if (arg == 0) {
-			processPVCOREQinit();
+			if (!checkPVCOREQ()) {
+				Logger.debug("Client already authenticated");
+				disconnectClient();
+				return;
+			}
+			setReaderUsername();
 			return;
 		}
 
@@ -321,48 +374,15 @@ class ServerSession {
 
 		switch (arg) {
 		case 1:
-			processPVCOREQarg1(reader);
+			readUsernameArg1(reader);
 			return;
 		case 2:
-			processPVCOREQarg2(reader);
+			readUsernameArg2(reader);
 			answerPVCOREQNOTIF(reader.username);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for PVCOREQ");
 		}
-	}
-
-	private void processPVCOREQinit() {
-		if (!isAuthent()) {
-			Logger.debug("Client not authenticated");
-			disconnectClient();
-			return;
-		}
-
-		serverReader = new ReaderUsername();
-		advanceReadState(Integer.BYTES);
-	}
-
-	private void processPVCOREQarg1(ReaderUsername reader) {
-		bbRead.flip();
-		reader.sizeUsername = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername);
-		if (reader.sizeUsername > USERNAME_MAX_SIZE || reader.sizeUsername == 0) {
-			Logger.debug("Invalid size username");
-			disconnectClient();
-			return;
-		}
-
-		advanceReadState(reader.sizeUsername);
-	}
-
-	private void processPVCOREQarg2(ReaderUsername reader) {
-		bbRead.flip();
-		String string = ServerCommunication.readStringUTF8(bbRead);
-		reader.username = new Username(string);
-		Logger.network(NetworkLogType.READ, "USERNAME : " + reader.username);
-
-		resetReadState();
 	}
 
 	private void answerPVCOREQNOTIF(Username reader) {
@@ -394,9 +414,18 @@ class ServerSession {
 		session.updateKey();
 	}
 
+	private boolean checkPVCOACC() {
+		return isAuthent();
+	}
+
 	private void processPVCOACC() {
 		if (arg == 0) {
-			processPVCOACCinit();
+			if (!checkPVCOACC()) {
+				Logger.debug("Client already authenticated");
+				disconnectClient();
+				return;
+			}
+			setReaderUsername();
 			return;
 		}
 
@@ -404,48 +433,15 @@ class ServerSession {
 
 		switch (arg) {
 		case 1:
-			processPVCOACCarg1(reader);
+			readUsernameArg1(reader);
 			return;
 		case 2:
-			processPVCOACCarg2(reader);
+			readUsernameArg2(reader);
 			answerPVCOESTASRC(reader.username);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for PVCOACC");
 		}
-	}
-
-	private void processPVCOACCinit() {
-		if (!isAuthent()) {
-			Logger.debug("Client not authenticated");
-			disconnectClient();
-			return;
-		}
-
-		serverReader = new ReaderUsername();
-		advanceReadState(Integer.BYTES);
-	}
-
-	private void processPVCOACCarg1(ReaderUsername reader) {
-		bbRead.flip();
-		reader.sizeUsername = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername);
-		if (reader.sizeUsername > USERNAME_MAX_SIZE || reader.sizeUsername == 0) {
-			Logger.debug("Invalid size username");
-			disconnectClient();
-			return;
-		}
-
-		advanceReadState(reader.sizeUsername);
-	}
-
-	private void processPVCOACCarg2(ReaderUsername reader) {
-		bbRead.flip();
-		String string = ServerCommunication.readStringUTF8(bbRead);
-		reader.username = new Username(string);
-		Logger.network(NetworkLogType.READ, "USERNAME : " + reader.username);
-
-		resetReadState();
 	}
 
 	private void answerPVCOESTASRC(Username target) {
@@ -470,12 +466,20 @@ class ServerSession {
 		}
 
 		session.updateKey();
+	}
 
+	private boolean checkPVCOPORT() {
+		return isAuthent();
 	}
 
 	private void processPVCOPORT() {
 		if (arg == 0) {
-			processPVCOPORTinit();
+			if (!checkPVCOPORT()) {
+				Logger.debug("Client already authenticated");
+				disconnectClient();
+				return;
+			}
+			setReaderPort();
 			return;
 		}
 
@@ -483,68 +487,21 @@ class ServerSession {
 
 		switch (arg) {
 		case 1:
-			processPVCOPORTarg1(reader);
+			readPortArg1(reader);
 			return;
 		case 2:
-			processPVCOPORTarg2(reader);
+			readPortArg2(reader);
 			return;
 		case 3:
-			processPVCOPORTarg3(reader);
+			readPortArg3(reader);
 			return;
 		case 4:
-			processPVCOPORTarg4(reader);
+			readPortArg4(reader);
 			answerPVCOESTADST(reader.username, reader.portMessage, reader.portFile);
 			return;
 		default:
 			throw new AssertionError("Argument " + arg + " is not valid for PVCOPORT");
 		}
-	}
-
-	private void processPVCOPORTinit() {
-		if (!isAuthent()) {
-			Logger.debug("Client not authenticated");
-			disconnectClient();
-			return;
-		}
-
-		serverReader = new ReaderPort();
-		advanceReadState(Integer.BYTES);
-	}
-
-	private void processPVCOPORTarg1(ReaderPort reader) {
-		bbRead.flip();
-		reader.sizeUsername = bbRead.getInt();
-		Logger.network(NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername);
-		if (reader.sizeUsername > USERNAME_MAX_SIZE || reader.sizeUsername == 0) {
-			Logger.debug("Invalid size username");
-			disconnectClient();
-			return;
-		}
-
-		advanceReadState(reader.sizeUsername);
-	}
-
-	private void processPVCOPORTarg2(ReaderPort reader) {
-		bbRead.flip();
-		String string = ServerCommunication.readStringUTF8(bbRead);
-		reader.username = new Username(string);
-		Logger.network(NetworkLogType.READ, "USERNAME : " + reader.username);
-
-		advanceReadState(Integer.BYTES);
-	}
-
-	private void processPVCOPORTarg3(ReaderPort reader) {
-		bbRead.flip();
-		reader.portMessage = bbRead.getInt();
-
-		advanceReadState(Integer.BYTES);
-	}
-
-	private void processPVCOPORTarg4(ReaderPort reader) {
-		bbRead.flip();
-		reader.portFile = bbRead.getInt();
-
-		resetReadState();
 	}
 
 	private void answerPVCOESTADST(Username source, int portMessage, int portFile) {
@@ -592,7 +549,7 @@ class ServerSession {
 			}
 		}
 
-		// Here : process the request's arguments.		
+		// Here : process the request's arguments.
 		switch (protocol) {
 		case COREQ:
 			processCOREQ();
