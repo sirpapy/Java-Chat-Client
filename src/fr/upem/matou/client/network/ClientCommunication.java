@@ -1,6 +1,7 @@
 package fr.upem.matou.client.network;
 
 import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 
@@ -15,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -65,14 +65,13 @@ class ClientCommunication {
 	private static void writeString(SocketChannel sc, ByteBuffer encoded) throws IOException {
 		int size = encoded.remaining();
 		writeInt(sc, size);
-		System.out.println("ENCODED : " + encoded);
 		encoded.compact();
 		writeFully(sc, encoded);
 	}
 		
-	private static void sendFileChunks(SocketChannel sc, Path path) throws IOException {
+	private static void writeFileChunks(SocketChannel sc, Path path) throws IOException {
 		Logger.debug("FILE UPLOADING : START");
-		try (InputStream is = Files.newInputStream(path, StandardOpenOption.READ)) {
+		try (InputStream is = Files.newInputStream(path, READ)) {
 			byte[] chunk = new byte[CHUNK_SIZE];
 			int read = 0;
 			while ((read = is.read(chunk)) != -1) {
@@ -93,7 +92,6 @@ class ClientCommunication {
 		}
 		writeProtocol(sc, NetworkProtocol.COREQ);
 		writeString(sc, optional.get());
-		System.out.println("true");
 		return true;
 	}
 
@@ -167,7 +165,7 @@ class ClientCommunication {
 
 			new Thread(() -> {
 				try {
-					sendFileChunks(sc, path);
+					writeFileChunks(sc, path);
 				} catch (Exception e) {
 					Logger.exception(e);
 				}
@@ -181,48 +179,39 @@ class ClientCommunication {
 		}
 	}
 
-	private static boolean readFully(SocketChannel sc, ByteBuffer bb) throws IOException {
+	private static void readFully(SocketChannel sc, ByteBuffer bb) throws IOException {
 		while (bb.hasRemaining()) {
 			int read = sc.read(bb);
 			if (read == -1) {
-				return false;
+				throw new IOException("Connection closed");
 			}
 		}
-		return true;
 	}
 
 	private static byte readByte(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Byte.BYTES);
-		if (!readFully(sc, bb)) {
-			throw new IOException("Connection closed");
-		}
+		readFully(sc, bb);
 		bb.flip();
 		return bb.get();
 	}
 
 	private static int readInt(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
-		if (!readFully(sc, bb)) {
-			throw new IOException("Connection closed");
-		}
+		readFully(sc, bb);
 		bb.flip();
 		return bb.getInt();
 	}
 
 	private static long readLong(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
-		if (!readFully(sc, bb)) {
-			throw new IOException("Connection closed");
-		}
+		readFully(sc, bb);
 		bb.flip();
 		return bb.getLong();
 	}
 
 	private static String readString(SocketChannel sc, int size) throws IOException {
-		ByteBuffer bb = ByteBuffer.allocate(size); // FIXME : Taille trop grosse ?
-		if (!readFully(sc, bb)) {
-			throw new IOException("Connection closed");
-		}
+		ByteBuffer bb = ByteBuffer.allocate(size);
+		readFully(sc, bb);
 		bb.flip();
 		return PROTOCOL_CHARSET.decode(bb).toString();
 	}
@@ -251,18 +240,14 @@ class ClientCommunication {
 		return readString(sc, size);
 	}
 
-	// TODO : readUsername & readMessage <= readString
-
 	private static InetAddress readAddress(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
-		ByteBuffer bbAddress = ByteBuffer.allocate(size);
-		if (!readFully(sc, bbAddress)) {
-			throw new IOException("Connection closed");
-		}
-		bbAddress.flip();
+		ByteBuffer bb = ByteBuffer.allocate(size);
+		readFully(sc, bb);
+		bb.flip();
 		byte[] addr = new byte[size];
 		for (int i = 0; i < size; i++) {
-			byte b = bbAddress.get();
+			byte b = bb.get();
 			addr[i] = b;
 		}
 		Logger.debug("ADDRESS = " + Arrays.toString(addr));
@@ -271,16 +256,15 @@ class ClientCommunication {
 
 	private static void saveFileChunks(SocketChannel sc, Path path, long totalSize) throws IOException {
 		try (OutputStream os = Files.newOutputStream(path, WRITE, CREATE, TRUNCATE_EXISTING)) {
+			ByteBuffer bb = ByteBuffer.allocate(CHUNK_SIZE);
 			for (long totalRead = 0; totalRead < totalSize;) {
 				long diff = totalSize - totalRead;
 				long capacity = diff <= CHUNK_SIZE ? diff : CHUNK_SIZE; // bytes of the next chunk
-				ByteBuffer bbChunk = ByteBuffer.allocate((int) capacity);
-				if (!readFully(sc, bbChunk)) {
-					throw new IOException("Connection closed");
-				}
-				bbChunk.flip();
-				byte[] chunk = bbChunk.array();
-				int read = bbChunk.remaining();
+				bb.limit((int) capacity);
+				readFully(sc, bb);
+				bb.flip();
+				byte[] chunk = bb.array();
+				int read = bb.remaining();
 				totalRead += read;
 				os.write(chunk, 0, read);
 			}
