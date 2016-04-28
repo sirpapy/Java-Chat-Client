@@ -57,12 +57,7 @@ public class ClientCoreHack implements Closeable {
 	// OK
 	public void startChat_ServerReservedRequest() throws IOException {
 		sendRequestMSGBC(sc, "foo", "abra kadabra");
-		Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
-		if (!optionalProtocol.isPresent()) {
-			System.out.println("No protocol");
-			return;
-		}
-		NetworkProtocol protocol = optionalProtocol.get();
+		NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 
 		switch (protocol) {
 		case MSGBC:
@@ -83,12 +78,7 @@ public class ClientCoreHack implements Closeable {
 		ClientCommunication.sendRequestMSG(sc, "kadabra");
 
 		for (int i = 0; i < 6; i++) {
-			Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
-			if (!optionalProtocol.isPresent()) {
-				System.out.println("No protocol");
-				return;
-			}
-			NetworkProtocol protocol = optionalProtocol.get();
+			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 
 			switch (protocol) {
 			case CORES:
@@ -115,12 +105,7 @@ public class ClientCoreHack implements Closeable {
 		ClientCommunication.sendRequestCOREQ(sc, "");
 
 		for (int i = 0; i < 2; i++) {
-			Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
-			if (!optionalProtocol.isPresent()) {
-				System.out.println("No protocol");
-				return;
-			}
-			NetworkProtocol protocol = optionalProtocol.get();
+			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 
 			switch (protocol) {
 			case CORES:
@@ -148,12 +133,7 @@ public class ClientCoreHack implements Closeable {
 		ClientCommunication.sendRequestCOREQ(sc, "abraabraabraabraabraabraabraabra!");
 
 		for (int i = 0; i < 2; i++) {
-			Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
-			if (!optionalProtocol.isPresent()) {
-				System.out.println("No protocol");
-				return;
-			}
-			NetworkProtocol protocol = optionalProtocol.get();
+			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 
 			switch (protocol) {
 			case CORES:
@@ -183,12 +163,7 @@ public class ClientCoreHack implements Closeable {
 				"abraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabra!");
 
 		for (int i = 0; i < 3; i++) {
-			Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
-			if (!optionalProtocol.isPresent()) {
-				System.out.println("No protocol");
-				return;
-			}
-			NetworkProtocol protocol = optionalProtocol.get();
+			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 
 			switch (protocol) {
 			case CORES:
@@ -217,12 +192,7 @@ public class ClientCoreHack implements Closeable {
 		ClientCommunication.sendRequestMSG(sc, "");
 
 		for (int i = 0; i < 3; i++) {
-			Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
-			if (!optionalProtocol.isPresent()) {
-				System.out.println("No protocol");
-				return;
-			}
-			NetworkProtocol protocol = optionalProtocol.get();
+			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 
 			switch (protocol) {
 			case CORES:
@@ -247,12 +217,7 @@ public class ClientCoreHack implements Closeable {
 		ClientCommunication.sendRequestMSG(sc,
 				"𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀");
 		for (int i = 0; i < 3; i++) {
-			Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
-			if (!optionalProtocol.isPresent()) {
-				System.out.println("No protocol");
-				return;
-			}
-			NetworkProtocol protocol = optionalProtocol.get();
+			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 
 			switch (protocol) {
 			case CORES:
@@ -286,12 +251,7 @@ public class ClientCoreHack implements Closeable {
 		int stop = 2 + flood;
 		for (int i = 0; i < stop; i++) {
 			System.out.println("REQ #" + (i + 1));
-			Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
-			if (!optionalProtocol.isPresent()) {
-				System.out.println("No protocol");
-				return;
-			}
-			NetworkProtocol protocol = optionalProtocol.get();
+			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 
 			switch (protocol) {
 			case CORES:
@@ -319,12 +279,7 @@ public class ClientCoreHack implements Closeable {
 	public void startChat_UnauthentMessage() throws IOException {
 		ClientCommunication.sendRequestMSG(sc, "Hello world");
 
-		Optional<NetworkProtocol> optionalProtocol = ClientCommunication.receiveRequestType(sc);
-		if (!optionalProtocol.isPresent()) {
-			System.out.println("No protocol");
-			return;
-		}
-		NetworkProtocol protocol = optionalProtocol.get();
+		NetworkProtocol protocol =  ClientCommunication.receiveRequestType(sc);
 
 		switch (protocol) {
 		case MSGBC:

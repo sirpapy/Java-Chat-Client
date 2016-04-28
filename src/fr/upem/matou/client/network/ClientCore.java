@@ -12,9 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 import fr.upem.matou.client.ui.ShellInterface;
 import fr.upem.matou.client.ui.UserInterface;
@@ -101,12 +98,7 @@ public class ClientCore implements Closeable {
 	}
 
 	private boolean usernameReceiver(String username) throws IOException {
-		Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
-		if (!optionalRequestType.isPresent()) {
-			throw new IOException("Protocol violation");
-		}
-
-		NetworkProtocol protocol = optionalRequestType.get();
+		NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 		switch (protocol) {
 		case CORES: {
@@ -140,21 +132,13 @@ public class ClientCore implements Closeable {
 	 * Reads requests from the server.
 	 */
 	private void messageReceiver() throws IOException {
-		Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(sc);
-		if (!optionalRequestType.isPresent()) {
-			throw new IOException("Protocol violation");
-		}
-		NetworkProtocol protocol = optionalRequestType.get();
+		NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 		Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 
 		switch (protocol) {
 
 		case ERROR: {
-			Optional<ErrorType> optionalERROR = ClientCommunication.receiveRequestERROR(sc);
-			if (!optionalERROR.isPresent()) {
-				throw new IOException("Protocol violation : " + protocol);
-			}
-			ErrorType type = optionalERROR.get();
+			ErrorType type = ClientCommunication.receiveRequestERROR(sc);
 			Logger.network(NetworkLogType.READ, "ERROR : " + type);
 			ui.displayError(type);
 
@@ -234,11 +218,7 @@ public class ClientCore implements Closeable {
 	 */
 	private void privateCommunicationMessage(SocketChannel pv, Username username) throws IOException {
 		while (true) {
-			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(pv);
-			if (!optionalRequestType.isPresent()) {
-				throw new IOException("Protocol violation");
-			}
-			NetworkProtocol protocol = optionalRequestType.get();
+			NetworkProtocol protocol = ClientCommunication.receiveRequestType(pv);
 			Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 
 			switch (protocol) {
@@ -264,11 +244,7 @@ public class ClientCore implements Closeable {
 	 */
 	private void privateCommunicationFile(SocketChannel pv, Username username) throws IOException {
 		while (true) {
-			Optional<NetworkProtocol> optionalRequestType = ClientCommunication.receiveRequestType(pv);
-			if (!optionalRequestType.isPresent()) {
-				throw new IOException("Protocol violation");
-			}
-			NetworkProtocol protocol = optionalRequestType.get();
+			NetworkProtocol protocol = ClientCommunication.receiveRequestType(pv);
 			Logger.network(NetworkLogType.READ, "PROTOCOL : " + protocol);
 
 			switch (protocol) {

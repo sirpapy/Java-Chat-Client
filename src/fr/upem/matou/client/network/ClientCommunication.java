@@ -219,7 +219,7 @@ class ClientCommunication {
 	private static String readUsername(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
 		if(size > USERNAME_MAX_SIZE) {
-			throw new IOException("Protocol violation");
+			throw new IOException("Protocol violation - Invalid username size : " + size);
 		}
 		return readString(sc, size);
 	}
@@ -227,7 +227,7 @@ class ClientCommunication {
 	private static String readMessage(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
 		if(size > MESSAGE_MAX_SIZE) {
-			throw new IOException("Protocol violation");
+			throw new IOException("Protocol violation - Invalid message size : " + size);
 		}
 		return readString(sc, size);
 	}
@@ -235,7 +235,7 @@ class ClientCommunication {
 	private static String readFilename(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
 		if(size > FILENAME_MAX_SIZE) {
-			throw new IOException("Protocol violation");
+			throw new IOException("Protocol violation - Invalid filename size : " + size);
 		}
 		return readString(sc, size);
 	}
@@ -274,14 +274,22 @@ class ClientCommunication {
 	/*
 	 * Receives a protocol type request.
 	 */
-	static Optional<NetworkProtocol> receiveRequestType(SocketChannel sc) throws IOException {
+	static NetworkProtocol receiveRequestType(SocketChannel sc) throws IOException {
 		int ordinal = readInt(sc);
-		return NetworkProtocol.getProtocol(ordinal);
+		Optional<NetworkProtocol> protocol = NetworkProtocol.getProtocol(ordinal);
+		if(!protocol.isPresent()) {
+			throw new IOException("Protocol violation - Invalid protocol type : " + ordinal);
+		}
+		return protocol.get();
 	}
 
-	static Optional<ErrorType> receiveRequestERROR(SocketChannel sc) throws IOException {
+	static ErrorType receiveRequestERROR(SocketChannel sc) throws IOException {
 		int ordinal = readInt(sc);
-		return ErrorType.getError(ordinal);
+		Optional<ErrorType> error = ErrorType.getError(ordinal);
+		if(!error.isPresent()) {
+			throw new IOException("Protocol violation - Invalid error type : " + ordinal);
+		}
+		return error.get();
 	}
 
 	/*
