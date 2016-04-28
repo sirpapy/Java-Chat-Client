@@ -34,6 +34,8 @@ public class Logger {
 
 	private static PrintStream OUTPUT = System.err;
 
+	private static final boolean HEADER_INFO = true; // displays more info
+	
 	private static final boolean LOG_DEBUG = true;
 	private static final boolean LOG_NETWORK = true;
 	private static final boolean LOG_WARNING = true;
@@ -58,15 +60,6 @@ public class Logger {
 		OUTPUT = out;
 	}
 
-	private static String formatLog(String level, String message) {
-		long now = System.currentTimeMillis();
-		String time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(now);
-
-		String thread = Thread.currentThread().getName();
-
-		return String.join(SEPARATOR, level, time, thread, message);
-	}
-
 	private static String localAddressToString(SocketChannel sc) {
 		try {
 			return sc.getLocalAddress().toString();
@@ -82,6 +75,18 @@ public class Logger {
 			return "???";
 		}
 	}
+	
+	private static String formatLog(String level, String message) {
+		if(!HEADER_INFO) {
+			return message;
+		}
+		long now = System.currentTimeMillis();
+		String time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(now);
+
+		String thread = Thread.currentThread().getName();
+
+		return String.join(SEPARATOR, level, time, thread, message);
+	}
 
 	public static String formatNetworkData(SocketChannel sc, String message) {
 		String local = localAddressToString(sc);
@@ -90,20 +95,24 @@ public class Logger {
 	}
 
 	public static String formatNetworkRequest(SocketChannel sc, NetworkLogType type, String message) {
-		String local = localAddressToString(sc);
-		String remote = remoteAddressToString(sc);
-
 		String direction = "";
 		switch (type) {
 		case READ:
-			direction = "R";
+			direction = "READ";
 			break;
 		case WRITE:
-			direction = "W";
+			direction = "WRITE";
 			break;
 		default:
 			break;
 		}
+		
+		if(!HEADER_INFO) {
+			return String.join(SEPARATOR, direction, message);
+		}
+		
+		String local = localAddressToString(sc);
+		String remote = remoteAddressToString(sc);
 		
 		return String.join(SEPARATOR, local + " -> " + remote, direction, message);
 	}
