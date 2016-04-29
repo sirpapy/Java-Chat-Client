@@ -146,6 +146,8 @@ public class ShellInterface implements UserInterface {
 
 	@Override
 	public void displayError(ErrorType type) {
+		requireNonNull(type);
+		
 		switch (type) {
 
 		case USRNOTCO:

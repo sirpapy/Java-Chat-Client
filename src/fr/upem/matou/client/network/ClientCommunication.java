@@ -44,34 +44,34 @@ class ClientCommunication {
 		bb.flip();
 		sc.write(bb);
 	}
-	
+
 	private static void writeProtocol(SocketChannel sc, NetworkProtocol protocol) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
 		bb.putInt(protocol.ordinal());
 		writeFully(sc, bb);
 	}
-	
+
 	private static void writeInt(SocketChannel sc, int value) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
 		bb.putInt(value);
 		writeFully(sc, bb);
 	}
-	
+
 	private static void writeLong(SocketChannel sc, long value) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
 		bb.putLong(value);
 		writeFully(sc, bb);
 	}
-	
+
 	private static void writeString(SocketChannel sc, ByteBuffer encoded) throws IOException {
 		int size = encoded.remaining();
 		writeInt(sc, size);
 		encoded.compact();
 		writeFully(sc, encoded);
 	}
-		
+
 	private static void writeFileChunks(SocketChannel sc, Path path) throws IOException {
-		Logger.debug("FILE UPLOADING : START");
+		Logger.debug("FILE UPLOADING START : " + path);
 		try (InputStream is = Files.newInputStream(path, READ)) {
 			byte[] chunk = new byte[CHUNK_SIZE];
 			int read = 0;
@@ -80,9 +80,9 @@ class ClientCommunication {
 				sc.write(wrap);
 			}
 		}
-		Logger.debug("FILE UPLOADING : END");
+		Logger.debug("FILE UPLOADING END : " + path);
 	}
-	
+
 	/*
 	 * Sends a COREQ request.
 	 */
@@ -170,12 +170,12 @@ class ClientCommunication {
 				} catch (Exception e) {
 					Logger.exception(e);
 				}
-			}).start();
+			}, "Private file uploader : " + path).start();
 
 			return true;
 
 		} catch (@SuppressWarnings("unused") NoSuchFileException __) {
-			Logger.warning("File \"" + path + "\" does not exist");
+			Logger.warning("This file does not exist : " + path);
 			return false;
 		}
 	}
@@ -216,26 +216,26 @@ class ClientCommunication {
 		bb.flip();
 		return PROTOCOL_CHARSET.decode(bb).toString();
 	}
-	
+
 	private static Username readUsername(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
-		if(size > USERNAME_MAX_SIZE) {
+		if (size > USERNAME_MAX_SIZE) {
 			throw new IOException("Protocol violation - Invalid username size : " + size);
 		}
 		return new Username(readString(sc, size));
 	}
-	
+
 	private static String readMessage(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
-		if(size > MESSAGE_MAX_SIZE) {
+		if (size > MESSAGE_MAX_SIZE) {
 			throw new IOException("Protocol violation - Invalid message size : " + size);
 		}
 		return readString(sc, size);
 	}
-	
+
 	private static String readFilename(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
-		if(size > FILENAME_MAX_SIZE) {
+		if (size > FILENAME_MAX_SIZE) {
 			throw new IOException("Protocol violation - Invalid filename size : " + size);
 		}
 		return readString(sc, size);
@@ -251,7 +251,6 @@ class ClientCommunication {
 			byte b = bb.get();
 			addr[i] = b;
 		}
-		Logger.debug("ADDRESS = " + Arrays.toString(addr));
 		return InetAddress.getByAddress(addr);
 	}
 
@@ -278,7 +277,7 @@ class ClientCommunication {
 	static NetworkProtocol receiveRequestType(SocketChannel sc) throws IOException {
 		int ordinal = readInt(sc);
 		Optional<NetworkProtocol> protocol = NetworkProtocol.getProtocol(ordinal);
-		if(!protocol.isPresent()) {
+		if (!protocol.isPresent()) {
 			throw new IOException("Protocol violation - Invalid protocol type : " + ordinal);
 		}
 		return protocol.get();
@@ -287,7 +286,7 @@ class ClientCommunication {
 	static ErrorType receiveRequestERROR(SocketChannel sc) throws IOException {
 		int ordinal = readInt(sc);
 		Optional<ErrorType> error = ErrorType.getError(ordinal);
-		if(!error.isPresent()) {
+		if (!error.isPresent()) {
 			throw new IOException("Protocol violation - Invalid error type : " + ordinal);
 		}
 		return error.get();
@@ -354,11 +353,12 @@ class ClientCommunication {
 		String filename = readFilename(sc);
 		long totalSize = readLong(sc);
 
-		Logger.debug("FILE DOWNLOADING : START");
 		Path path = Files.createTempFile(Paths.get("./files"), username + "_", "_" + filename);
-		saveFileChunks(sc, path, totalSize);
 
-		Logger.debug("FILE DOWNLOADING : END");
+		Logger.debug("FILE DOWNLOADING START : " + path);
+		saveFileChunks(sc, path, totalSize);
+		Logger.debug("FILE DOWNLOADING END : " + path);
+
 		return path;
 	}
 

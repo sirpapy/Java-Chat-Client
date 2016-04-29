@@ -33,6 +33,7 @@ public class Logger {
 	}
 
 	private static PrintStream OUTPUT = System.err;
+	private static PrintStream EXCEPT = System.err;
 
 	private static final boolean HEADER_INFO = true; // displays more info
 	
@@ -47,8 +48,6 @@ public class Logger {
 	private Logger() {
 	}
 
-	// TODO : Prendre un objet à logger en paramètre afin d'afficher ses informations
-
 	/**
 	 * Changes the normal output of the logger.
 	 * 
@@ -58,6 +57,17 @@ public class Logger {
 	public static void attachOutput(PrintStream out) {
 		requireNonNull(out);
 		OUTPUT = out;
+	}
+	
+	/**
+	 * Changes the exception output of the logger.
+	 * 
+	 * @param except
+	 *            The new exception output.
+	 */
+	public static void attachException(PrintStream except) {
+		requireNonNull(except);
+		EXCEPT = except;
 	}
 
 	private static String localAddressToString(SocketChannel sc) {
@@ -173,7 +183,9 @@ public class Logger {
 	 */
 	public static void exception(Exception exception) {
 		if (LOG_EXCEPTION) {
-			exception.printStackTrace(OUTPUT);
+			EXCEPT.println("--------------------------------------------------------------------------------");
+			exception.printStackTrace(EXCEPT);
+			EXCEPT.println("--------------------------------------------------------------------------------");
 		}
 	}
 

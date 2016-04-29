@@ -20,5 +20,4 @@ public class Tasks {
 	// TODO : Ecrire la javadoc
 	// TODO : Ecrire le rapport + disclaimers (colorator)
 	
-	// TEMP : Retirer les UnsupportedOperationException !
 }

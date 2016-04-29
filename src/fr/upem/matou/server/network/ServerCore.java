@@ -1,5 +1,6 @@
 package fr.upem.matou.server.network;
 
+import static fr.upem.matou.shared.logger.Logger.formatNetworkData;
 import static fr.upem.matou.shared.logger.Logger.formatNetworkRequest;
 
 import java.io.Closeable;
@@ -80,7 +81,7 @@ public class ServerCore implements Closeable {
 				}
 			} catch (IOException e) {
 				SocketChannel sc = (SocketChannel) key.channel();
-				Logger.warning(sc.getRemoteAddress() + " | " + e.toString());
+				Logger.warning(formatNetworkData(sc, e.toString()));
 				ServerSession session = (ServerSession) key.attachment();
 				session.disconnectClient();
 			}
@@ -99,7 +100,7 @@ public class ServerCore implements Closeable {
 		SelectionKey registeredKey = acceptedChannel.register(selector, SelectionKey.OP_READ);
 		Optional<ServerSession> optional = db.newServerSession(acceptedChannel, registeredKey);
 		if (!optional.isPresent()) {
-			Logger.warning("Server is full"); // FIXME : MàJ OP_ACCEPT
+			Logger.warning(formatNetworkData(acceptedChannel, "Server is full"));
 			NetworkCommunication.silentlyClose(acceptedChannel);
 			return;
 		}

@@ -1,5 +1,6 @@
 package fr.upem.matou.client.network;
 
+import static fr.upem.matou.shared.logger.Logger.formatNetworkData;
 import static fr.upem.matou.shared.logger.Logger.formatNetworkRequest;
 
 import java.io.Closeable;
@@ -27,10 +28,11 @@ import fr.upem.matou.shared.network.Username;
 public class ClientCore implements Closeable {
 
 	private final Object monitor = new Object();
-	private boolean exit = false;
 	private final SocketChannel sc;
 	private final ClientSession session;
 	private final UserInterface ui = new ShellInterface();
+
+	private boolean exit;
 
 	/**
 	 * Constructs a new client core.
@@ -49,8 +51,8 @@ public class ClientCore implements Closeable {
 	}
 
 	private void setExit() {
-		Logger.debug("EXIT !!!");
 		synchronized (monitor) {
+			Logger.debug("EXIT !!!");
 			exit = true;
 			monitor.notify();
 		}
@@ -192,7 +194,7 @@ public class ClientCore implements Closeable {
 		}
 
 		default:
-			throw new UnsupportedOperationException("Unsupported protocol request : " + protocol); // TEMP
+			throw new IOException("Unsupported protocol request : " + protocol);
 
 		}
 
@@ -218,7 +220,7 @@ public class ClientCore implements Closeable {
 			}
 
 			default:
-				throw new UnsupportedOperationException("Unsupported protocol request : " + protocol); // TEMP
+				throw new IOException("Unsupported protocol request : " + protocol);
 
 			}
 		}
@@ -244,7 +246,7 @@ public class ClientCore implements Closeable {
 			}
 
 			default:
-				throw new UnsupportedOperationException("Unsupported protocol request : " + protocol); // TEMP
+				throw new IOException("Unsupported protocol request : " + protocol);
 
 			}
 		}
@@ -257,11 +259,11 @@ public class ClientCore implements Closeable {
 				pv = ssc.accept();
 				InetAddress connected = ((InetSocketAddress) pv.getRemoteAddress()).getAddress();
 				if (!address.equals(connected)) {
-					Logger.debug("[SOURCE] CONNECTION HACK !!!");
+					Logger.debug(formatNetworkData(pv, "[SOURCE] CONNECTION HIJACK !!!"));
 					NetworkCommunication.silentlyClose(pv);
 					continue;
 				}
-				Logger.debug("[SOURCE] CONNECTION ACCEPTED");
+				Logger.debug(formatNetworkData(pv,"[SOURCE] CONNECTION ACCEPTED"));
 				return pv;
 			}
 		} // close the ssc correctly
@@ -282,10 +284,11 @@ public class ClientCore implements Closeable {
 
 		new Thread(() -> {
 			try (SocketChannel scMessage = acceptCommunication(sscMessage, addressDst)) {
-				Logger.debug("[SOURCE] MESSAGE CONNECTED");
+				Logger.debug(formatNetworkData(scMessage,"[SOURCE] MESSAGE CONNECTED"));
 				session.addNewPrivateMessageChannel(username, scMessage);
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
+				Logger.warning(e.toString());
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			} finally {
@@ -295,10 +298,11 @@ public class ClientCore implements Closeable {
 
 		new Thread(() -> {
 			try (SocketChannel scFile = acceptCommunication(sscFile, addressDst)) {
-				Logger.debug("[SOURCE] FILE CONNECTED");
+				Logger.debug(formatNetworkData(scFile,"[SOURCE] FILE CONNECTED"));
 				session.addNewPrivateFileChannel(username, scFile);
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
+				Logger.warning(e.toString());
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			} finally {
@@ -316,13 +320,15 @@ public class ClientCore implements Closeable {
 		Logger.debug("[DESTINATION] MESSAGE PORT : " + portMessage);
 		Logger.debug("[DESTINATION] FILE PORT : " + portFile);
 
-		Logger.debug("[DESTINATION] CONNECTED");
+		Logger.debug(formatNetworkData(scMessage,"[DESTINATION] MESSAGE CONNECTED"));
+		Logger.debug(formatNetworkData(scFile,"[DESTINATION] FILE CONNECTED"));
 
 		new Thread(() -> {
 			try {
 				session.addNewPrivateMessageChannel(username, scMessage);
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
+				Logger.warning(e.toString());
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			} finally {
@@ -335,6 +341,7 @@ public class ClientCore implements Closeable {
 				session.addNewPrivateFileChannel(username, scFile);
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
+				Logger.warning(e.toString());
 				Logger.exception(e);
 				session.closePrivateConnection(username);
 			} finally {
@@ -348,6 +355,7 @@ public class ClientCore implements Closeable {
 			try {
 				privateCommunicationSource(username, addressDst);
 			} catch (IOException e) {
+				Logger.warning(e.toString());
 				Logger.exception(e);
 			}
 		}, "Private source connection : " + username).start();
@@ -358,12 +366,11 @@ public class ClientCore implements Closeable {
 			try {
 				privateCommunicationDestination(username, addressSrc, portMessage, portFile);
 			} catch (IOException e) {
+				Logger.warning(e.toString());
 				Logger.exception(e);
 			}
 		}, "Private destination connection : " + username).start();
 	}
-
-	// FIXME : Déconnexion publique => Déconnexion privée ?
 
 	private void threadMessageSender() {
 		try {
@@ -423,6 +430,7 @@ public class ClientCore implements Closeable {
 	 *             If an interruption occurs.
 	 */
 	public void startChat() throws IOException, InterruptedException {
+		exit = false;
 		while (true) {
 			Optional<String> optional = usernameGetter();
 			if (!optional.isPresent()) {
@@ -455,6 +463,7 @@ public class ClientCore implements Closeable {
 	 *             If an interruption occurs.
 	 */
 	public void startChat(String username) throws IOException, InterruptedException {
+		exit = false;
 		if (!connectUsername(username)) {
 			Logger.debug("CONNECTION FAILED");
 			return;
@@ -483,11 +492,9 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	// FIXME : Utiliser plusieurs fois startChat ?
-
 	@Override
 	public void close() throws IOException {
-		Logger.debug("CLOSING");
+		Logger.debug("CHAT CLOSING");
 		ui.close();
 		sc.close();
 	}

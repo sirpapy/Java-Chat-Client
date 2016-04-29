@@ -67,7 +67,9 @@ class ClientSession {
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "MESSAGE : " + message));
 		try {
 			return ClientCommunication.sendRequestPVMSG(sc, message);
-		} catch (@SuppressWarnings("unused") IOException __) {
+		} catch (IOException e) {
+			Logger.warning(e.toString());
+			Logger.exception(e);
 			closePrivateConnection(username);
 			return false;
 		}
@@ -83,7 +85,9 @@ class ClientSession {
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PATH : " + path));
 		try {
 			return ClientCommunication.sendRequestPVFILE(sc, path);
-		} catch (@SuppressWarnings("unused") IOException __) {
+		} catch (IOException e) {
+			Logger.warning(e.toString());
+			Logger.exception(e);
 			closePrivateConnection(username);
 			return false;
 		}

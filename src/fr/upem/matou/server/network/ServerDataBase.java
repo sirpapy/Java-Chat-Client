@@ -32,7 +32,7 @@ class ServerDataBase {
 	private final ByteBuffer bbBroadcast = ByteBuffer.allocateDirect(BUFFER_SIZE_BROADCAST);
 	
 	ServerDataBase(Set<SelectionKey> keys) {
-		this.keys = keys;
+		this.keys = keys;		
 	}
 
 	/*
@@ -112,31 +112,30 @@ class ServerDataBase {
 			return;
 		}
 
+		int ready = 0;
 		for (SelectionKey key : keys) {
 			if (!key.isValid()) {
-				Logger.debug("\tKEY : INVALID");
 				continue;
 			}
 
 			ServerSession session = (ServerSession) key.attachment();
 			if (session == null) {
-				Logger.debug("\tKEY : NO SESSION");
 				continue;
 			}
 
 			if (!session.isAuthent()) {
-				Logger.debug("\tKEY : NOT AUTHENT");
 				continue;
 			}
-
-			Logger.debug("\tKEY : OK");
 
 			session.appendWriteBuffer(bbBroadcast);
 
 			int ops = key.interestOps();
 			key.interestOps(ops | SelectionKey.OP_WRITE);
+			
+			ready++;
 		}
-
+		Logger.debug("Forwarding to " + ready + " client(s)");
+		
 		bbBroadcast.clear();
 	}
 
