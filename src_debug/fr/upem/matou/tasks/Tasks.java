@@ -2,6 +2,7 @@ package fr.upem.matou.tasks;
 
 // TEMP : Classe temporaire où figurent les TASKS générales au projet
 
+@SuppressWarnings("javadoc")
 public class Tasks {
 
 	// FIXME : Tracer les exceptions avec le logger
@@ -19,5 +20,7 @@ public class Tasks {
 	// TODO : Vérifier qu'il n'y a pas de code mort
 	// TODO : Ecrire la javadoc
 	// TODO : Ecrire le rapport + disclaimers (colorator)
+	
+	// TEMP : Désactiver le logger
 	
 }

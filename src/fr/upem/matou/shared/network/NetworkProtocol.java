@@ -19,27 +19,84 @@ import fr.upem.matou.shared.logger.Logger;
  */
 public enum NetworkProtocol {
 
+	/**
+	 * Error notification.
+	 */
 	ERROR(SERVER, CLIENT, "ERROR_NOTIFICATION", Integer.BYTES),
+
+	/**
+	 * Connection request.
+	 */
 	COREQ(CLIENT, SERVER, "PUBLIC_CONNECTION_REQUEST", Integer.BYTES, USERNAME_MAX_SIZE),
+
+	/**
+	 * Connection response.
+	 */
 	CORES(SERVER, CLIENT, "PUBLIC_CONNECTION_RESPONSE", Integer.BYTES, Byte.BYTES),
+
+	/**
+	 * Connection notification.
+	 */
 	CONOTIF(SERVER, CLIENT, "PUBLIC_CONNECTION_NOTIFICATION", Integer.BYTES, USERNAME_MAX_SIZE),
+
+	/**
+	 * Public message.
+	 */
 	MSG(CLIENT, SERVER, "PUBLIC_MESSAGE", Integer.BYTES, MESSAGE_MAX_SIZE),
-	MSGBC(SERVER, CLIENT, "PUBLIC_MESSAGE_BROADCAST", Integer.BYTES, USERNAME_MAX_SIZE, Integer.BYTES,
-			MESSAGE_MAX_SIZE),
+
+	/**
+	 * Public message forwarding.
+	 */
+	MSGBC(SERVER, CLIENT, "PUBLIC_MESSAGE_BROADCAST", Integer.BYTES, USERNAME_MAX_SIZE, Integer.BYTES, MESSAGE_MAX_SIZE),
+
+	/**
+	 * Disconnection notification.
+	 */
 	DISCONOTIF(SERVER, CLIENT, "PUBLIC_DISCONNECTION_NOTIFICATION", Integer.BYTES, USERNAME_MAX_SIZE),
+
+	/**
+	 * Private connection request.
+	 */
 	PVCOREQ(CLIENT, SERVER, "PRIVATE_CONNECTION_REQUEST", Integer.BYTES, USERNAME_MAX_SIZE),
+
+	/**
+	 * Private connection request notification.
+	 */
 	PVCOREQNOTIF(SERVER, CLIENT, "PRIVATE_CONNECTION_REQUEST_NOTIFICATION", Integer.BYTES, USERNAME_MAX_SIZE),
+
+	/**
+	 * Private connection acceptation.
+	 */
 	PVCOACC(CLIENT, SERVER, "PRIVATE_CONNECTION_ACCEPTATION", Integer.BYTES, USERNAME_MAX_SIZE),
-	PVCOPORT(CLIENT, SERVER, "PRIVATE_CONNECTION_PORT_TRANSFER", Integer.BYTES, USERNAME_MAX_SIZE, Integer.BYTES,
-			Integer.BYTES),
-	PVCOESTASRC(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_SOURCE", Integer.BYTES, USERNAME_MAX_SIZE,
-			Integer.BYTES, 16),
-	PVCOESTADST(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION", Integer.BYTES, USERNAME_MAX_SIZE,
-			Integer.BYTES, 16, Integer.BYTES, Integer.BYTES),
+
+	/**
+	 * Private connection port transfer.
+	 */
+	PVCOPORT(CLIENT, SERVER, "PRIVATE_CONNECTION_PORT_TRANSFER", Integer.BYTES, USERNAME_MAX_SIZE, Integer.BYTES, Integer.BYTES),
+
+	/**
+	 * Private connection establishement to source.
+	 */
+	PVCOESTASRC(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_SOURCE", Integer.BYTES, USERNAME_MAX_SIZE, Integer.BYTES, 16),
+
+	/**
+	 * Private connection establishement to destination.
+	 */
+	PVCOESTADST(SERVER, CLIENT, "PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION", Integer.BYTES, USERNAME_MAX_SIZE, Integer.BYTES, 16, Integer.BYTES, Integer.BYTES),
+
+	/**
+	 * Private message.
+	 */
 	PVMSG(CLIENT, CLIENT, "PRIVATE_MESSAGE", Integer.BYTES, MESSAGE_MAX_SIZE),
+
+	/**
+	 * Private file.
+	 */
 	PVFILE(CLIENT, CLIENT, "PRIVATE_FILE", Integer.BYTES, FILENAME_MAX_SIZE, Long.BYTES),
+
 	;
 
+	
 	static enum Communicator {
 		CLIENT, SERVER;
 	}

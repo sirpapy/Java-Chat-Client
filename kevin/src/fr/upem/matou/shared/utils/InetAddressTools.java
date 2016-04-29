@@ -3,6 +3,7 @@ package fr.upem.matou.shared.utils;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+@SuppressWarnings("javadoc")
 public class InetAddressTools {
 	private InetAddressTools() {
 	}

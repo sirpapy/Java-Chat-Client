@@ -5,7 +5,7 @@ import org.junit.Test;
 import fr.upem.matou.client.ClientMatou;
 import fr.upem.matou.server.ServerMatou;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "javadoc" })
 public class NetworkTest {
 
 	private static final Runnable serverMain = () -> {

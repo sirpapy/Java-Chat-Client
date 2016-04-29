@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
+@SuppressWarnings("javadoc")
 public class FileTransfer {
 
 	private static final int CHUNK_SIZE = 4096; // in bytes

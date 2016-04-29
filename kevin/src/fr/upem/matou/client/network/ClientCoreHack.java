@@ -16,6 +16,7 @@ import fr.upem.matou.shared.network.Username;
 /*
  * This class is the core of the client.
  */
+@SuppressWarnings("javadoc")
 public class ClientCoreHack implements Closeable {
 
 	private final SocketChannel sc;

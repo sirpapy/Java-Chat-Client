@@ -3,6 +3,7 @@ package fr.upem.matou.shared.utils;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@SuppressWarnings("javadoc")
 public class FileUtils {
 	public static String getFileExtension(Path path) {
 		System.out.println("PATH = " + path);

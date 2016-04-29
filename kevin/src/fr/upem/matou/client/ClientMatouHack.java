@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import fr.upem.matou.client.network.ClientCoreHack;
 
+@SuppressWarnings("javadoc")
 public class ClientMatouHack {
 
 	private ClientMatouHack() {

@@ -35,7 +35,8 @@ public class NetworkCommunication {
 	/**
 	 * Returns whether this username is valid or not.
 	 * 
-	 * @param username The username to test
+	 * @param username
+	 *            The username to test
 	 * @return true if the username is valid, false otherwise.
 	 */
 	public static boolean checkUsernameValidity(String username) {
@@ -48,7 +49,8 @@ public class NetworkCommunication {
 	/**
 	 * Returns whether this message is valid or not.
 	 * 
-	 * @param username The message to test
+	 * @param message
+	 *            The message to test
 	 * @return true if the message is valid, false otherwise.
 	 */
 	public static boolean checkMessageValidity(String message) {
@@ -59,10 +61,10 @@ public class NetworkCommunication {
 	}
 
 	/**
-	 * Returns whether this encoded username is valid or not. 
-	 * The buffer is not altered.
+	 * Returns whether this encoded username is valid or not. The buffer is not altered.
 	 * 
-	 * @param username The encoded username to test (in write mode)
+	 * @param username
+	 *            The encoded username to test (in write mode)
 	 * @return true if the username is valid, false otherwise.
 	 */
 	private static boolean checkEncodedUsernameValidity(ByteBuffer username) {
@@ -71,17 +73,17 @@ public class NetworkCommunication {
 	}
 
 	/**
-	 * Returns whether this encoded message is valid or not. 
-	 * The buffer is not altered.
+	 * Returns whether this encoded message is valid or not. The buffer is not altered.
 	 * 
-	 * @param username The encoded message to test (in write mode)
+	 * @param username
+	 *            The encoded message to test (in write mode)
 	 * @return true if the message is valid, false otherwise.
 	 */
 	private static boolean checkEncodedMessageValidity(ByteBuffer message) {
 		int size = message.remaining();
 		return size <= MESSAGE_MAX_SIZE && size > 0;
 	}
-	
+
 	private static boolean checkEncodedPathValidity(ByteBuffer path) {
 		int size = path.remaining();
 		return size <= FILENAME_MAX_SIZE && size > 0;
@@ -99,12 +101,13 @@ public class NetworkCommunication {
 	/**
 	 * Encodes a username.
 	 * 
-	 * @param username The username to encode
+	 * @param username
+	 *            The username to encode
 	 * @return An optional that contains the encoded username if valid.
 	 */
 	public static Optional<ByteBuffer> encodeUsername(String username) {
 		requireNonNull(username);
-		if(!checkUsernameValidity(username)) {
+		if (!checkUsernameValidity(username)) {
 			return Optional.empty();
 		}
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(username);
@@ -117,12 +120,13 @@ public class NetworkCommunication {
 	/**
 	 * Encodes a message.
 	 * 
-	 * @param username The message to encode
+	 * @param message
+	 *            The message to encode.
 	 * @return An optional that contains the encoded message if valid.
 	 */
 	public static Optional<ByteBuffer> encodeMessage(String message) {
 		requireNonNull(message);
-		if(!checkMessageValidity(message)) {
+		if (!checkMessageValidity(message)) {
 			return Optional.empty();
 		}
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(message);
@@ -131,7 +135,14 @@ public class NetworkCommunication {
 		}
 		return Optional.of(encoded);
 	}
-	
+
+	/**
+	 * Encodes a path.
+	 * 
+	 * @param path
+	 *            The path to encode.
+	 * @return An optional that contains the encoded path if valid.
+	 */
 	public static Optional<ByteBuffer> encodePath(Path path) {
 		requireNonNull(path);
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(path.toString());
@@ -158,7 +169,12 @@ public class NetworkCommunication {
 	public static int getMessageMaxSize() {
 		return MESSAGE_MAX_SIZE;
 	}
-	
+
+	/**
+	 * Returns the maximum encoded filename size.
+	 * 
+	 * @return The maximum encoded filename size.
+	 */
 	public static int getFilenameMaxSize() {
 		return FILENAME_MAX_SIZE;
 	}
@@ -171,11 +187,12 @@ public class NetworkCommunication {
 	public static int getFileChunkSize() {
 		return FILE_CHUNK_SIZE;
 	}
-	
+
 	/**
 	 * Closes the SocketChannel without throwing exception.
 	 * 
-	 * @param sc The SocketChannel to close.
+	 * @param sc
+	 *            The SocketChannel to close.
 	 */
 	public static void silentlyClose(SocketChannel sc) {
 		try {

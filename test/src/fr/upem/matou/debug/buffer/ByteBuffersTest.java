@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import fr.upem.matou.shared.utils.ByteBuffers;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({ "static-method", "javadoc" })
 public class ByteBuffersTest {
 
 	@Test
