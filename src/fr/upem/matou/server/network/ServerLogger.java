@@ -12,15 +12,25 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Set;
 
-/*
- * This class provides static methods on selectors.
+/**
+ * This class provides static methods in order to log selector events.
  */
-class ServerLogger {
+public class ServerLogger {
 
 	private static final PrintStream OUTPUT = System.out;
 	
-	private static final boolean LOG_SELECT = true;
+	private static boolean LOG_SELECT = false;
 
+	/**
+	 * Enables or disables selector logging.
+	 * 
+	 * @param activation
+	 *            true to enable or false to disable.
+	 */
+	public static void activateSelect(boolean activation) {
+		LOG_SELECT = activation;
+	}
+	
 	private static String remoteAddressToString(SocketChannel sc) {
 		try {
 			return sc.getRemoteAddress().toString();

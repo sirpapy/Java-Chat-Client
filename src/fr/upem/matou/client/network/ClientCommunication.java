@@ -166,8 +166,8 @@ class ClientCommunication {
 			new Thread(() -> {
 				try {
 					writeFileChunks(sc, path);
-				} catch (Exception e) {
-					Logger.exception(e);
+				} catch (IOException e) {
+					Logger.warning(e.toString());
 				}
 			}, "Private file uploader : " + path).start();
 

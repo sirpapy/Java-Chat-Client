@@ -291,7 +291,6 @@ public class ClientCore implements Closeable {
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
 				Logger.warning(e.toString());
-				Logger.exception(e);
 				session.closePrivateConnection(username);
 			} finally {
 				ui.displayNewPrivateMessageDisconnection(username);
@@ -305,7 +304,6 @@ public class ClientCore implements Closeable {
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
 				Logger.warning(e.toString());
-				Logger.exception(e);
 				session.closePrivateConnection(username);
 			} finally {
 				ui.displayNewPrivateFileDisconnection(username);
@@ -331,7 +329,6 @@ public class ClientCore implements Closeable {
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
 				Logger.warning(e.toString());
-				Logger.exception(e);
 				session.closePrivateConnection(username);
 			} finally {
 				ui.displayNewPrivateMessageDisconnection(username);
@@ -344,7 +341,6 @@ public class ClientCore implements Closeable {
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
 				Logger.warning(e.toString());
-				Logger.exception(e);
 				session.closePrivateConnection(username);
 			} finally {
 				ui.displayNewPrivateFileDisconnection(username);
@@ -358,7 +354,6 @@ public class ClientCore implements Closeable {
 				privateCommunicationSource(username, addressDst);
 			} catch (IOException e) {
 				Logger.warning(e.toString());
-				Logger.exception(e);
 			}
 		}, "Private source connection : " + username).start();
 	}
@@ -369,7 +364,6 @@ public class ClientCore implements Closeable {
 				privateCommunicationDestination(username, addressSrc, portMessage, portFile);
 			} catch (IOException e) {
 				Logger.warning(e.toString());
-				Logger.exception(e);
 			}
 		}, "Private destination connection : " + username).start();
 	}
@@ -382,7 +376,6 @@ public class ClientCore implements Closeable {
 					stop = messageSender();
 				} catch (IOException e) {
 					Logger.warning(e.toString());
-					Logger.exception(e);
 					return;
 				}
 			}

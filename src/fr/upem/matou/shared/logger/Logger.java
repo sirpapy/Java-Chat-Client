@@ -35,13 +35,14 @@ public class Logger {
 	private static PrintStream OUTPUT = System.err;
 	private static PrintStream EXCEPT = System.err;
 
-	private static final boolean HEADER_INFO = true; // displays more info
+	private static boolean HEADER_INFO = false; // display more info
 
-	private static final boolean LOG_DEBUG = true;
-	private static final boolean LOG_NETWORK = true;
-	private static final boolean LOG_WARNING = true;
-	private static final boolean LOG_ERROR = true;
-	private static final boolean LOG_EXCEPTION = true;
+	private static boolean LOG_ERROR = false;
+	private static boolean LOG_WARNING = false;
+	private static boolean LOG_INFO = false;
+	private static boolean LOG_DEBUG = false;
+
+	private static boolean LOG_EXCEPTION = true;
 
 	private static final String SEPARATOR = " | ";
 
@@ -68,6 +69,66 @@ public class Logger {
 	public static void attachException(PrintStream except) {
 		requireNonNull(except);
 		EXCEPT = except;
+	}
+
+	/**
+	 * Enables or disables the header info of the logger.
+	 * 
+	 * @param activation
+	 *            true to enable or false to disable.
+	 */
+	public static void activateHeader(boolean activation) {
+		HEADER_INFO = activation;
+	}
+
+	/**
+	 * Enables or disables error logging.
+	 * 
+	 * @param activation
+	 *            true to enable or false to disable.
+	 */
+	public static void activateError(boolean activation) {
+		LOG_ERROR = activation;
+	}
+
+	/**
+	 * Enables or disables warning logging.
+	 * 
+	 * @param activation
+	 *            true to enable or false to disable.
+	 */
+	public static void activateWarning(boolean activation) {
+		LOG_WARNING = activation;
+	}
+
+	/**
+	 * Enables or disables info logging.
+	 * 
+	 * @param activation
+	 *            true to enable or false to disable.
+	 */
+	public static void activateInfo(boolean activation) {
+		LOG_INFO = activation;
+	}
+
+	/**
+	 * Enables or disables debug logging.
+	 * 
+	 * @param activation
+	 *            true to enable or false to disable.
+	 */
+	public static void activateDebug(boolean activation) {
+		LOG_DEBUG = activation;
+	}
+
+	/**
+	 * Enables or disables exception logging.
+	 * 
+	 * @param activation
+	 *            true to enable or false to disable.
+	 */
+	public static void activateException(boolean activation) {
+		LOG_EXCEPTION = activation;
 	}
 
 	private static String localAddressToString(SocketChannel sc) {
@@ -166,7 +227,7 @@ public class Logger {
 	 *            The message
 	 */
 	public static void info(String message) {
-		if (LOG_NETWORK) {
+		if (LOG_INFO) {
 			OUTPUT.println(colorGreen(formatLog("INFO", message)));
 		}
 	}

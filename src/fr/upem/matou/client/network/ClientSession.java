@@ -69,7 +69,6 @@ class ClientSession {
 			return ClientCommunication.sendRequestPVMSG(sc, message);
 		} catch (IOException e) {
 			Logger.warning(e.toString());
-			Logger.exception(e);
 			closePrivateConnection(username);
 			return false;
 		}
@@ -87,7 +86,6 @@ class ClientSession {
 			return ClientCommunication.sendRequestPVFILE(sc, path);
 		} catch (IOException e) {
 			Logger.warning(e.toString());
-			Logger.exception(e);
 			closePrivateConnection(username);
 			return false;
 		}

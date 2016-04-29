@@ -5,10 +5,10 @@ package fr.upem.matou.tasks;
 @SuppressWarnings("javadoc")
 public class Tasks {
 
-	// FIXME : Tracer les exceptions avec le logger
 	// FIXME : Commentaires de code
 	
 	// TODO : Command line options
+	// TODO : Tracer les exceptions avec le logger
 	
 	// TODO : Logger sur les exceptions -> Logger.warning/Logger.error
 	// TODO : Tests unitaires

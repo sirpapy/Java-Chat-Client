@@ -6,7 +6,7 @@ package fr.upem.matou.shared.logger;
  * Inspired from : http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
  */
 public class Colorator {
-	private static boolean enabled = true;
+	private static boolean enabled = false;
 
 	private static final String ANSI_RESET = "\u001B[0m";
 	private static final String ANSI_BLACK = "\u001B[30m";
@@ -17,6 +17,16 @@ public class Colorator {
 	private static final String ANSI_PURPLE = "\u001B[35m";
 	private static final String ANSI_CYAN = "\u001B[36m";
 	private static final String ANSI_WHITE = "\u001B[37m";
+
+	/**
+	 * Enables or disables the colorator.
+	 * 
+	 * @param activation
+	 *            true to enable or false to disable.
+	 */
+	public static void activateColorator(boolean activation) {
+		enabled = activation;
+	}
 
 	/**
 	 * Returns the given string colored in black. If the colorator is disabled, the string is returned without any
@@ -158,6 +168,7 @@ public class Colorator {
 	 *            Command-line arguments (ignored)
 	 */
 	public static void main(String[] args) {
+		activateColorator(true);
 		printColors();
 	}
 }
