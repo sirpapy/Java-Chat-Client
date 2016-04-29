@@ -36,7 +36,7 @@ public class Logger {
 	private static PrintStream EXCEPT = System.err;
 
 	private static final boolean HEADER_INFO = true; // displays more info
-	
+
 	private static final boolean LOG_DEBUG = true;
 	private static final boolean LOG_NETWORK = true;
 	private static final boolean LOG_WARNING = true;
@@ -58,7 +58,7 @@ public class Logger {
 		requireNonNull(out);
 		OUTPUT = out;
 	}
-	
+
 	/**
 	 * Changes the exception output of the logger.
 	 * 
@@ -85,9 +85,9 @@ public class Logger {
 			return "???";
 		}
 	}
-	
+
 	private static String formatLog(String level, String message) {
-		if(!HEADER_INFO) {
+		if (!HEADER_INFO) {
 			return message;
 		}
 		long now = System.currentTimeMillis();
@@ -98,12 +98,32 @@ public class Logger {
 		return String.join(SEPARATOR, level, time, thread, message);
 	}
 
+	/**
+	 * Formats a message associated with a SocketChannel.
+	 * 
+	 * @param sc
+	 *            The channel.
+	 * @param message
+	 *            The message.
+	 * @return The formated message.
+	 */
 	public static String formatNetworkData(SocketChannel sc, String message) {
 		String local = localAddressToString(sc);
 		String remote = remoteAddressToString(sc);
 		return String.join(SEPARATOR, local + " -> " + remote, message);
 	}
 
+	/**
+	 * Formats a network request associated with a SocketChannel.
+	 * 
+	 * @param sc
+	 *            The channel.
+	 * @param type
+	 *            The direction of the request.
+	 * @param message
+	 *            The message.
+	 * @return The formated message.
+	 */
 	public static String formatNetworkRequest(SocketChannel sc, NetworkLogType type, String message) {
 		String direction = "";
 		switch (type) {
@@ -116,14 +136,14 @@ public class Logger {
 		default:
 			break;
 		}
-		
-		if(!HEADER_INFO) {
+
+		if (!HEADER_INFO) {
 			return String.join(SEPARATOR, direction, message);
 		}
-		
+
 		String local = localAddressToString(sc);
 		String remote = remoteAddressToString(sc);
-		
+
 		return String.join(SEPARATOR, local + " -> " + remote, direction, message);
 	}
 
