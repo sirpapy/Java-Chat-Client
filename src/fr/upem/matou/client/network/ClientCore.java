@@ -31,6 +31,7 @@ public class ClientCore implements Closeable {
 	private final SocketChannel sc;
 	private final ClientSession session;
 	private final UserInterface ui = new ShellInterface();
+	private final ThreadGroup threadGroup = new ThreadGroup("ChatThreads");
 
 	private boolean exit;
 
@@ -66,8 +67,9 @@ public class ClientCore implements Closeable {
 		}
 	}
 
-	private static void interruptAllThreads() {
-		Thread.currentThread().getThreadGroup().interrupt();
+	private void interruptAllThreads() {
+		Logger.debug("INTERRUPT ALL THREADS");
+		threadGroup.interrupt();
 	}
 
 	private Optional<String> usernameGetter() {
@@ -263,7 +265,7 @@ public class ClientCore implements Closeable {
 					NetworkCommunication.silentlyClose(pv);
 					continue;
 				}
-				Logger.debug(formatNetworkData(pv,"[SOURCE] CONNECTION ACCEPTED"));
+				Logger.debug(formatNetworkData(pv, "[SOURCE] CONNECTION ACCEPTED"));
 				return pv;
 			}
 		} // close the ssc correctly
@@ -282,9 +284,9 @@ public class ClientCore implements Closeable {
 
 		ClientCommunication.sendRequestPVCOPORT(sc, username.toString(), portMessage, portFile);
 
-		new Thread(() -> {
+		new Thread(threadGroup, () -> {
 			try (SocketChannel scMessage = acceptCommunication(sscMessage, addressDst)) {
-				Logger.debug(formatNetworkData(scMessage,"[SOURCE] MESSAGE CONNECTED"));
+				Logger.debug(formatNetworkData(scMessage, "[SOURCE] MESSAGE CONNECTED"));
 				session.addNewPrivateMessageChannel(username, scMessage);
 				privateCommunicationMessage(scMessage, username);
 			} catch (IOException e) {
@@ -296,9 +298,9 @@ public class ClientCore implements Closeable {
 			}
 		}, "Private messages : " + username).start();
 
-		new Thread(() -> {
+		new Thread(threadGroup, () -> {
 			try (SocketChannel scFile = acceptCommunication(sscFile, addressDst)) {
-				Logger.debug(formatNetworkData(scFile,"[SOURCE] FILE CONNECTED"));
+				Logger.debug(formatNetworkData(scFile, "[SOURCE] FILE CONNECTED"));
 				session.addNewPrivateFileChannel(username, scFile);
 				privateCommunicationFile(scFile, username);
 			} catch (IOException e) {
@@ -320,10 +322,10 @@ public class ClientCore implements Closeable {
 		Logger.debug("[DESTINATION] MESSAGE PORT : " + portMessage);
 		Logger.debug("[DESTINATION] FILE PORT : " + portFile);
 
-		Logger.debug(formatNetworkData(scMessage,"[DESTINATION] MESSAGE CONNECTED"));
-		Logger.debug(formatNetworkData(scFile,"[DESTINATION] FILE CONNECTED"));
+		Logger.debug(formatNetworkData(scMessage, "[DESTINATION] MESSAGE CONNECTED"));
+		Logger.debug(formatNetworkData(scFile, "[DESTINATION] FILE CONNECTED"));
 
-		new Thread(() -> {
+		new Thread(threadGroup, () -> {
 			try {
 				session.addNewPrivateMessageChannel(username, scMessage);
 				privateCommunicationMessage(scMessage, username);
@@ -336,7 +338,7 @@ public class ClientCore implements Closeable {
 			}
 		}, "Private messages : " + username).start();
 
-		new Thread(() -> {
+		new Thread(threadGroup, () -> {
 			try {
 				session.addNewPrivateFileChannel(username, scFile);
 				privateCommunicationFile(scFile, username);
@@ -351,7 +353,7 @@ public class ClientCore implements Closeable {
 	}
 
 	private void launchPrivateConnection(Username username, InetAddress addressDst) {
-		new Thread(() -> {
+		new Thread(threadGroup, () -> {
 			try {
 				privateCommunicationSource(username, addressDst);
 			} catch (IOException e) {
@@ -362,7 +364,7 @@ public class ClientCore implements Closeable {
 	}
 
 	private void launchPrivateConnection(Username username, InetAddress addressSrc, int portMessage, int portFile) {
-		new Thread(() -> {
+		new Thread(threadGroup, () -> {
 			try {
 				privateCommunicationDestination(username, addressSrc, portMessage, portFile);
 			} catch (IOException e) {
@@ -410,8 +412,8 @@ public class ClientCore implements Closeable {
 	}
 
 	private void processMessages() throws InterruptedException {
-		Thread sender = new Thread(() -> threadMessageSender(), "Public sender");
-		Thread receiver = new Thread(() -> threadMessageReceiver(), "Public receiver");
+		Thread sender = new Thread(threadGroup, () -> threadMessageSender(), "Public sender");
+		Thread receiver = new Thread(threadGroup, () -> threadMessageReceiver(), "Public receiver");
 
 		sender.start();
 		receiver.start();
