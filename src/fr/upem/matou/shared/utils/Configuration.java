@@ -72,7 +72,7 @@ public class Configuration {
 	 * @return true if this line is an affectation or false otherwise.
 	 */
 	public static boolean isAffectation(String line) {
-		return line.contains("" + AFFECTATION_SYMBOL);
+		return line.chars().anyMatch(c -> c == AFFECTATION_SYMBOL);
 	}
 
 	/**
