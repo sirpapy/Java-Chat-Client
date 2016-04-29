@@ -1,128 +1,125 @@
 package fr.upem.matou.client;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import fr.upem.matou.client.network.ClientCore;
 import fr.upem.matou.shared.logger.Colorator;
 import fr.upem.matou.shared.logger.Logger;
+import fr.upem.matou.shared.utils.Configuration;
+import fr.upem.matou.shared.utils.Configuration.ConfigEntry;
 
 /**
  * Main class of the client Matou.
  */
 public class ClientMatou {
 
+	private static final Path CLIENT_CONFIG = Paths.get("./config/client.conf");
+
 	private ClientMatou() {
 	}
+	
+	@SuppressWarnings("resource")
+	private static void loadConfigLine(String line) {
+		ConfigEntry entry = Configuration.parseLine(line);
+		String command = entry.getCommand();
+		String argument = entry.getArgument();
+		System.out.println(command + ":" + argument);
 
+		switch (command) {
+		case "COLORATOR": {
+			boolean activation = Boolean.parseBoolean(argument);
+			Colorator.activateColorator(activation);
+			break;
+		}
+		case "ERROR": {
+			boolean activation = Boolean.parseBoolean(argument);
+			Logger.activateError(activation);
+			break;
+		}
+		case "WARNING": {
+			boolean activation = Boolean.parseBoolean(argument);
+			Logger.activateWarning(activation);
+			break;
+		}
+		case "INFO": {
+			boolean activation = Boolean.parseBoolean(argument);
+			Logger.activateInfo(activation);
+			break;
+		}
+		case "DEBUG": {
+			boolean activation = Boolean.parseBoolean(argument);
+			Logger.activateDebug(activation);
+			break;
+		}
+		case "HEADER": {
+			boolean activation = Boolean.parseBoolean(argument);
+			Logger.activateHeader(activation);
+			break;
+		}
+		case "LOG_OUTPUT": {
+			try {
+				PrintStream ps = new PrintStream(argument);
+				Logger.attachOutput(ps);
+			} catch (@SuppressWarnings("unused") IOException __) {
+				// Ignored
+			}
+			break;
+		}
+		case "LOG_EXCEPT": {
+			try {
+				PrintStream ps = new PrintStream(argument);
+				Logger.attachException(ps);
+			} catch (@SuppressWarnings("unused") IOException __) {
+				// Ignored
+			}
+			break;
+		}
+		default:
+			break;
+		}
+	}
+
+	private static void loadConfig() {
+		try (Stream<String> lines = Files.lines(CLIENT_CONFIG)) {
+			lines.map(Configuration::removeComments).filter(Configuration::isAffectation)
+					.forEach(ClientMatou::loadConfigLine);
+		} catch (@SuppressWarnings("unused") IOException __) {
+			return;
+		}
+	}
+	
 	private static void usage() {
-		System.err.println("Usage : [options] host port [username]" + "\nAvailable options :"
-				+ "\n-error : enables error logging" + "\n-warning : enables warning logging"
-				+ "\n-info : enables info logging" + "\n-debug : enables debug logging"
-				+ "\n-header : enables header logs displaying" + "\n-noexception : disables exception logging"
-				+ "\n-color : enables colorated logger"
-				+ "\n-logoutput path : redirects the normal output of the logger to the given path"
-				+ "\n-logexcept path : redirects the exception output of the logger to the given path");
+		System.err.println("Usage : host port [username]");
 	}
 
 	/**
 	 * Main method of the chat client program.
 	 * 
 	 * @param args
-	 *            Command line arguments.
-	 * @throws FileNotFoundException
-	 *             If some other error occurs while opening or creating the log file.
+	 *            Command line arguments
 	 */
-	public static void main(String[] args) throws FileNotFoundException {
-
-		int opt;
-		for (opt = 0; opt < args.length; opt++) {
-
-			if (!args[opt].startsWith("-")) {
-				break;
-			}
-
-			switch (args[opt]) {
-
-			case "-error": {
-				Logger.activateError(true);
-				break;
-			}
-
-			case "-warning": {
-				Logger.activateWarning(true);
-				break;
-			}
-
-			case "-info": {
-				Logger.activateInfo(true);
-				break;
-			}
-
-			case "-debug": {
-				Logger.activateDebug(true);
-				break;
-			}
-
-			case "-header": {
-				Logger.activateHeader(true);
-				break;
-			}
-
-			case "-noexception": {
-				Logger.activateException(false);
-				break;
-			}
-
-			case "-color": {
-				Colorator.activateColorator(true);
-				break;
-			}
-
-			case "-logoutput": {
-				String arg = args[++opt];
-				PrintStream ps = new PrintStream(arg);
-				Logger.attachOutput(ps);
-				break;
-			}
-
-			case "-logexcept": {
-				String arg = args[++opt];
-				PrintStream ps = new PrintStream(arg);
-				Logger.attachException(ps);
-				break;
-			}
-
-			case "-help": {
-				usage();
-				return;
-			}
-
-			default:
-				System.err.println("Unknown option : " + args[opt]);
-				usage();
-				return;
-
-			}
-		}
-
-		String host;
-		int port;
-		String username = null;
-		try {
-			host = args[opt];
-			port = Integer.parseInt(args[opt + 1]);
-
-			if (opt + 2 == args.length - 1) {
-				username = args[opt + 2];
-			}
-		} catch (@SuppressWarnings("unused") IndexOutOfBoundsException __) {
+	public static void main(String[] args) {
+		if (args.length < 2 || args.length > 3) {
 			usage();
 			return;
 		}
 
+		loadConfig();
+		
+		String host = args[0];
+		int port = Integer.parseInt(args[1]);
+		
+		String username = null;
+		if(args.length >= 3) {
+			username = args[2];
+		}
+		
 		try (ClientCore client = new ClientCore(host, port)) {
 			client.startChat(Optional.ofNullable(username));
 		} catch (IOException e) {
@@ -131,6 +128,6 @@ public class ClientMatou {
 		} catch (InterruptedException e) {
 			Logger.warning(e.toString());
 		}
-
+		
 	}
 }
