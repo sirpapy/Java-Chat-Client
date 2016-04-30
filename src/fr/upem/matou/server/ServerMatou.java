@@ -1,6 +1,5 @@
 package fr.upem.matou.server;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -9,8 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-import fr.upem.matou.server.network.ServerCore;
 import fr.upem.matou.server.network.SelectorLogger;
+import fr.upem.matou.server.network.ServerCore;
 import fr.upem.matou.shared.logger.Colorator;
 import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.utils.Configuration;
