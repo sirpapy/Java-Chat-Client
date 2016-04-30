@@ -22,6 +22,6 @@ public class Tasks {
 	// TODO : Ecrire le rapport + disclaimers (colorator)
 	// TODO : Build.xml
 	
-	// TEMP : Désactiver le logger
+	// TEMP : Désactiver le logger dans le fichier de config
 	
 }

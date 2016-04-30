@@ -13,8 +13,6 @@ import fr.upem.matou.shared.network.ErrorType;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 
-// TEMP : Crash Test
-
 /*
  * This class is the core of the client.
  */

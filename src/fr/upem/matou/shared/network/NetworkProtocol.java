@@ -92,11 +92,10 @@ public enum NetworkProtocol {
 	/**
 	 * Private file.
 	 */
-	PVFILE(CLIENT, CLIENT, "PRIVATE_FILE", Integer.BYTES, FILENAME_MAX_SIZE, Long.BYTES),
+	PVFILE(CLIENT, CLIENT, "PRIVATE_FILE", Integer.BYTES, FILENAME_MAX_SIZE, Long.BYTES), /* + FileChunks */
 
 	;
 
-	
 	static enum Communicator {
 		CLIENT, SERVER;
 	}
