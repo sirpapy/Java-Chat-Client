@@ -14,7 +14,7 @@ import fr.upem.matou.shared.logger.Logger;
  */
 public class ClientCore implements Closeable {
 
-	private final InetSocketAddress socketAddress;
+	private final InetSocketAddress address;
 	private final UserInterface ui = new ShellInterface();
 
 	/**
@@ -28,7 +28,7 @@ public class ClientCore implements Closeable {
 	 *             If an I/O error occurs.
 	 */
 	public ClientCore(String hostname, int port) throws IOException {
-		this.socketAddress = new InetSocketAddress(hostname, port);
+		this.address = new InetSocketAddress(hostname, port);
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class ClientCore implements Closeable {
 	 *             If an interruption occurs.
 	 */
 	public void startChat() throws IOException, InterruptedException {
-		try (ClientInstance chat = new ClientInstance(socketAddress, ui)) {
+		try (ClientInstance chat = new ClientInstance(address, ui)) {
 			chat.start();
 		}
 	}
@@ -56,7 +56,7 @@ public class ClientCore implements Closeable {
 	 *             If an interruption occurs.
 	 */
 	public void startChat(String username) throws IOException, InterruptedException {
-		try (ClientInstance chat = new ClientInstance(socketAddress, ui)) {
+		try (ClientInstance chat = new ClientInstance(address, ui)) {
 			chat.start(username);
 		}
 	}

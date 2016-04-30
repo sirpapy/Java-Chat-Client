@@ -20,6 +20,9 @@ import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 
+/*
+ * This class represents the state of the chat client. This class is thread-safe.
+ */
 @SuppressWarnings("resource")
 class ClientInstance implements Closeable {
 
@@ -31,8 +34,8 @@ class ClientInstance implements Closeable {
 
 	private boolean exit = false;
 
-	ClientInstance(InetSocketAddress socketAddress, UserInterface ui) throws IOException {
-		this.sc = SocketChannel.open(socketAddress);
+	ClientInstance(InetSocketAddress address, UserInterface ui) throws IOException {
+		this.sc = SocketChannel.open(address);
 		this.session = new ClientSession(sc);
 		this.ui = ui;
 	}
@@ -405,10 +408,7 @@ class ClientInstance implements Closeable {
 	void start() throws IOException, InterruptedException {
 		while (true) {
 			String username = usernameGetter();
-			if (!usernameSender(username)) {
-				continue;
-			}
-			if (!usernameReceiver(username)) {
+			if (!connectUsername(username)) {
 				continue;
 			}
 			break;
