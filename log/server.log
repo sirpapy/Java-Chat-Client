@@ -1,0 +1,173 @@
+DEBUG | 30/04/16 19:08:58 | main | SERVER BROADCAST BUFFER SIZE : 556
+DEBUG | 30/04/16 19:09:16 | main | SERVER READ BUFFER SIZE : 512
+DEBUG | 30/04/16 19:09:16 | main | SERVER WRITE BUFFER SIZE : 5560
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | PROTOCOL : [1 - COREQ - CLIENT => SERVER - PUBLIC_CONNECTION_REQUEST]
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | SIZE USERNAME : 4
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | USERNAME : abra
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PROTOCOL : [2 - CORES - SERVER => CLIENT - PUBLIC_CONNECTION_RESPONSE]
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | ACCEPTATION : true
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PROTOCOL : [3 - CONOTIF - SERVER => CLIENT - PUBLIC_CONNECTION_NOTIFICATION]
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | USERNAME : abra
+DEBUG | 30/04/16 19:09:16 | main | BROADCAST BUFFER : java.nio.DirectByteBuffer[pos=12 lim=556 cap=556]
+DEBUG | 30/04/16 19:09:16 | main | Forwarding to 1 client(s)
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=17 cap=5560]
+INFO | 30/04/16 19:09:31 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:31 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | PROTOCOL : [1 - COREQ - CLIENT => SERVER - PUBLIC_CONNECTION_REQUEST]
+INFO | 30/04/16 19:09:31 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:31 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | SIZE USERNAME : 7
+INFO | 30/04/16 19:09:32 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=7 lim=7 cap=512]
+INFO | 30/04/16 19:09:32 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:09:32 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | PROTOCOL : [2 - CORES - SERVER => CLIENT - PUBLIC_CONNECTION_RESPONSE]
+INFO | 30/04/16 19:09:32 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | ACCEPTATION : true
+INFO | 30/04/16 19:09:32 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | PROTOCOL : [3 - CONOTIF - SERVER => CLIENT - PUBLIC_CONNECTION_NOTIFICATION]
+INFO | 30/04/16 19:09:32 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | USERNAME : kadabra
+DEBUG | 30/04/16 19:09:32 | main | BROADCAST BUFFER : java.nio.DirectByteBuffer[pos=15 lim=556 cap=556]
+DEBUG | 30/04/16 19:09:32 | main | Forwarding to 2 client(s)
+INFO | 30/04/16 19:09:32 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=20 cap=5560]
+INFO | 30/04/16 19:09:32 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=15 cap=5560]
+INFO | 30/04/16 19:09:36 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:36 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | PROTOCOL : [4 - MSG - CLIENT => SERVER - PUBLIC_MESSAGE]
+INFO | 30/04/16 19:09:36 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:36 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | SIZE MESSAGE : 4
+INFO | 30/04/16 19:09:36 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:36 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | MESSAGE : abra
+INFO | 30/04/16 19:09:36 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:09:36 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | USERNAME : abra
+INFO | 30/04/16 19:09:36 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | MESSAGE : abra
+DEBUG | 30/04/16 19:09:36 | main | BROADCAST BUFFER : java.nio.DirectByteBuffer[pos=20 lim=556 cap=556]
+DEBUG | 30/04/16 19:09:36 | main | Forwarding to 2 client(s)
+INFO | 30/04/16 19:09:36 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=20 cap=5560]
+INFO | 30/04/16 19:09:36 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=20 cap=5560]
+INFO | 30/04/16 19:09:38 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:38 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | PROTOCOL : [4 - MSG - CLIENT => SERVER - PUBLIC_MESSAGE]
+INFO | 30/04/16 19:09:38 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:38 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | SIZE MESSAGE : 7
+INFO | 30/04/16 19:09:38 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=7 lim=7 cap=512]
+INFO | 30/04/16 19:09:38 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | MESSAGE : kadabra
+INFO | 30/04/16 19:09:38 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:09:38 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | USERNAME : kadabra
+INFO | 30/04/16 19:09:38 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | MESSAGE : kadabra
+DEBUG | 30/04/16 19:09:38 | main | BROADCAST BUFFER : java.nio.DirectByteBuffer[pos=26 lim=556 cap=556]
+DEBUG | 30/04/16 19:09:38 | main | Forwarding to 2 client(s)
+INFO | 30/04/16 19:09:38 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=26 cap=5560]
+INFO | 30/04/16 19:09:38 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=26 cap=5560]
+INFO | 30/04/16 19:09:46 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:46 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | PROTOCOL : [7 - PVCOREQ - CLIENT => SERVER - PRIVATE_CONNECTION_REQUEST]
+INFO | 30/04/16 19:09:46 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:46 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | SIZE USERNAME : 4
+INFO | 30/04/16 19:09:46 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:46 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | USERNAME : abra
+DEBUG | 30/04/16 19:09:46 | main | PV ADD (kadabra -> abra) : [abra]
+DEBUG | 30/04/16 19:09:46 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | PRIVATE REQUEST VALIDITY : true
+INFO | 30/04/16 19:09:46 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PROTOCOL : [8 - PVCOREQNOTIF - SERVER => CLIENT - PRIVATE_CONNECTION_REQUEST_NOTIFICATION]
+INFO | 30/04/16 19:09:46 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | USERNAME : kadabra
+INFO | 30/04/16 19:09:46 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=15 cap=5560]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | PROTOCOL : [9 - PVCOACC - CLIENT => SERVER - PRIVATE_CONNECTION_ACCEPTATION]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | SIZE USERNAME : 7
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=7 lim=7 cap=512]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | USERNAME : kadabra
+DEBUG | 30/04/16 19:09:51 | main | PV CHECK (abra -> kadabra) : [abra]
+DEBUG | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | PRIVATE REQUEST ACCEPTATION : true
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | PROTOCOL : [11 - PVCOESTASRC - SERVER => CLIENT - PRIVATE_CONNECTION_ESTABLISHEMENT_SOURCE]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | USERNAME : abra
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | ADDRESS : /127.0.0.1
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=20 cap=5560]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | PROTOCOL : [10 - PVCOPORT - CLIENT => SERVER - PRIVATE_CONNECTION_PORT_TRANSFER]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | SIZE USERNAME : 4
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | USERNAME : abra
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+DEBUG | 30/04/16 19:09:51 | main | PV CHECK & REMOVE (abra -> kadabra) : [abra]
+DEBUG | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | PRIVATE REQUEST ESTABLISHMENT : true
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PROTOCOL : [12 - PVCOESTADST - SERVER => CLIENT - PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION]
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | USERNAME : kadabra
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | ADDRESS : /127.0.0.1
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PORT MESSAGE : 41068
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PORT FILE : 55601
+INFO | 30/04/16 19:09:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=31 cap=5560]
+INFO | 30/04/16 19:09:57 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:57 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | PROTOCOL : [4 - MSG - CLIENT => SERVER - PUBLIC_MESSAGE]
+INFO | 30/04/16 19:09:57 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:09:57 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | SIZE MESSAGE : 9
+INFO | 30/04/16 19:09:57 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=9 lim=9 cap=512]
+INFO | 30/04/16 19:09:57 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | MESSAGE : test abra
+INFO | 30/04/16 19:09:57 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:09:57 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | USERNAME : abra
+INFO | 30/04/16 19:09:57 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | MESSAGE : test abra
+DEBUG | 30/04/16 19:09:57 | main | BROADCAST BUFFER : java.nio.DirectByteBuffer[pos=25 lim=556 cap=556]
+DEBUG | 30/04/16 19:09:57 | main | Forwarding to 2 client(s)
+INFO | 30/04/16 19:09:57 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=25 cap=5560]
+INFO | 30/04/16 19:09:57 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=25 cap=5560]
+INFO | 30/04/16 19:10:00 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:10:00 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | PROTOCOL : [4 - MSG - CLIENT => SERVER - PUBLIC_MESSAGE]
+INFO | 30/04/16 19:10:00 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:10:00 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | SIZE MESSAGE : 12
+INFO | 30/04/16 19:10:00 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=12 lim=12 cap=512]
+INFO | 30/04/16 19:10:00 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | MESSAGE : test kadabra
+INFO | 30/04/16 19:10:00 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:10:00 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | USERNAME : kadabra
+INFO | 30/04/16 19:10:00 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | MESSAGE : test kadabra
+DEBUG | 30/04/16 19:10:00 | main | BROADCAST BUFFER : java.nio.DirectByteBuffer[pos=31 lim=556 cap=556]
+DEBUG | 30/04/16 19:10:00 | main | Forwarding to 2 client(s)
+INFO | 30/04/16 19:10:00 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=31 cap=5560]
+INFO | 30/04/16 19:10:00 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=31 cap=5560]
+INFO | 30/04/16 19:10:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:10:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | PROTOCOL : [7 - PVCOREQ - CLIENT => SERVER - PRIVATE_CONNECTION_REQUEST]
+INFO | 30/04/16 19:10:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:10:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | SIZE USERNAME : 4
+INFO | 30/04/16 19:10:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:10:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | USERNAME : abra
+DEBUG | 30/04/16 19:10:51 | main | PV ADD (kadabra -> abra) : [abra]
+DEBUG | 30/04/16 19:10:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | PRIVATE REQUEST VALIDITY : true
+INFO | 30/04/16 19:10:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PROTOCOL : [8 - PVCOREQNOTIF - SERVER => CLIENT - PRIVATE_CONNECTION_REQUEST_NOTIFICATION]
+INFO | 30/04/16 19:10:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | USERNAME : kadabra
+INFO | 30/04/16 19:10:51 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=15 cap=5560]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | PROTOCOL : [9 - PVCOACC - CLIENT => SERVER - PRIVATE_CONNECTION_ACCEPTATION]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | SIZE USERNAME : 7
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | BUFFER = java.nio.DirectByteBuffer[pos=7 lim=7 cap=512]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | READ | USERNAME : kadabra
+DEBUG | 30/04/16 19:10:54 | main | PV CHECK (abra -> kadabra) : [abra]
+DEBUG | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | PRIVATE REQUEST ACCEPTATION : true
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | PROTOCOL : [11 - PVCOESTASRC - SERVER => CLIENT - PRIVATE_CONNECTION_ESTABLISHEMENT_SOURCE]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | USERNAME : abra
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | ADDRESS : /127.0.0.1
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=20 cap=5560]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | PROTOCOL : [10 - PVCOPORT - CLIENT => SERVER - PRIVATE_CONNECTION_PORT_TRANSFER]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | SIZE USERNAME : 4
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | USERNAME : abra
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | READ | BUFFER = java.nio.DirectByteBuffer[pos=4 lim=4 cap=512]
+DEBUG | 30/04/16 19:10:54 | main | PV CHECK & REMOVE (abra -> kadabra) : [abra]
+DEBUG | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | PRIVATE REQUEST ESTABLISHMENT : true
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PROTOCOL : [12 - PVCOESTADST - SERVER => CLIENT - PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION]
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | USERNAME : kadabra
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | ADDRESS : /127.0.0.1
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PORT MESSAGE : 55388
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PORT FILE : 35312
+INFO | 30/04/16 19:10:54 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=31 cap=5560]
+DEBUG | 30/04/16 19:10:58 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | SILENTLY CLOSE
+DEBUG | 30/04/16 19:10:58 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | DISCONNECTION : Optional[kadabra]
+INFO | 30/04/16 19:10:58 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | PROTOCOL : [6 - DISCONOTIF - SERVER => CLIENT - PUBLIC_DISCONNECTION_NOTIFICATION]
+INFO | 30/04/16 19:10:58 | main | /127.0.0.1:7777 -> /127.0.0.1:48428 | WRITE | USERNAME : kadabra
+DEBUG | 30/04/16 19:10:58 | main | BROADCAST BUFFER : java.nio.DirectByteBuffer[pos=15 lim=556 cap=556]
+DEBUG | 30/04/16 19:10:58 | main | Forwarding to 2 client(s)
+INFO | 30/04/16 19:10:58 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | BUFFER = java.nio.DirectByteBuffer[pos=0 lim=15 cap=5560]
+DEBUG | 30/04/16 19:11:01 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | SILENTLY CLOSE
+DEBUG | 30/04/16 19:11:01 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | DISCONNECTION : Optional[abra]
+INFO | 30/04/16 19:11:01 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | PROTOCOL : [6 - DISCONOTIF - SERVER => CLIENT - PUBLIC_DISCONNECTION_NOTIFICATION]
+INFO | 30/04/16 19:11:01 | main | /127.0.0.1:7777 -> /127.0.0.1:48427 | WRITE | USERNAME : abra
+DEBUG | 30/04/16 19:11:01 | main | BROADCAST BUFFER : java.nio.DirectByteBuffer[pos=12 lim=556 cap=556]
+DEBUG | 30/04/16 19:11:01 | main | Forwarding to 1 client(s)

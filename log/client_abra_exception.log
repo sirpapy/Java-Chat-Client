@@ -1,0 +1,11 @@
+--------------------------------------------------------------------------------
+java.nio.channels.AsynchronousCloseException
+	at java.nio.channels.spi.AbstractInterruptibleChannel.end(AbstractInterruptibleChannel.java:205)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:407)
+	at fr.upem.matou.client.network.ClientCommunication.readFully(ClientCommunication.java:227)
+	at fr.upem.matou.client.network.ClientCommunication.readInt(ClientCommunication.java:243)
+	at fr.upem.matou.client.network.ClientCommunication.receiveRequestType(ClientCommunication.java:323)
+	at fr.upem.matou.client.network.ClientInstance.publicReceiver(ClientInstance.java:114)
+	at fr.upem.matou.client.network.ClientInstance.lambda$7(ClientInstance.java:372)
+	at java.lang.Thread.run(Thread.java:745)
+--------------------------------------------------------------------------------

@@ -1,0 +1,78 @@
+INFO | 30/04/16 19:09:31 | main | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | WRITE | PROTOCOL : [1 - COREQ - CLIENT => SERVER - PUBLIC_CONNECTION_REQUEST]
+INFO | 30/04/16 19:09:31 | main | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | WRITE | USERNAME : kadabra
+INFO | 30/04/16 19:09:32 | main | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [2 - CORES - SERVER => CLIENT - PUBLIC_CONNECTION_RESPONSE]
+INFO | 30/04/16 19:09:32 | main | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | ACCEPTATION : true
+DEBUG | 30/04/16 19:09:32 | main | USER CONNECTED
+DEBUG | 30/04/16 19:09:32 | main | WAIT FOR TERMINAISON : START WAITING
+INFO | 30/04/16 19:09:32 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [3 - CONOTIF - SERVER => CLIENT - PUBLIC_CONNECTION_NOTIFICATION]
+INFO | 30/04/16 19:09:32 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:09:36 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:09:36 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | USERNAME : abra
+INFO | 30/04/16 19:09:36 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | MESSAGE : abra
+INFO | 30/04/16 19:09:38 | Chat sender | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | WRITE | PROTOCOL : [4 - MSG - CLIENT => SERVER - PUBLIC_MESSAGE]
+INFO | 30/04/16 19:09:38 | Chat sender | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | WRITE | MESSAGE : kadabra
+INFO | 30/04/16 19:09:38 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:09:38 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:09:38 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | MESSAGE : kadabra
+INFO | 30/04/16 19:09:46 | Chat sender | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | WRITE | PROTOCOL : [7 - PVCOREQ - CLIENT => SERVER - PRIVATE_CONNECTION_REQUEST]
+INFO | 30/04/16 19:09:46 | Chat sender | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | WRITE | USERNAME : abra
+INFO | 30/04/16 19:09:51 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [11 - PVCOESTASRC - SERVER => CLIENT - PRIVATE_CONNECTION_ESTABLISHEMENT_SOURCE]
+INFO | 30/04/16 19:09:51 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | USERNAME : abra
+INFO | 30/04/16 19:09:51 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | ADDRESS : /127.0.0.1
+DEBUG | 30/04/16 19:09:51 | Private source connection : abra | [SOURCE] MESSAGE PORT : 41068
+DEBUG | 30/04/16 19:09:51 | Private source connection : abra | [SOURCE] FILE PORT : 55601
+DEBUG | 30/04/16 19:09:51 | Private message receiver : abra | /127.0.0.1:41068 -> /127.0.0.1:45412 | CONNECTION ACCEPTED
+DEBUG | 30/04/16 19:09:51 | Private file receiver : abra | /127.0.0.1:55601 -> /127.0.0.1:50553 | CONNECTION ACCEPTED
+DEBUG | 30/04/16 19:09:51 | Private message receiver : abra | /127.0.0.1:41068 -> /127.0.0.1:45412 | [SOURCE] MESSAGE CONNECTED
+DEBUG | 30/04/16 19:09:51 | Private file receiver : abra | /127.0.0.1:55601 -> /127.0.0.1:50553 | [SOURCE] FILE CONNECTED
+INFO | 30/04/16 19:09:57 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:09:57 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | USERNAME : abra
+INFO | 30/04/16 19:09:57 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | MESSAGE : test abra
+INFO | 30/04/16 19:10:00 | Chat sender | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | WRITE | PROTOCOL : [4 - MSG - CLIENT => SERVER - PUBLIC_MESSAGE]
+INFO | 30/04/16 19:10:00 | Chat sender | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | WRITE | MESSAGE : test kadabra
+INFO | 30/04/16 19:10:00 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:10:00 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:10:00 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | MESSAGE : test kadabra
+INFO | 30/04/16 19:10:08 | Private message receiver : abra | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [13 - PVMSG - CLIENT => CLIENT - PRIVATE_MESSAGE]
+INFO | 30/04/16 19:10:08 | Private message receiver : abra | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | USERNAME : abra
+INFO | 30/04/16 19:10:08 | Private message receiver : abra | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | MESSAGE : test abra kadabra
+INFO | 30/04/16 19:10:14 | Chat sender | /127.0.0.1:41068 -> /127.0.0.1:45412 | WRITE | PROTOCOL : [13 - PVMSG - CLIENT => CLIENT - PRIVATE_MESSAGE]
+INFO | 30/04/16 19:10:14 | Chat sender | /127.0.0.1:41068 -> /127.0.0.1:45412 | WRITE | USERNAME : abra
+INFO | 30/04/16 19:10:14 | Chat sender | /127.0.0.1:41068 -> /127.0.0.1:45412 | WRITE | MESSAGE : test kadabra abra
+INFO | 30/04/16 19:10:26 | Private file receiver : abra | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [14 - PVFILE - CLIENT => CLIENT - PRIVATE_FILE]
+DEBUG | 30/04/16 19:10:26 | Private file receiver : abra | /127.0.0.1:55601 -> /127.0.0.1:50553 | FILE DOWNLOADING START : ./files/abra_1981930173698128112_image.png
+DEBUG | 30/04/16 19:10:26 | Private file receiver : abra | /127.0.0.1:55601 -> /127.0.0.1:50553 | FILE DOWNLOADING END : ./files/abra_1981930173698128112_image.png
+INFO | 30/04/16 19:10:26 | Private file receiver : abra | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | USERNAME : abra
+INFO | 30/04/16 19:10:26 | Private file receiver : abra | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | PATH : ./files/abra_1981930173698128112_image.png
+INFO | 30/04/16 19:10:38 | Chat sender | /127.0.0.1:55601 -> /127.0.0.1:50553 | WRITE | PROTOCOL : [14 - PVFILE - CLIENT => CLIENT - PRIVATE_FILE]
+INFO | 30/04/16 19:10:38 | Chat sender | /127.0.0.1:55601 -> /127.0.0.1:50553 | WRITE | USERNAME : abra
+INFO | 30/04/16 19:10:38 | Chat sender | /127.0.0.1:55601 -> /127.0.0.1:50553 | WRITE | PATH : test/image.jpg
+DEBUG | 30/04/16 19:10:38 | Private file uploader : test/image.jpg | /127.0.0.1:55601 -> /127.0.0.1:50553 | FILE UPLOADING START : test/image.jpg
+DEBUG | 30/04/16 19:10:38 | Private file uploader : test/image.jpg | /127.0.0.1:55601 -> /127.0.0.1:50553 | FILE UPLOADING END : test/image.jpg
+DEBUG | 30/04/16 19:10:47 | Chat sender | /127.0.0.1:41068 -> /127.0.0.1:45412 | SILENTLY CLOSE (PV MESSAGE)
+WARNING | 30/04/16 19:10:47 | Private message receiver : abra | java.nio.channels.AsynchronousCloseException
+DEBUG | 30/04/16 19:10:47 | Chat sender | /127.0.0.1:55601 -> /127.0.0.1:50553 | SILENTLY CLOSE (PV FILE)
+WARNING | 30/04/16 19:10:47 | Private file receiver : abra | java.nio.channels.AsynchronousCloseException
+INFO | 30/04/16 19:10:51 | Chat sender | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | WRITE | PROTOCOL : [7 - PVCOREQ - CLIENT => SERVER - PRIVATE_CONNECTION_REQUEST]
+INFO | 30/04/16 19:10:51 | Chat sender | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | WRITE | USERNAME : abra
+INFO | 30/04/16 19:10:54 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [11 - PVCOESTASRC - SERVER => CLIENT - PRIVATE_CONNECTION_ESTABLISHEMENT_SOURCE]
+INFO | 30/04/16 19:10:54 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | USERNAME : abra
+INFO | 30/04/16 19:10:54 | Public receiver | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | READ | ADDRESS : /127.0.0.1
+DEBUG | 30/04/16 19:10:54 | Private source connection : abra | [SOURCE] MESSAGE PORT : 55388
+DEBUG | 30/04/16 19:10:54 | Private source connection : abra | [SOURCE] FILE PORT : 35312
+DEBUG | 30/04/16 19:10:54 | Private message receiver : abra | /127.0.0.1:55388 -> /127.0.0.1:54050 | CONNECTION ACCEPTED
+DEBUG | 30/04/16 19:10:54 | Private message receiver : abra | /127.0.0.1:55388 -> /127.0.0.1:54050 | [SOURCE] MESSAGE CONNECTED
+DEBUG | 30/04/16 19:10:54 | Private file receiver : abra | /127.0.0.1:35312 -> /127.0.0.1:46630 | CONNECTION ACCEPTED
+DEBUG | 30/04/16 19:10:54 | Private file receiver : abra | /127.0.0.1:35312 -> /127.0.0.1:46630 | [SOURCE] FILE CONNECTED
+DEBUG | 30/04/16 19:10:58 | Chat sender | EXIT NOTIFICATION
+DEBUG | 30/04/16 19:10:58 | main | WAIT FOR TERMINAISON : END WAITING
+DEBUG | 30/04/16 19:10:58 | main | DISCONNECTION
+DEBUG | 30/04/16 19:10:58 | main | /127.0.0.1:48428 -> localhost/127.0.0.1:7777 | CHAT INSTANCE CLOSING
+DEBUG | 30/04/16 19:10:58 | main | INTERRUPT THREAD GROUP
+ERROR | 30/04/16 19:10:58 | Public receiver | ??? -> ??? | java.nio.channels.AsynchronousCloseException
+WARNING | 30/04/16 19:10:58 | Private message receiver : abra | java.nio.channels.ClosedByInterruptException
+DEBUG | 30/04/16 19:10:58 | Private message receiver : abra | ??? -> ??? | SILENTLY CLOSE (PV MESSAGE)
+DEBUG | 30/04/16 19:10:58 | main | CLIENT CORE CLOSING
+DEBUG | 30/04/16 19:10:58 | Private message receiver : abra | ??? -> ??? | SILENTLY CLOSE (PV FILE)
+WARNING | 30/04/16 19:10:58 | Private file receiver : abra | java.nio.channels.ClosedByInterruptException
+DEBUG | 30/04/16 19:10:58 | Public receiver | EXIT NOTIFICATION

@@ -1,0 +1,86 @@
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | WRITE | PROTOCOL : [1 - COREQ - CLIENT => SERVER - PUBLIC_CONNECTION_REQUEST]
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | WRITE | USERNAME : abra
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [2 - CORES - SERVER => CLIENT - PUBLIC_CONNECTION_RESPONSE]
+INFO | 30/04/16 19:09:16 | main | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | ACCEPTATION : true
+DEBUG | 30/04/16 19:09:16 | main | USER CONNECTED
+DEBUG | 30/04/16 19:09:16 | main | WAIT FOR TERMINAISON : START WAITING
+INFO | 30/04/16 19:09:16 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [3 - CONOTIF - SERVER => CLIENT - PUBLIC_CONNECTION_NOTIFICATION]
+INFO | 30/04/16 19:09:16 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : abra
+INFO | 30/04/16 19:09:32 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [3 - CONOTIF - SERVER => CLIENT - PUBLIC_CONNECTION_NOTIFICATION]
+INFO | 30/04/16 19:09:32 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:09:36 | Chat sender | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | WRITE | PROTOCOL : [4 - MSG - CLIENT => SERVER - PUBLIC_MESSAGE]
+INFO | 30/04/16 19:09:36 | Chat sender | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | WRITE | MESSAGE : abra
+INFO | 30/04/16 19:09:36 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:09:36 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : abra
+INFO | 30/04/16 19:09:36 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | MESSAGE : abra
+INFO | 30/04/16 19:09:38 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:09:38 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:09:38 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | MESSAGE : kadabra
+INFO | 30/04/16 19:09:46 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [8 - PVCOREQNOTIF - SERVER => CLIENT - PRIVATE_CONNECTION_REQUEST_NOTIFICATION]
+INFO | 30/04/16 19:09:46 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:09:51 | Chat sender | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | WRITE | PROTOCOL : [9 - PVCOACC - CLIENT => SERVER - PRIVATE_CONNECTION_ACCEPTATION]
+INFO | 30/04/16 19:09:51 | Chat sender | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | WRITE | USERNAME : kadabra
+INFO | 30/04/16 19:09:51 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [12 - PVCOESTADST - SERVER => CLIENT - PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION]
+INFO | 30/04/16 19:09:51 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:09:51 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | ADDRESS : /127.0.0.1
+INFO | 30/04/16 19:09:51 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PORT MESSAGE : 41068
+INFO | 30/04/16 19:09:51 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PORT FILE : 55601
+DEBUG | 30/04/16 19:09:51 | Private destination connection : kadabra | [DESTINATION] MESSAGE PORT : 41068
+DEBUG | 30/04/16 19:09:51 | Private destination connection : kadabra | [DESTINATION] FILE PORT : 55601
+DEBUG | 30/04/16 19:09:51 | Private destination connection : kadabra | /127.0.0.1:45412 -> /127.0.0.1:41068 | [DESTINATION] MESSAGE CONNECTED
+DEBUG | 30/04/16 19:09:51 | Private destination connection : kadabra | /127.0.0.1:50553 -> /127.0.0.1:55601 | [DESTINATION] FILE CONNECTED
+INFO | 30/04/16 19:09:57 | Chat sender | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | WRITE | PROTOCOL : [4 - MSG - CLIENT => SERVER - PUBLIC_MESSAGE]
+INFO | 30/04/16 19:09:57 | Chat sender | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | WRITE | MESSAGE : test abra
+INFO | 30/04/16 19:09:57 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:09:57 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : abra
+INFO | 30/04/16 19:09:57 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | MESSAGE : test abra
+INFO | 30/04/16 19:10:00 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [5 - MSGBC - SERVER => CLIENT - PUBLIC_MESSAGE_BROADCAST]
+INFO | 30/04/16 19:10:00 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:10:00 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | MESSAGE : test kadabra
+INFO | 30/04/16 19:10:08 | Chat sender | /127.0.0.1:45412 -> /127.0.0.1:41068 | WRITE | PROTOCOL : [13 - PVMSG - CLIENT => CLIENT - PRIVATE_MESSAGE]
+INFO | 30/04/16 19:10:08 | Chat sender | /127.0.0.1:45412 -> /127.0.0.1:41068 | WRITE | USERNAME : kadabra
+INFO | 30/04/16 19:10:08 | Chat sender | /127.0.0.1:45412 -> /127.0.0.1:41068 | WRITE | MESSAGE : test abra kadabra
+INFO | 30/04/16 19:10:14 | Private message receiver : kadabra | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [13 - PVMSG - CLIENT => CLIENT - PRIVATE_MESSAGE]
+INFO | 30/04/16 19:10:14 | Private message receiver : kadabra | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:10:14 | Private message receiver : kadabra | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | MESSAGE : test kadabra abra
+INFO | 30/04/16 19:10:26 | Chat sender | /127.0.0.1:50553 -> /127.0.0.1:55601 | WRITE | PROTOCOL : [14 - PVFILE - CLIENT => CLIENT - PRIVATE_FILE]
+INFO | 30/04/16 19:10:26 | Chat sender | /127.0.0.1:50553 -> /127.0.0.1:55601 | WRITE | USERNAME : kadabra
+INFO | 30/04/16 19:10:26 | Chat sender | /127.0.0.1:50553 -> /127.0.0.1:55601 | WRITE | PATH : ./test/image.png
+DEBUG | 30/04/16 19:10:26 | Private file uploader : ./test/image.png | /127.0.0.1:50553 -> /127.0.0.1:55601 | FILE UPLOADING START : ./test/image.png
+DEBUG | 30/04/16 19:10:26 | Private file uploader : ./test/image.png | /127.0.0.1:50553 -> /127.0.0.1:55601 | FILE UPLOADING END : ./test/image.png
+INFO | 30/04/16 19:10:38 | Private file receiver : kadabra | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [14 - PVFILE - CLIENT => CLIENT - PRIVATE_FILE]
+DEBUG | 30/04/16 19:10:38 | Private file receiver : kadabra | /127.0.0.1:50553 -> /127.0.0.1:55601 | FILE DOWNLOADING START : ./files/kadabra_47971000380693040_image.jpg
+DEBUG | 30/04/16 19:10:38 | Private file receiver : kadabra | /127.0.0.1:50553 -> /127.0.0.1:55601 | FILE DOWNLOADING END : ./files/kadabra_47971000380693040_image.jpg
+INFO | 30/04/16 19:10:38 | Private file receiver : kadabra | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:10:38 | Private file receiver : kadabra | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PATH : ./files/kadabra_47971000380693040_image.jpg
+WARNING | 30/04/16 19:10:47 | Private message receiver : kadabra | java.io.IOException: Connection closed
+DEBUG | 30/04/16 19:10:47 | Private message receiver : kadabra | /127.0.0.1:45412 -> /127.0.0.1:41068 | SILENTLY CLOSE (PV MESSAGE)
+DEBUG | 30/04/16 19:10:47 | Private message receiver : kadabra | /127.0.0.1:50553 -> /127.0.0.1:55601 | SILENTLY CLOSE (PV FILE)
+WARNING | 30/04/16 19:10:47 | Private file receiver : kadabra | java.io.IOException: Connection closed
+INFO | 30/04/16 19:10:51 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [8 - PVCOREQNOTIF - SERVER => CLIENT - PRIVATE_CONNECTION_REQUEST_NOTIFICATION]
+INFO | 30/04/16 19:10:51 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:10:54 | Chat sender | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | WRITE | PROTOCOL : [9 - PVCOACC - CLIENT => SERVER - PRIVATE_CONNECTION_ACCEPTATION]
+INFO | 30/04/16 19:10:54 | Chat sender | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | WRITE | USERNAME : kadabra
+INFO | 30/04/16 19:10:54 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [12 - PVCOESTADST - SERVER => CLIENT - PRIVATE_CONNECTION_ESTABLISHEMENT_DESTINATION]
+INFO | 30/04/16 19:10:54 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+INFO | 30/04/16 19:10:54 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | ADDRESS : /127.0.0.1
+INFO | 30/04/16 19:10:54 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PORT MESSAGE : 55388
+INFO | 30/04/16 19:10:54 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PORT FILE : 35312
+DEBUG | 30/04/16 19:10:54 | Private destination connection : kadabra | [DESTINATION] MESSAGE PORT : 55388
+DEBUG | 30/04/16 19:10:54 | Private destination connection : kadabra | [DESTINATION] FILE PORT : 35312
+DEBUG | 30/04/16 19:10:54 | Private destination connection : kadabra | /127.0.0.1:54050 -> /127.0.0.1:55388 | [DESTINATION] MESSAGE CONNECTED
+DEBUG | 30/04/16 19:10:54 | Private destination connection : kadabra | /127.0.0.1:46630 -> /127.0.0.1:35312 | [DESTINATION] FILE CONNECTED
+WARNING | 30/04/16 19:10:58 | Private message receiver : kadabra | java.io.IOException: Connection closed
+DEBUG | 30/04/16 19:10:58 | Private message receiver : kadabra | /127.0.0.1:54050 -> /127.0.0.1:55388 | SILENTLY CLOSE (PV MESSAGE)
+DEBUG | 30/04/16 19:10:58 | Private message receiver : kadabra | /127.0.0.1:46630 -> /127.0.0.1:35312 | SILENTLY CLOSE (PV FILE)
+WARNING | 30/04/16 19:10:58 | Private file receiver : kadabra | java.nio.channels.AsynchronousCloseException
+INFO | 30/04/16 19:10:58 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | PROTOCOL : [6 - DISCONOTIF - SERVER => CLIENT - PUBLIC_DISCONNECTION_NOTIFICATION]
+INFO | 30/04/16 19:10:58 | Public receiver | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | READ | USERNAME : kadabra
+DEBUG | 30/04/16 19:11:01 | Chat sender | EXIT NOTIFICATION
+DEBUG | 30/04/16 19:11:01 | main | WAIT FOR TERMINAISON : END WAITING
+DEBUG | 30/04/16 19:11:01 | main | DISCONNECTION
+DEBUG | 30/04/16 19:11:01 | main | /127.0.0.1:48427 -> localhost/127.0.0.1:7777 | CHAT INSTANCE CLOSING
+DEBUG | 30/04/16 19:11:01 | main | INTERRUPT THREAD GROUP
+DEBUG | 30/04/16 19:11:01 | main | CLIENT CORE CLOSING
+ERROR | 30/04/16 19:11:01 | Public receiver | ??? -> ??? | java.nio.channels.AsynchronousCloseException
+DEBUG | 30/04/16 19:11:01 | Public receiver | EXIT NOTIFICATION
