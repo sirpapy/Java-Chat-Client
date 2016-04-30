@@ -71,7 +71,7 @@ public class ClientMatou {
 			lines.map(Configuration::removeComments).filter(Configuration::isAffectation)
 					.forEach(ClientMatou::loadConfigLine);
 		} catch (@SuppressWarnings("unused") NoSuchFileException __) {
-			// There is no configuration file
+			// There is no configuration file to load
 			return;
 		}
 	}

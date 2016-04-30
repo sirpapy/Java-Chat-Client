@@ -212,7 +212,7 @@ class ClientCommunication {
 				} catch (IOException e) {
 					Logger.warning(e.toString());
 				}
-			}, "Private file uploader : " + path).start();
+			}, "private file uploader : " + path).start();
 
 			return true;
 

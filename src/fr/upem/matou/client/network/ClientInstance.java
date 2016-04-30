@@ -268,7 +268,7 @@ class ClientInstance implements Closeable {
 			} finally {
 				ui.displayNewPrivateMessageDisconnection(username);
 			}
-		}, "Private message receiver : " + username).start();
+		}, "private message receiver : " + username).start();
 
 		new Thread(threadGroup, () -> {
 			try (SocketChannel scFile = ClientCommunication.acceptConnection(sscFile, addressDst)) {
@@ -281,7 +281,7 @@ class ClientInstance implements Closeable {
 			} finally {
 				ui.displayNewPrivateFileDisconnection(username);
 			}
-		}, "Private file receiver : " + username).start();
+		}, "private file receiver : " + username).start();
 
 	}
 
@@ -306,7 +306,7 @@ class ClientInstance implements Closeable {
 			} finally {
 				ui.displayNewPrivateMessageDisconnection(username);
 			}
-		}, "Private message receiver : " + username).start();
+		}, "private message receiver : " + username).start();
 
 		new Thread(threadGroup, () -> {
 			try {
@@ -318,7 +318,7 @@ class ClientInstance implements Closeable {
 			} finally {
 				ui.displayNewPrivateFileDisconnection(username);
 			}
-		}, "Private file receiver : " + username).start();
+		}, "private file receiver : " + username).start();
 	}
 
 	private void launchPrivateConnection(Username username, InetAddress addressDst) {
@@ -328,7 +328,7 @@ class ClientInstance implements Closeable {
 			} catch (IOException e) {
 				Logger.warning(e.toString());
 			}
-		}, "Private source connection : " + username).start();
+		}, "private source connection : " + username).start();
 	}
 
 	private void launchPrivateConnection(Username username, InetAddress addressSrc, int portMessage, int portFile) {
@@ -338,7 +338,7 @@ class ClientInstance implements Closeable {
 			} catch (IOException e) {
 				Logger.warning(e.toString());
 			}
-		}, "Private destination connection : " + username).start();
+		}, "private destination connection : " + username).start();
 	}
 
 	private boolean connectUsername(String username) throws IOException {
@@ -363,7 +363,7 @@ class ClientInstance implements Closeable {
 			} finally {
 				setExit();
 			}
-		}, "Chat sender").start();
+		}, "chat sender").start();
 
 		new Thread(threadGroup, () -> {
 			try {
@@ -379,7 +379,7 @@ class ClientInstance implements Closeable {
 			} finally {
 				setExit();
 			}
-		}, "Public receiver").start();
+		}, "public receiver").start();
 
 		waitForTerminaison();
 
