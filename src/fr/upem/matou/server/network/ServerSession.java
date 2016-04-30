@@ -34,17 +34,16 @@ class ServerSession {
 	private final SocketChannel sc;
 	private final InetAddress address;
 	private final SelectionKey key;
-
 	private final ByteBuffer bbRead = ByteBuffer.allocateDirect(BUFFER_SIZE_INPUT);
 	private final ByteBuffer bbWrite = ByteBuffer.allocateDirect(BUFFER_SIZE_OUTPUT);
 
 	private boolean authent = false; // If the client has a username
 	private NetworkProtocol protocol = null;
-	private int arg = 0;
 	private ServerReader serverReader = null;
+	private int arg = 0; // Argument number of the current reader
 
 	static interface ServerReader {
-		// Marker interface
+		// Marker interface of readers
 	}
 
 	static class ReaderUsername implements ServerReader {
@@ -69,7 +68,7 @@ class ServerSession {
 		this.sc = sc;
 		this.key = key;
 		this.address = ((InetSocketAddress) sc.getRemoteAddress()).getAddress();
-		clearAndLimit(bbRead, Integer.BYTES);
+		resetReadState();
 	}
 
 	boolean isAuthent() {
@@ -88,11 +87,6 @@ class ServerSession {
 		return bbWrite;
 	}
 
-	private final static void clearAndLimit(ByteBuffer bb, int size) {
-		bb.clear();
-		bb.limit(size);
-	}
-
 	void appendWriteBuffer(ByteBuffer bb) {
 		boolean succeeded = ByteBuffers.append(bbWrite, bb);
 		if (!succeeded) {
@@ -100,10 +94,15 @@ class ServerSession {
 		}
 	}
 
+	private final static void clearAndLimit(ByteBuffer bb, int size) {
+		bb.clear();
+		bb.limit(size);
+	}
+
 	/*
 	 * Resets the read state of this client in order to read another request.
 	 */
-	private void resetReadState() {
+	private final void resetReadState() {
 		clearAndLimit(bbRead, Integer.BYTES);
 		arg = 0;
 		protocol = null;
@@ -219,7 +218,7 @@ class ServerSession {
 	}
 
 	/*
-	 * Retrives the protocol request type from the read buffer and updates current state.
+	 * Retrives the protocol request type from the read buffer and updates current state by setting the protocol type.
 	 */
 	private int processRequestType() {
 		bbRead.flip();
@@ -345,6 +344,7 @@ class ServerSession {
 			disconnectClient();
 			return;
 		}
+
 		Username username = db.usernameOf(sc).get();
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSGBC));
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + username));
@@ -365,7 +365,7 @@ class ServerSession {
 	private void processPVCOREQ() {
 		if (arg == 0) {
 			if (!checkPVCOREQ()) {
-				Logger.warning(formatNetworkData(sc, "Client already authenticated"));
+				Logger.warning(formatNetworkData(sc, "Client not authenticated"));
 				disconnectClient();
 				return;
 			}
@@ -401,7 +401,7 @@ class ServerSession {
 			return;
 		}
 
-		boolean valid = db.addNewPrivateRequest(requester, requested);
+		boolean valid = db.addPrivateRequest(requester, requested);
 		Logger.debug(formatNetworkData(sc, "PRIVATE REQUEST VALIDITY : " + valid));
 		if (!valid) {
 			return;
@@ -428,7 +428,7 @@ class ServerSession {
 	private void processPVCOACC() {
 		if (arg == 0) {
 			if (!checkPVCOACC()) {
-				Logger.warning(formatNetworkData(sc, "Client already authenticated"));
+				Logger.warning(formatNetworkData(sc, "Client not authenticated"));
 				disconnectClient();
 				return;
 			}
@@ -487,7 +487,7 @@ class ServerSession {
 	private void processPVCOPORT() {
 		if (arg == 0) {
 			if (!checkPVCOPORT()) {
-				Logger.warning(formatNetworkData(sc, "Client already authenticated"));
+				Logger.warning(formatNetworkData(sc, "Client not authenticated"));
 				disconnectClient();
 				return;
 			}
@@ -518,9 +518,9 @@ class ServerSession {
 
 	private void answerPVCOESTADST(Username source, int portMessage, int portFile) {
 		Username destination = db.usernameOf(sc).get();
+
 		boolean valid = db.removePrivateRequest(source, destination);
 		Logger.debug(formatNetworkData(sc, "PRIVATE REQUEST ESTABLISHMENT : " + valid));
-
 		if (!valid) {
 			Logger.warning(formatNetworkData(sc,
 					"Invalid private connection establishment : " + source + " -> " + destination));
@@ -557,14 +557,14 @@ class ServerSession {
 
 		if (protocol == null) { // New request
 			int code = processRequestType();
-			if (protocol == null) {
+			if (protocol == null) { // Null again => the given code is not valid
 				Logger.warning(formatNetworkData(sc, "Invalid protocol code : " + code));
 				disconnectClient();
 				return;
 			}
 		}
 
-		// Here : process the request's arguments.
+		// Here : process the request by its type
 		switch (protocol) {
 		case COREQ:
 			processCOREQ();
@@ -610,12 +610,12 @@ class ServerSession {
 	 * Updates the interest ops of the selection key of the client.
 	 */
 	void updateKey() {
-		if (!key.isValid()) {
+		if (!key.isValid()) { // It's ok after a call to disconnectClient()
 			return;
 		}
 
 		int ops = computeInterestOps();
-		if (ops == 0) {
+		if (ops == 0) { // Something went wrong
 			throw new AssertionError("Key is inactive");
 		}
 		key.interestOps(ops);
@@ -626,19 +626,24 @@ class ServerSession {
 	 */
 	void disconnectClient() {
 		Logger.debug(formatNetworkData(sc, "SILENTLY CLOSE"));
+
 		Optional<Username> disconnected = db.removeClient(sc);
 		Logger.debug(formatNetworkData(sc, "DISCONNECTION : " + disconnected));
+
 		if (disconnected.isPresent()) {
 			String username = disconnected.get().toString();
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCONOTIF));
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + username));
+
 			ByteBuffer bbWriteAll = db.getBroadcastBuffer();
 			if (!ServerCommunication.addRequestDISCONOTIF(bbWriteAll, username)) {
 				Logger.warning(formatNetworkData(sc, "DISCONOTIF lost : Broadcast Buffer cannot hold it"));
 			} else {
 				db.updateStateReadAll();
 			}
+
 		}
+
 		NetworkCommunication.silentlyClose(sc);
 	}
 

@@ -93,7 +93,7 @@ public class ServerCore implements Closeable {
 		ServerSocketChannel channel = (ServerSocketChannel) key.channel();
 		SocketChannel acceptedChannel = channel.accept();
 
-		if (acceptedChannel == null) {
+		if (acceptedChannel == null) { // Selector gave a bad hint
 			return;
 		}
 

@@ -84,7 +84,6 @@ class ServerCommunication {
 		}
 
 		bbWrite.putInt(NetworkProtocol.CORES.ordinal());
-
 		if (acceptation) {
 			bbWrite.put((byte) 1);
 		} else {
@@ -103,7 +102,6 @@ class ServerCommunication {
 
 		int sizeUsername = encodedUsername.remaining();
 		int sizeMessage = encodedMessage.remaining();
-
 		int length = Integer.BYTES + Integer.BYTES + sizeUsername + Integer.BYTES + sizeMessage;
 		if (bbWrite.remaining() < length) {
 			return false;
@@ -123,11 +121,11 @@ class ServerCommunication {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 
 		int sizeUsername = encodedUsername.remaining();
-
 		int length = Integer.BYTES + Integer.BYTES + sizeUsername;
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
+
 		bbWrite.putInt(NetworkProtocol.CONOTIF.ordinal());
 		bbWrite.putInt(sizeUsername).put(encodedUsername);
 
@@ -141,11 +139,11 @@ class ServerCommunication {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 
 		int sizeUsername = encodedUsername.remaining();
-
 		int length = Integer.BYTES + Integer.BYTES + sizeUsername;
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
+
 		bbWrite.putInt(NetworkProtocol.DISCONOTIF.ordinal());
 		bbWrite.putInt(sizeUsername).put(encodedUsername);
 
@@ -156,11 +154,11 @@ class ServerCommunication {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 
 		int sizeUsername = encodedUsername.remaining();
-
 		int length = Integer.BYTES + Integer.BYTES + sizeUsername;
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
+
 		bbWrite.putInt(NetworkProtocol.PVCOREQNOTIF.ordinal());
 		bbWrite.putInt(sizeUsername).put(encodedUsername);
 
@@ -173,7 +171,6 @@ class ServerCommunication {
 
 		int sizeUsername = encodedUsername.remaining();
 		int sizeAddress = addr.length;
-
 		int length = Integer.BYTES + Integer.BYTES + sizeUsername + Integer.BYTES + sizeAddress;
 		if (bbWrite.remaining() < length) {
 			return false;
@@ -181,7 +178,6 @@ class ServerCommunication {
 
 		bbWrite.putInt(NetworkProtocol.PVCOESTASRC.ordinal());
 		bbWrite.putInt(sizeUsername).put(encodedUsername);
-
 		bbWrite.putInt(sizeAddress);
 		for (byte b : addr) {
 			bbWrite.put(b);
@@ -197,19 +193,17 @@ class ServerCommunication {
 
 		int sizeUsername = encodedUsername.remaining();
 		int sizeAddress = addr.length;
-
 		int length = Integer.BYTES + Integer.BYTES + sizeUsername + Integer.BYTES + sizeAddress + (2 * Integer.BYTES);
 		if (bbWrite.remaining() < length) {
 			return false;
 		}
+
 		bbWrite.putInt(NetworkProtocol.PVCOESTADST.ordinal());
 		bbWrite.putInt(sizeUsername).put(encodedUsername);
-
 		bbWrite.putInt(addr.length);
 		for (byte b : addr) {
 			bbWrite.put(b);
 		}
-
 		bbWrite.putInt(portMessage).putInt(portFile);
 
 		return true;
