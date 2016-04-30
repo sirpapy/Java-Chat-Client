@@ -18,9 +18,9 @@ public class ByteBuffers {
 	 * neither buffers are modified and false is returned.
 	 * 
 	 * @param target
-	 *            The target buffer (in write mode)
+	 *            The target buffer (in write mode).
 	 * @param source
-	 *            The source buffer (in write mode)
+	 *            The source buffer (in write mode).
 	 * @return true if the operation succeeded, false otherwise (because of insufficient space in target buffer).
 	 */
 	public static boolean append(ByteBuffer target, ByteBuffer source) {

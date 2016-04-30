@@ -133,7 +133,8 @@ public class ClientMatou {
 		// Now "opt" is the first index of non optional arguments
 
 		int remaining = args.length - opt;
-		if (remaining < 2 || remaining > 3) { // Incorrect number of remaining arguments
+		if (remaining < 2 || remaining > 3) { 
+			// Incorrect number of remaining arguments
 			usage();
 			return;
 		}

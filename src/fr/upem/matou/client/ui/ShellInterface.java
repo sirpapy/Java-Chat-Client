@@ -20,9 +20,9 @@ import fr.upem.matou.shared.network.Username;
 public class ShellInterface implements UserInterface {
 	private static final String INPUT_CHARSET = "UTF-8";
 
-	private final InputStream input = System.in;
-	private final PrintStream output = System.out;
-	private final PrintStream error = System.err;
+	private final InputStream input = System.in; // For "get" methodss
+	private final PrintStream output = System.out; // For "display" methods
+	private final PrintStream error = System.err; // For "warn" methods
 	private final Scanner scanner = new Scanner(input, INPUT_CHARSET);
 
 	private String readLine() throws IOException {
@@ -142,7 +142,7 @@ public class ShellInterface implements UserInterface {
 	}
 
 	@Override
-	public void displayError(ErrorType type) {
+	public void warnError(ErrorType type) {
 		requireNonNull(type);
 
 		switch (type) {

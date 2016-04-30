@@ -24,12 +24,12 @@ public class Username {
 			return false;
 		}
 		Username username = (Username) obj;
-		return name.equalsIgnoreCase(username.name);
+		return name.toLowerCase().equals(username.name.toLowerCase());
 	}
 
 	@Override
 	public int hashCode() {
-		return name.toUpperCase().toLowerCase().hashCode();
+		return name.toLowerCase().hashCode();
 	}
 
 	@Override

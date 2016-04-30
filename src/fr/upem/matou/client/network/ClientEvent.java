@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import fr.upem.matou.shared.network.Username;
 
 /**
- * This class provides events requested by a client through the user interface.
+ * This class provides events requested by a client user through the user interface on a client chat session.
  */
 public interface ClientEvent {
 
@@ -58,31 +58,6 @@ public interface ClientEvent {
 		public boolean execute(ClientSession session) throws IOException {
 			requireNonNull(session);
 			return session.sendMessage(message);
-		}
-
-	}
-
-	/**
-	 * Closing a private connection.
-	 */
-	public static class ClientEventClosePrivate implements ClientEvent {
-		private final Username username;
-
-		/**
-		 * Private connection close event.
-		 * 
-		 * @param username
-		 *            The target username.
-		 */
-		public ClientEventClosePrivate(String username) {
-			requireNonNull(username);
-			this.username = new Username(username);
-		}
-
-		@Override
-		public boolean execute(ClientSession session) throws IOException {
-			requireNonNull(session);
-			return session.closePrivateConnection(username);
 		}
 
 	}
@@ -138,6 +113,36 @@ public interface ClientEvent {
 	}
 
 	/**
+	 * Sending a private message.
+	 */
+	public static class ClientEventSendPrivateMessage implements ClientEvent {
+		private final Username username;
+		private final String message;
+
+		/**
+		 * Private message event.
+		 * 
+		 * @param username
+		 *            The target username.
+		 * @param message
+		 *            The message to send.
+		 */
+		public ClientEventSendPrivateMessage(String username, String message) {
+			requireNonNull(username);
+			requireNonNull(message);
+			this.username = new Username(username);
+			this.message = message;
+		}
+
+		@Override
+		public boolean execute(ClientSession session) {
+			requireNonNull(session);
+			return session.sendPrivateMessage(username, message);
+		}
+
+	}
+
+	/**
 	 * Sending a private file.
 	 */
 	public static class ClientEventSendPrivateFile implements ClientEvent {
@@ -168,31 +173,26 @@ public interface ClientEvent {
 	}
 
 	/**
-	 * Sending a private message.
+	 * Closing a private connection.
 	 */
-	public static class ClientEventSendPrivateMessage implements ClientEvent {
+	public static class ClientEventClosePrivate implements ClientEvent {
 		private final Username username;
-		private final String message;
 
 		/**
-		 * Private message event.
+		 * Private connection close event.
 		 * 
 		 * @param username
 		 *            The target username.
-		 * @param message
-		 *            The message to send.
 		 */
-		public ClientEventSendPrivateMessage(String username, String message) {
+		public ClientEventClosePrivate(String username) {
 			requireNonNull(username);
-			requireNonNull(message);
 			this.username = new Username(username);
-			this.message = message;
 		}
 
 		@Override
-		public boolean execute(ClientSession session) {
+		public boolean execute(ClientSession session) throws IOException {
 			requireNonNull(session);
-			return session.sendPrivateMessage(username, message);
+			return session.closePrivateConnection(username);
 		}
 
 	}

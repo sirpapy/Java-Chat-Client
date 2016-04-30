@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * This class defines the communication protocol that both server and client have to meet.
+ * This class defines the communication protocol types that both server and client have to use in order to meet the
+ * protocol requirements.
  */
 public enum NetworkProtocol {
 
@@ -137,8 +138,8 @@ public enum NetworkProtocol {
 	 * Returns the protocol associated with this ordinal number.
 	 *
 	 * @param ordinal
-	 *            The ordinal number of the protocol
-	 * @return The protocol if the ordinal number is valid
+	 *            The ordinal number of the protocol.
+	 * @return The protocol if the ordinal number is valid.
 	 */
 	public static Optional<NetworkProtocol> getProtocol(int ordinal) {
 		NetworkProtocol[] values = values();

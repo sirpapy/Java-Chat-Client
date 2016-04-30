@@ -16,7 +16,7 @@ Difficultés rencontrés :
 Bug connu :
 	- Localhost privé
 	- Le Sender Thread n'est pas interrompu à cause du Shell
-	- Alphabet bizarre (Georgian)
+	- Pseudo et alphabet bizarre (Georgian)
 
 Features / Implémentation :
 	- Format du Logger
@@ -38,3 +38,4 @@ Schéma :
 	- UML
 	
 Si rien n'est précisé : ByteBuffer en write mode
+Commandes : exit, etc

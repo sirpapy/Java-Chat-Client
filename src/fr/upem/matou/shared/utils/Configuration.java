@@ -33,7 +33,7 @@ public class Configuration {
 		/**
 		 * Returns the command of this entry.
 		 * 
-		 * @return The command
+		 * @return The command.
 		 */
 		public String getCommand() {
 			return command;
@@ -42,7 +42,7 @@ public class Configuration {
 		/**
 		 * Returns the argument of this entry.
 		 * 
-		 * @return The arguments.
+		 * @return The argument.
 		 */
 		public String getArgument() {
 			return argument;
@@ -50,11 +50,11 @@ public class Configuration {
 	}
 
 	/**
-	 * Returns a lien without comments.
+	 * Returns a line without comments.
 	 * 
 	 * @param line
-	 *            The raw line
-	 * @return The line without comments
+	 *            The raw line.
+	 * @return The line without comments.
 	 */
 	public static String removeComments(String line) {
 		int comment = line.indexOf(COMMENT_SYMBOL);

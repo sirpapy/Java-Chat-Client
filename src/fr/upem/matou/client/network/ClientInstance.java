@@ -119,7 +119,7 @@ class ClientInstance implements Closeable {
 		case ERROR: {
 			ErrorType type = ClientCommunication.receiveRequestERROR(sc);
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "ERROR : " + type));
-			ui.displayError(type);
+			ui.warnError(type);
 
 			break;
 		}

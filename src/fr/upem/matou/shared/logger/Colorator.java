@@ -1,9 +1,13 @@
 package fr.upem.matou.shared.logger;
 
 /**
- * This class provides static methods to display colored string in a shell using the ANSI escape codes.
+ * This class provides static methods to display colored string in a shell using the ANSI escape codes. If the colorator
+ * is disabled (by {@link #activateColorator(boolean)} with {@code false}) then all methods will return the given string
+ * without any change.
  * 
- * Inspired from : http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
+ * @see <a href="https://en.wikipedia.org/wiki/ANSI_escape_code">Wikipedia</a>
+ * @see <a href="http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println">
+ *      Stack Overflow</a>
  */
 public class Colorator {
 	private static boolean enabled = false;

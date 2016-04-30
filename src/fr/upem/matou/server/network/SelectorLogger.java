@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 /**
- * This class provides static methods in order to log selector events.
+ * This class provides static methods in order to log selector events of the server.
  */
 public class SelectorLogger {
 

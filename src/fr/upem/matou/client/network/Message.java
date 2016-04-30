@@ -13,7 +13,7 @@ public class Message {
 	private final boolean isPrivate;
 
 	/**
-	 * Creates a new message.
+	 * Creates a new public message.
 	 * 
 	 * @param username
 	 *            The username of the speaker.
@@ -59,9 +59,9 @@ public class Message {
 	}
 
 	/**
-	 * Returns true if the message is private, false otherwise.
+	 * Returns true if the message is private or false otherwise.
 	 * 
-	 * @return true if the message is private, false otherwise.
+	 * @return true if the message is private or false otherwise.
 	 */
 	public boolean isPrivate() {
 		return isPrivate;

@@ -138,7 +138,8 @@ public class ServerMatou {
 		// Now "opt" is the first index of non optional arguments
 
 		int remaining = args.length - opt;
-		if (remaining != 1) { // Incorrect number of remaining arguments
+		if (remaining != 1) {
+			// Incorrect number of remaining arguments
 			usage();
 			return;
 		}
@@ -153,5 +154,6 @@ public class ServerMatou {
 			Logger.error(e.toString());
 			Logger.exception(e);
 		}
+		
 	}
 }

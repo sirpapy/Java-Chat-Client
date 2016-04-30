@@ -40,7 +40,7 @@ public interface UserInterface extends Closeable {
 	 * @param type
 	 *            The error.
 	 */
-	public void displayError(ErrorType type);
+	public void warnError(ErrorType type);
 
 	/**
 	 * Displays a message to the user.
@@ -117,7 +117,7 @@ public interface UserInterface extends Closeable {
 	public void warnInvalidUsername(String username);
 
 	/**
-	 * Warns the user that this event is not valid during the message phase.
+	 * Warns the user that this event is not valid.
 	 * 
 	 * @param event
 	 *            The event.
@@ -125,7 +125,7 @@ public interface UserInterface extends Closeable {
 	public void warnInvalidMessageEvent(ClientEvent event);
 
 	/**
-	 * Warns the user that this username is not valid
+	 * Warns the user that this username is not currently available.
 	 * 
 	 * @param username
 	 *            The username.
