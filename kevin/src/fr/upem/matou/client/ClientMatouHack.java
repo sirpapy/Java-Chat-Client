@@ -25,7 +25,7 @@ public class ClientMatouHack {
 		int port = Integer.parseInt(args[1]);
 
 		try (ClientCoreHack client = new ClientCoreHack(host, port)) {
-			client.startChat();
+			client.startHack();
 		}
 	}
 }

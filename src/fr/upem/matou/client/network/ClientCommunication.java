@@ -44,29 +44,34 @@ class ClientCommunication {
 		sc.write(bb);
 	}
 
-	private static void writeProtocol(SocketChannel sc, NetworkProtocol protocol) throws IOException {
+	static void writeProtocol(SocketChannel sc, NetworkProtocol protocol) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
 		bb.putInt(protocol.ordinal());
 		writeFully(sc, bb);
 	}
 
-	private static void writeInt(SocketChannel sc, int value) throws IOException {
+	static void writeInt(SocketChannel sc, int value) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
 		bb.putInt(value);
 		writeFully(sc, bb);
 	}
 
-	private static void writeLong(SocketChannel sc, long value) throws IOException {
+	static void writeLong(SocketChannel sc, long value) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
 		bb.putLong(value);
 		writeFully(sc, bb);
 	}
 
-	private static void writeString(SocketChannel sc, ByteBuffer encoded) throws IOException {
+	static void writeString(SocketChannel sc, ByteBuffer encoded) throws IOException {
 		int size = encoded.remaining();
 		writeInt(sc, size);
 		encoded.compact();
 		writeFully(sc, encoded);
+	}
+	
+	static void writeString(SocketChannel sc, String string) throws IOException {
+		ByteBuffer encoded = PROTOCOL_CHARSET.encode(string);
+		writeString(sc, encoded);
 	}
 
 	private static void writeFileChunks(SocketChannel sc, Path path) throws IOException {

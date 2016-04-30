@@ -253,7 +253,7 @@ class ServerSession {
 	private void processCOREQ() {
 		if (arg == 0) {
 			if (!checkCOREQ()) {
-				Logger.debug("Client already authenticated");
+				Logger.warning("Client already authenticated");
 				disconnectClient();
 				return;
 			}
@@ -316,7 +316,7 @@ class ServerSession {
 	private void processMSG() {
 		if (arg == 0) {
 			if (!checkMSG()) {
-				Logger.debug("Client not authenticated");
+				Logger.warning("Client not authenticated");
 				disconnectClient();
 				return;
 			}
@@ -365,7 +365,7 @@ class ServerSession {
 	private void processPVCOREQ() {
 		if (arg == 0) {
 			if (!checkPVCOREQ()) {
-				Logger.debug("Client already authenticated");
+				Logger.warning("Client already authenticated");
 				disconnectClient();
 				return;
 			}
@@ -428,7 +428,7 @@ class ServerSession {
 	private void processPVCOACC() {
 		if (arg == 0) {
 			if (!checkPVCOACC()) {
-				Logger.debug("Client already authenticated");
+				Logger.warning("Client already authenticated");
 				disconnectClient();
 				return;
 			}
@@ -453,10 +453,10 @@ class ServerSession {
 
 	private void answerPVCOESTASRC(Username destination) {
 		Username source = db.usernameOf(sc).get();
-		if(destination.equals(source)) {
+		if (destination.equals(source)) {
 			return;
 		}
-		
+
 		boolean valid = db.checkPrivateRequest(source, destination);
 		Logger.debug("PRIVATE REQUEST ACCEPTATION : " + valid);
 
@@ -487,7 +487,7 @@ class ServerSession {
 	private void processPVCOPORT() {
 		if (arg == 0) {
 			if (!checkPVCOPORT()) {
-				Logger.debug("Client already authenticated");
+				Logger.warning("Client already authenticated");
 				disconnectClient();
 				return;
 			}
@@ -522,8 +522,8 @@ class ServerSession {
 		Logger.debug("PRIVATE REQUEST ESTABLISHMENT : " + valid);
 
 		if (!valid) {
-			Logger.warning(
-					formatNetworkData(sc, "Invalid private connection establishment of " + source + " to " + destination));
+			Logger.warning(formatNetworkData(sc,
+					"Invalid private connection establishment : " + source + " -> " + destination));
 			disconnectClient();
 			return;
 		}
@@ -537,7 +537,8 @@ class ServerSession {
 		Logger.info(formatNetworkRequest(session.sc, NetworkLogType.WRITE, "PORT MESSAGE : " + portMessage));
 		Logger.info(formatNetworkRequest(session.sc, NetworkLogType.WRITE, "PORT FILE : " + portFile));
 
-		if (!ServerCommunication.addRequestPVCOESTADST(bbTarget, destination.toString(), address, portMessage, portFile)) {
+		if (!ServerCommunication.addRequestPVCOESTADST(bbTarget, destination.toString(), address, portMessage,
+				portFile)) {
 			Logger.warning(formatNetworkData(session.sc, "PVCOESTADST lost : Write Buffer cannot hold it"));
 			return;
 		}
@@ -627,10 +628,8 @@ class ServerSession {
 	void disconnectClient() {
 		Logger.debug("SILENTLY CLOSE OF : " + sc);
 		Optional<Username> disconnected = db.removeClient(sc);
-		if (!disconnected.isPresent()) {
-			Logger.debug("DISCONNECTION : {UNAUTHENTICATED CLIENT}");
-		} else {
-			Logger.debug("DISCONNECTION : " + disconnected);
+		Logger.debug("DISCONNECTION : " + disconnected);
+		if (disconnected.isPresent()) {
 			String username = disconnected.get().toString();
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCONOTIF));
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + username));
@@ -641,7 +640,6 @@ class ServerSession {
 				db.updateStateReadAll();
 			}
 		}
-
 		NetworkCommunication.silentlyClose(sc);
 	}
 

@@ -396,6 +396,7 @@ class ClientInstance implements Closeable {
 	}
 
 	private void processMessages() throws InterruptedException {
+		Logger.debug("USER CONNECTED");
 		Thread sender = new Thread(threadGroup, () -> threadMessageSender(), "Public sender");
 		Thread receiver = new Thread(threadGroup, () -> threadMessageReceiver(), "Public receiver");
 
@@ -403,6 +404,7 @@ class ClientInstance implements Closeable {
 		receiver.start();
 
 		waitForTerminaison();
+		Logger.debug("DISCONNECTION");
 	}
 
 	void start() throws IOException, InterruptedException {
@@ -415,19 +417,14 @@ class ClientInstance implements Closeable {
 		}
 
 		processMessages();
-
-		Logger.debug("DISCONNECTION");
 	}
 
 	void start(String username) throws IOException, InterruptedException {
 		if (!connectUsername(username)) {
-			Logger.debug("CONNECTION FAILED"); // XXX : UI message
 			return;
 		}
 
 		processMessages();
-
-		Logger.debug("DISCONNECTION");
 	}
 
 	@Override

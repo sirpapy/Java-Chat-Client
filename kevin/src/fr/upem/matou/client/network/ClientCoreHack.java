@@ -1,13 +1,15 @@
 package fr.upem.matou.client.network;
 
+import static fr.upem.matou.client.network.ClientCommunication.*;
+import static fr.upem.matou.shared.network.NetworkProtocol.*;
+
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
 
-import fr.upem.matou.shared.network.NetworkCommunication;
+import fr.upem.matou.shared.network.ErrorType;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 
@@ -26,281 +28,231 @@ public class ClientCoreHack implements Closeable {
 		sc = SocketChannel.open(address);
 	}
 
-	private static final Charset PROTOCOL_CHARSET = NetworkCommunication.getProtocolCharset();
-
-	public static ByteBuffer encodeRequestMSGBC(String pseudo, String message) {
-		ByteBuffer encodedPseudo = PROTOCOL_CHARSET.encode(pseudo);
-		ByteBuffer encodedMessage = PROTOCOL_CHARSET.encode(message);
-
-		int sizePseudo = encodedPseudo.remaining();
-		int sizeMessage = encodedMessage.remaining();
-
-		int capacity = Integer.BYTES + Integer.BYTES + sizePseudo + Integer.BYTES + sizeMessage;
-		ByteBuffer request = ByteBuffer.allocate(capacity);
-
-		request.putInt(NetworkProtocol.MSGBC.ordinal());
-		request.putInt(sizePseudo).put(encodedPseudo);
-		request.putInt(sizeMessage).put(encodedMessage);
-
-		return request;
-	}
-
-	private static void sendRequest(SocketChannel sc, ByteBuffer bb) throws IOException {
-		bb.flip();
-		sc.write(bb);
-	}
-
-	public static void sendRequestMSGBC(SocketChannel sc, String pseudo, String message) throws IOException {
-		ByteBuffer bb = encodeRequestMSGBC(pseudo, message);
-		sendRequest(sc, bb);
-	}
-
-	// OK
-	public void startChat_ServerReservedRequest() throws IOException {
-		sendRequestMSGBC(sc, "foo", "abra kadabra");
-		NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
-
-		switch (protocol) {
-		case MSGBC:
-			Message message = ClientCommunication.receiveRequestMSGBC(sc);
-			System.out.println(message);
-			break;
-		default:
-			System.out.println("Invalid protocol : " + protocol);
-			break;
-		}
-	}
-
-	// OK
-	public void startChat_MultipleCOREQ() throws IOException {
-		ClientCommunication.sendRequestCOREQ(sc, "abra");
-		ClientCommunication.sendRequestMSG(sc, "abra");
-		ClientCommunication.sendRequestCOREQ(sc, "kadabra");
-		ClientCommunication.sendRequestMSG(sc, "kadabra");
-
-		for (int i = 0; i < 6; i++) {
-			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
-
-			switch (protocol) {
-			case CORES:
-				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
-				System.out.println("Acceptation = " + acceptation);
-				break;
-			case CONOTIF:
-				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				System.out.println("New connection : " + pseudo);
-				break;
-			case MSGBC:
-				Message message = ClientCommunication.receiveRequestMSGBC(sc);
-				System.out.println(message);
-				break;
-			default:
-				System.out.println("Invalid protocol : " + protocol);
-				return;
-			}
-		}
-	}
-
-	// OK
-	public void startChat_PseudoEmpty() throws IOException {
-		ClientCommunication.sendRequestCOREQ(sc, "");
-
-		for (int i = 0; i < 2; i++) {
-			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
-
-			switch (protocol) {
-			case CORES:
-				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
-				System.out.println("Acceptation = " + acceptation);
-				break;
-			case CONOTIF:
-				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				System.out.println("New connection : " + pseudo);
-				break;
-			case MSGBC:
-				Message message = ClientCommunication.receiveRequestMSGBC(sc);
-				System.out.println(message);
-				break;
-			default:
-				System.out.println("Invalid protocol : " + protocol);
-				return;
-			}
-		}
-
-	}
-
-	// OK
-	public void startChat_PseudoBigger() throws IOException {
-		ClientCommunication.sendRequestCOREQ(sc, "abraabraabraabraabraabraabraabra!");
-
-		for (int i = 0; i < 2; i++) {
-			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
-
-			switch (protocol) {
-			case CORES:
-				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
-				System.out.println("Acceptation = " + acceptation);
-				break;
-			case CONOTIF:
-				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				System.out.println("New connection : " + pseudo);
-				break;
-			case MSGBC:
-				Message message = ClientCommunication.receiveRequestMSGBC(sc);
-				System.out.println(message);
-				break;
-			default:
-				System.out.println("Invalid protocol : " + protocol);
-				return;
-			}
-		}
-
-	}
-
-	// OK
-	public void startChat_MessageBigger() throws IOException {
-		ClientCommunication.sendRequestCOREQ(sc, "abra");
-		ClientCommunication.sendRequestMSG(sc,
-				"abraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabraabra!");
-
-		for (int i = 0; i < 3; i++) {
-			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
-
-			switch (protocol) {
-			case CORES:
-				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
-				System.out.println("Acceptation = " + acceptation);
-				break;
-			case CONOTIF:
-				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				System.out.println("New connection : " + pseudo);
-				break;
-			case MSGBC:
-				Message message = ClientCommunication.receiveRequestMSGBC(sc);
-				System.out.println(message);
-				break;
-			default:
-				System.out.println("Invalid protocol : " + protocol);
-				return;
-			}
-		}
-
-	}
-
-	// OK
-	public void startChat_MessageEmpty() throws IOException {
-		ClientCommunication.sendRequestCOREQ(sc, "foo");
-		ClientCommunication.sendRequestMSG(sc, "");
-
-		for (int i = 0; i < 3; i++) {
-			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
-
-			switch (protocol) {
-			case CORES:
-				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
-				System.out.println("Acceptation = " + acceptation);
-				break;
-			case CONOTIF:
-				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				System.out.println("New connection : " + pseudo);
-				break;
-			default:
-				System.out.println("Invalid protocol : " + protocol);
-				return;
-			}
-		}
-
-	}
-
-	// OK
-	public void startChat_FullMessage() throws IOException {
-		ClientCommunication.sendRequestCOREQ(sc, "øøøøøøøøøøøøøøøø");
-		ClientCommunication.sendRequestMSG(sc,
-				"𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀");
-		for (int i = 0; i < 3; i++) {
-			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
-
-			switch (protocol) {
-			case CORES:
-				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
-				System.out.println("Acceptation = " + acceptation);
-				break;
-			case CONOTIF:
-				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				System.out.println("New connection : " + pseudo);
-				break;
-			case MSGBC:
-				Message message = ClientCommunication.receiveRequestMSGBC(sc);
-				System.out.println(message);
-				break;
-			default:
-				System.out.println("Invalid protocol : " + protocol);
-				return;
-			}
-		}
-	}
-
-	// OK
-	public void startChat_FloodMessage() throws IOException {
-		ClientCommunication.sendRequestCOREQ(sc, "øøøøøøøøøøøøøøøø");
-		int flood = 32;
-		for (int i = 0; i < flood; i++) {
-			ClientCommunication.sendRequestMSG(sc,
-					"𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀");
-		}
-
-		int stop = 2 + flood;
-		for (int i = 0; i < stop; i++) {
-			System.out.println("REQ #" + (i + 1));
-			NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
-
-			switch (protocol) {
-			case CORES:
-				boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
-				System.out.println("Acceptation = " + acceptation);
-				break;
-			case CONOTIF:
-				Username pseudo = ClientCommunication.receiveRequestCONOTIF(sc);
-				System.out.println("New connection : " + pseudo);
-				break;
-			case MSGBC:
-				Message message = ClientCommunication.receiveRequestMSGBC(sc);
-				System.out.println(message);
-				break;
-			default:
-				System.out.println("Invalid protocol : " + protocol);
-				return;
-			}
-		}
-
-		System.out.println("SUCCESS");
-	}
-
-	// OK
-	public void startChat_UnauthentMessage() throws IOException {
-		ClientCommunication.sendRequestMSG(sc, "Hello world");
-
-		NetworkProtocol protocol =  ClientCommunication.receiveRequestType(sc);
-
-		switch (protocol) {
-		case MSGBC:
-			Message message = ClientCommunication.receiveRequestMSGBC(sc);
-			System.out.println(message);
-			break;
-		default:
-			System.out.println("Invalid protocol : " + protocol);
-			return;
-		}
-
-	}
-
 	@Override
 	public void close() throws IOException {
 		sc.close();
 	}
 
-	public void startChat() throws IOException {
-		startChat_UnauthentMessage();
+	private void readServerAnswer() throws IOException {
+		NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
+		System.out.println("PROTOCOL : " + protocol);
+
+		switch (protocol) {
+
+		case ERROR: {
+			ErrorType type = ClientCommunication.receiveRequestERROR(sc);
+			System.out.println("ERROR : " + type);
+
+			break;
+		}
+
+		case CORES: {
+			boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
+			System.out.println("ACCEPTATION : " + acceptation);
+			break;
+		}
+
+		case MSGBC: {
+			Message message = ClientCommunication.receiveRequestMSGBC(sc);
+			System.out.println("USERNAME : " + message.getUsername());
+			System.out.println("MESSAGE : " + message.getContent());
+
+			break;
+		}
+
+		case CONOTIF: {
+			Username connected = ClientCommunication.receiveRequestCONOTIF(sc);
+			System.out.println("USERNAME : " + connected);
+
+			break;
+		}
+
+		case DISCONOTIF: {
+			Username disconnected = ClientCommunication.receiveRequestDISCONOTIF(sc);
+			System.out.println("USERNAME : " + disconnected);
+
+			break;
+		}
+
+		case PVCOREQNOTIF: {
+			Username requester = ClientCommunication.receiveRequestPVCOREQNOTIF(sc);
+			System.out.println("USERNAME : " + requester);
+
+			break;
+		}
+
+		case PVCOESTASRC: {
+			SourceConnection sourceInfo = ClientCommunication.receiveRequestPVCOESTASRC(sc);
+			Username username = sourceInfo.getUsername();
+			InetAddress address = sourceInfo.getAddress();
+			System.out.println("USERNAME : " + username);
+			System.out.println("ADDRESS : " + address);
+
+			break;
+		}
+
+		case PVCOESTADST: {
+			DestinationConnection destinationInfo = ClientCommunication.receiveRequestPVCOESTADST(sc);
+			Username username = destinationInfo.getUsername();
+			InetAddress address = destinationInfo.getAddress();
+			int portMessage = destinationInfo.getPortMessage();
+			int portFile = destinationInfo.getPortFile();
+			System.out.println("USERNAME : " + username);
+			System.out.println("ADDRESS : " + address);
+			System.out.println("PORT MESSAGE : " + portMessage);
+			System.out.println("PORT FILE : " + portFile);
+
+			break;
+		}
+
+		default:
+			throw new IOException("Unsupported protocol request : " + protocol);
+
+		}
+	}
+
+	public void hack_MultipleCOREQ() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "abra");
+		writeProtocol(sc, COREQ);
+		writeString(sc, "kadabra");
+		while (true) {
+			readServerAnswer();
+		}
+	}
+
+	public void hack_UnauthentMSG() throws IOException {
+		writeProtocol(sc, MSG);
+		writeString(sc, "Hello World");
+		while (true) {
+			readServerAnswer();
+		}
+	}
+
+	public void hack_ServerReservedRequest() throws IOException {
+		writeProtocol(sc, MSGBC);
+		while (true) {
+			readServerAnswer();
+		}
+	}
+
+	public void hack_UsernameEmpty() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "");
+		while (true) {
+			readServerAnswer();
+		}
+	}
+
+	public void hack_MessageEmpty() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "foo");
+		writeProtocol(sc, MSG);
+		writeString(sc, "");
+		while (true) {
+			readServerAnswer();
+		}
+	}
+
+	public void hack_UsernameInvalid() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "Abra Kadabra");
+		while (true) {
+			readServerAnswer();
+		}
+	}
+
+	public void hack_MessageInvalid() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "foo");
+		writeProtocol(sc, MSG);
+		writeString(sc, "Testing\n");
+		while (true) {
+			readServerAnswer();
+		}
+	}
+
+	public void hack_UsernameToLong() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "000000000000000000000000000000000");
+		while (true) {
+			readServerAnswer();
+		}
+	}
+
+	public void hack_MessageToLong() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "foo");
+		writeProtocol(sc, MSG);
+		writeString(sc,
+				"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+		while (true) {
+			readServerAnswer();
+		}
+	}
+
+	public void hack_UsernameAndMessageFull() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "øøøøøøøøøøøøøøøø");
+		writeProtocol(sc, MSG);
+		writeString(sc,
+				"𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀");
+		for (int i = 0; i < 3; i++) {
+			readServerAnswer();
+		}
+	}
+
+	public void hack_FloodMessages() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "øøøøøøøøøøøøøøøø");
+		int flood = 100;
+		int max = flood + 2;
+		for (int i = 0; i < flood; i++) {
+			writeProtocol(sc, MSG);
+			writeString(sc,
+					"𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀𠀀");
+
+		}
+		for (int i = 0; i < max; i++) {
+			readServerAnswer();
+			System.out.println("REQUEST " + (i + 1) + " : OK");
+		}
+	}
+
+	public void hack_FakePVCOREQ() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "foo");
+		writeProtocol(sc, PVCOREQ);
+		writeString(sc, "lol");
+		for (int i = 0; i < 3; i++) {
+			readServerAnswer();
+		}
+	}
+	
+	public void hack_FakePVCOACC() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "foo");
+		writeProtocol(sc, PVCOACC);
+		writeString(sc, "lol");
+		for (int i = 0; i < 3; i++) {
+			readServerAnswer();
+		}
+	}
+
+	public void hack_FakePVCOPORT() throws IOException {
+		writeProtocol(sc, COREQ);
+		writeString(sc, "foo");
+		writeProtocol(sc, PVCOPORT);
+		writeString(sc, "mdr");
+		writeInt(sc, 10);
+		writeInt(sc,10);
+		while (true) {
+			readServerAnswer();
+		}
+	}
+
+	public void startHack() throws IOException {
+		hack_FakePVCOPORT();
 	}
 
 }
