@@ -28,12 +28,13 @@ import fr.upem.matou.shared.network.Username;
 public class ClientCore implements Closeable {
 
 	private final Object monitor = new Object();
-	private final SocketChannel sc;
-	private final ClientSession session;
+	private final InetSocketAddress socketAddress;
 	private final UserInterface ui = new ShellInterface();
 	private final ThreadGroup threadGroup = new ThreadGroup("ChatThreads");
 
 	private boolean exit;
+	private SocketChannel sc;
+	private ClientSession session;
 
 	/**
 	 * Constructs a new client core.
@@ -46,25 +47,31 @@ public class ClientCore implements Closeable {
 	 *             If an I/O error occurs.
 	 */
 	public ClientCore(String hostname, int port) throws IOException {
-		InetSocketAddress address = new InetSocketAddress(hostname, port);
-		sc = SocketChannel.open(address);
+		this.socketAddress = new InetSocketAddress(hostname, port);
+	}
+
+	private void initChat() throws IOException {
+		sc = SocketChannel.open(socketAddress);
 		session = new ClientSession(sc);
 	}
 
 	private void setExit() {
 		synchronized (monitor) {
-			Logger.debug("EXIT !!!");
 			exit = true;
 			monitor.notify();
+			Logger.debug("SET EXIT : TRUE");
 		}
 	}
 
 	private void waitForTerminaison() throws InterruptedException {
 		synchronized (monitor) {
+			exit = false;
+			Logger.debug("SET EXIT : FALSE");
 			while (!exit) {
 				monitor.wait();
 			}
 		}
+		Logger.debug("WAIT FOR TERMINAISON : TERMINAISON SIGNAL");
 	}
 
 	private void interruptAllThreads() {
@@ -72,7 +79,7 @@ public class ClientCore implements Closeable {
 		threadGroup.interrupt();
 	}
 
-	private Optional<String> usernameGetter() {
+	private String usernameGetter() throws IOException {
 		return ui.getUsername();
 	}
 
@@ -412,8 +419,6 @@ public class ClientCore implements Closeable {
 		receiver.start();
 
 		waitForTerminaison();
-
-		interruptAllThreads();
 	}
 
 	/**
@@ -425,26 +430,26 @@ public class ClientCore implements Closeable {
 	 *             If an interruption occurs.
 	 */
 	public void startChat() throws IOException, InterruptedException {
-		exit = false;
-		while (true) {
-			Optional<String> optional = usernameGetter();
-			if (!optional.isPresent()) {
-				Logger.debug("CONNECTION FAILED");
-				return;
+		initChat();
+		try {
+
+			while (true) {
+				String username = usernameGetter();
+				if (!usernameSender(username)) {
+					continue;
+				}
+				if (!usernameReceiver(username)) {
+					continue;
+				}
+				break;
 			}
-			String username = optional.get();
-			if (!usernameSender(username)) {
-				continue;
-			}
-			if (!usernameReceiver(username)) {
-				continue;
-			}
-			break;
+
+			processMessages();
+
+			Logger.debug("DISCONNECTION");
+		} finally {
+			closeChat();
 		}
-
-		processMessages();
-
-		Logger.debug("DISCONNECTION");
 	}
 
 	/**
@@ -458,15 +463,21 @@ public class ClientCore implements Closeable {
 	 *             If an interruption occurs.
 	 */
 	public void startChat(String username) throws IOException, InterruptedException {
-		exit = false;
-		if (!connectUsername(username)) {
-			Logger.debug("CONNECTION FAILED");
-			return;
+		initChat();
+		try {			
+
+			if (!connectUsername(username)) {
+				Logger.debug("CONNECTION FAILED"); // XXX : UI message
+				return;
+			}
+
+			processMessages();
+
+			Logger.debug("DISCONNECTION");
+
+		} finally {
+			closeChat();
 		}
-
-		processMessages();
-
-		Logger.debug("DISCONNECTION");
 	}
 
 	/**
@@ -487,11 +498,16 @@ public class ClientCore implements Closeable {
 		}
 	}
 
+	private void closeChat() throws IOException {
+		Logger.debug("CHAT INSTANCE CLOSING");
+		sc.close();
+		interruptAllThreads();
+	}
+
 	@Override
 	public void close() throws IOException {
-		Logger.debug("CHAT CLOSING");
+		Logger.debug("CHAT CORE CLOSING");
 		ui.close();
-		sc.close();
 	}
 
 }

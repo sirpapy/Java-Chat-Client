@@ -15,12 +15,18 @@ import fr.upem.matou.client.network.ClientEvent.*;
 class ShellCommand {
 
 	private static final String COMMAND_TOKEN = "/";
+	private static final String EXIT_COMMAND = COMMAND_TOKEN + "exit";
+	
 
 	private ShellCommand() {
 	}
 
 	private static boolean isCommandMessage(String input) {
 		return input.startsWith(COMMAND_TOKEN);
+	}
+	
+	static boolean isExit(String input) {
+		return input.equals(EXIT_COMMAND);
 	}
 
 	static Optional<ClientEvent> parseLine(String input) {

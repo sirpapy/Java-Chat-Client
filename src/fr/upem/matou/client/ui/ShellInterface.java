@@ -25,29 +25,27 @@ public class ShellInterface implements UserInterface {
 	private final PrintStream error = System.err;
 	private final Scanner scanner = new Scanner(input, INPUT_CHARSET);
 
-	private Optional<String> readLine() {
-		if (scanner.hasNextLine()) {
-			String line = scanner.nextLine();
-			return Optional.of(line);
+	private String readLine() throws IOException {
+		if (!scanner.hasNextLine()) {
+			throw new IOException("InputStream source of scanner is closed");
 		}
-		return Optional.empty();
+		String line = scanner.nextLine();
+		return line;
 	}
 
 	@Override
-	public Optional<String> getUsername() {
+	public String getUsername() throws IOException {
 		output.print("Username > ");
 		return readLine();
 	}
 
 	@Override
-	public Optional<ClientEvent> getEvent() {
+	public Optional<ClientEvent> getEvent() throws IOException {
 		while (true) {
-			Optional<String> optional = readLine();
-			if (!optional.isPresent()) {
+			String line = readLine();
+			if (ShellCommand.isExit(line)) {
 				return Optional.empty();
 			}
-
-			String line = optional.get();
 			Optional<ClientEvent> event = ShellCommand.parseLine(line);
 			if (!event.isPresent()) {
 				warnInvalidCommand();
@@ -136,8 +134,7 @@ public class ShellInterface implements UserInterface {
 	}
 
 	private void warnInvalidCommand() {
-		error.println("Invalid command" 
-				+ "\n<message> : send a public message"
+		error.println("Invalid command" + "\n<message> : send a public message"
 				+ "\n/open <username> : ask for a private connection"
 				+ "\n/accept <username> : accept a private connection"
 				+ "\n/pv <username> <message> : send a private message"
@@ -147,7 +144,7 @@ public class ShellInterface implements UserInterface {
 	@Override
 	public void displayError(ErrorType type) {
 		requireNonNull(type);
-		
+
 		switch (type) {
 
 		case USRNOTCO:

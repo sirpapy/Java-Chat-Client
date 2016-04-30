@@ -1,6 +1,7 @@
 package fr.upem.matou.client.ui;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -19,15 +20,19 @@ public interface UserInterface extends Closeable {
 	 * Retrieves the username given by the user.
 	 * 
 	 * @return The username.
+	 * @throws IOException
+	 *             If an I/O error occurs.
 	 */
-	public Optional<String> getUsername();
+	public String getUsername() throws IOException;
 
 	/**
 	 * Retrieves an event requested by the user.
 	 * 
 	 * @return An event.
+	 * @throws IOException
+	 *             If an I/O error occurs.
 	 */
-	public Optional<ClientEvent> getEvent();
+	public Optional<ClientEvent> getEvent() throws IOException;
 
 	/**
 	 * Displays a message to the user.

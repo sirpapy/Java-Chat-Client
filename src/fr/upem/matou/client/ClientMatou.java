@@ -122,6 +122,7 @@ public class ClientMatou {
 		
 		try (ClientCore client = new ClientCore(host, port)) {
 			client.startChat(Optional.ofNullable(username));
+			client.startChat(Optional.ofNullable(username));
 		} catch (IOException e) {
 			Logger.error(e.toString());
 			Logger.exception(e);
