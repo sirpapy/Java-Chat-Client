@@ -1,5 +1,6 @@
 package fr.upem.matou.client.network;
 
+import static fr.upem.matou.shared.logger.Logger.formatNetworkData;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
@@ -75,7 +76,7 @@ class ClientCommunication {
 	}
 
 	private static void writeFileChunks(SocketChannel sc, Path path) throws IOException {
-		Logger.debug("FILE UPLOADING START : " + path);
+		Logger.debug(formatNetworkData(sc, "FILE UPLOADING START : " + path));
 		try (InputStream is = Files.newInputStream(path, READ)) {
 			byte[] chunk = new byte[CHUNK_SIZE];
 			int read = 0;
@@ -84,7 +85,7 @@ class ClientCommunication {
 				sc.write(wrap);
 			}
 		}
-		Logger.debug("FILE UPLOADING END : " + path);
+		Logger.debug(formatNetworkData(sc, "FILE UPLOADING END : " + path));
 	}
 
 	/*
@@ -359,9 +360,9 @@ class ClientCommunication {
 
 		Path path = Files.createTempFile(Paths.get("./files"), username + "_", "_" + filename);
 
-		Logger.debug("FILE DOWNLOADING START : " + path);
+		Logger.debug(formatNetworkData(sc, "FILE DOWNLOADING START : " + path));
 		saveFileChunks(sc, path, totalSize);
-		Logger.debug("FILE DOWNLOADING END : " + path);
+		Logger.debug(formatNetworkData(sc, "FILE DOWNLOADING END : " + path));
 
 		return path;
 	}

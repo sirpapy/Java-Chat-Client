@@ -366,7 +366,7 @@ class ClientInstance implements Closeable {
 				try {
 					stop = messageSender();
 				} catch (IOException e) {
-					Logger.warning(e.toString());
+					Logger.warning(formatNetworkData(sc,e.toString()));
 					return;
 				}
 			}
@@ -381,7 +381,7 @@ class ClientInstance implements Closeable {
 				try {
 					messageReceiver();
 				} catch (IOException e) {
-					Logger.warning(e.toString());
+					Logger.warning(formatNetworkData(sc,e.toString()));
 					Logger.exception(e);
 					return;
 				}

@@ -23,6 +23,7 @@ import fr.upem.matou.shared.utils.ByteBuffers;
  * This class represents the state of a client connected to the chat server. A ServerSession is always attached to one
  * ServerDataBase and should be created by ServerDataBase.newServerSession(SocketChannel,SelectionKey).
  */
+@SuppressWarnings("resource")
 class ServerSession {
 
 	private static final int BUFFER_SIZE_INPUT = NetworkProtocol.getServerReadBufferSize();
@@ -131,7 +132,7 @@ class ServerSession {
 		reader.sizeUsername = bbRead.getInt();
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername));
 		if (reader.sizeUsername > USERNAME_MAX_SIZE || reader.sizeUsername == 0) {
-			Logger.debug("Invalid size username");
+			Logger.warning(formatNetworkData(sc, "Invalid size username"));
 			disconnectClient();
 			return;
 		}
@@ -161,7 +162,7 @@ class ServerSession {
 		reader.sizeMessage = bbRead.getInt();
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "SIZE MESSAGE : " + reader.sizeMessage));
 		if (reader.sizeMessage > MESSAGE_MAX_SIZE || reader.sizeMessage == 0) {
-			Logger.debug("Invalid size message");
+			Logger.warning(formatNetworkData(sc, "Invalid size message"));
 			disconnectClient();
 			return;
 		}
@@ -187,7 +188,7 @@ class ServerSession {
 		reader.sizeUsername = bbRead.getInt();
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "SIZE USERNAME : " + reader.sizeUsername));
 		if (reader.sizeUsername > USERNAME_MAX_SIZE || reader.sizeUsername == 0) {
-			Logger.debug("Invalid size username");
+			Logger.warning(formatNetworkData(sc, "Invalid size username"));
 			disconnectClient();
 			return;
 		}
@@ -253,7 +254,7 @@ class ServerSession {
 	private void processCOREQ() {
 		if (arg == 0) {
 			if (!checkCOREQ()) {
-				Logger.warning("Client already authenticated");
+				Logger.warning(formatNetworkData(sc, "Client already authenticated"));
 				disconnectClient();
 				return;
 			}
@@ -281,7 +282,7 @@ class ServerSession {
 	 */
 	private void answerCORES(Username username) {
 		if (!NetworkCommunication.checkUsernameValidity(username.toString())) {
-			Logger.debug("INVALID USERNAME : " + username);
+			Logger.warning(formatNetworkData(sc, "INVALID USERNAME : " + username));
 			disconnectClient();
 			return;
 		}
@@ -316,7 +317,7 @@ class ServerSession {
 	private void processMSG() {
 		if (arg == 0) {
 			if (!checkMSG()) {
-				Logger.warning("Client not authenticated");
+				Logger.warning(formatNetworkData(sc, "Client not authenticated"));
 				disconnectClient();
 				return;
 			}
@@ -341,7 +342,7 @@ class ServerSession {
 
 	private void answerMSGBC(String message) {
 		if (!NetworkCommunication.checkMessageValidity(message)) {
-			Logger.debug("INVALID MESSAGE : " + message);
+			Logger.warning(formatNetworkData(sc, "INVALID MESSAGE : " + message));
 			disconnectClient();
 			return;
 		}
@@ -365,7 +366,7 @@ class ServerSession {
 	private void processPVCOREQ() {
 		if (arg == 0) {
 			if (!checkPVCOREQ()) {
-				Logger.warning("Client already authenticated");
+				Logger.warning(formatNetworkData(sc, "Client already authenticated"));
 				disconnectClient();
 				return;
 			}
@@ -396,13 +397,13 @@ class ServerSession {
 
 		Optional<ServerSession> optional = db.sessionOf(requested);
 		if (!optional.isPresent()) {
-			Logger.debug("Target " + requested + " is not connected");
+			Logger.debug(formatNetworkData(sc, "Target " + requested + " is not connected"));
 			answerERROR(ErrorType.USRNOTCO);
 			return;
 		}
 
 		boolean valid = db.addNewPrivateRequest(requester, requested);
-		Logger.debug("PRIVATE REQUEST VALIDITY : " + valid);
+		Logger.debug(formatNetworkData(sc, "PRIVATE REQUEST VALIDITY : " + valid));
 		if (!valid) {
 			return;
 		}
@@ -428,7 +429,7 @@ class ServerSession {
 	private void processPVCOACC() {
 		if (arg == 0) {
 			if (!checkPVCOACC()) {
-				Logger.warning("Client already authenticated");
+				Logger.warning(formatNetworkData(sc, "Client already authenticated"));
 				disconnectClient();
 				return;
 			}
@@ -458,7 +459,7 @@ class ServerSession {
 		}
 
 		boolean valid = db.checkPrivateRequest(source, destination);
-		Logger.debug("PRIVATE REQUEST ACCEPTATION : " + valid);
+		Logger.debug(formatNetworkData(sc, "PRIVATE REQUEST ACCEPTATION : " + valid));
 
 		if (!valid) {
 			answerERROR(ErrorType.USRNOTPVREQ);
@@ -487,7 +488,7 @@ class ServerSession {
 	private void processPVCOPORT() {
 		if (arg == 0) {
 			if (!checkPVCOPORT()) {
-				Logger.warning("Client already authenticated");
+				Logger.warning(formatNetworkData(sc, "Client already authenticated"));
 				disconnectClient();
 				return;
 			}
@@ -519,7 +520,7 @@ class ServerSession {
 	private void answerPVCOESTADST(Username source, int portMessage, int portFile) {
 		Username destination = db.usernameOf(sc).get();
 		boolean valid = db.removePrivateRequest(source, destination);
-		Logger.debug("PRIVATE REQUEST ESTABLISHMENT : " + valid);
+		Logger.debug(formatNetworkData(sc, "PRIVATE REQUEST ESTABLISHMENT : " + valid));
 
 		if (!valid) {
 			Logger.warning(formatNetworkData(sc,
@@ -611,7 +612,6 @@ class ServerSession {
 	 */
 	void updateKey() {
 		if (!key.isValid()) {
-			Logger.debug("This key is not valid anymore");
 			return;
 		}
 
@@ -626,9 +626,9 @@ class ServerSession {
 	 * Disconnects the client.
 	 */
 	void disconnectClient() {
-		Logger.debug("SILENTLY CLOSE OF : " + sc);
+		Logger.debug(formatNetworkData(sc, "SILENTLY CLOSE"));
 		Optional<Username> disconnected = db.removeClient(sc);
-		Logger.debug("DISCONNECTION : " + disconnected);
+		Logger.debug(formatNetworkData(sc, "DISCONNECTION : " + disconnected));
 		if (disconnected.isPresent()) {
 			String username = disconnected.get().toString();
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.DISCONOTIF));

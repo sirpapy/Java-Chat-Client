@@ -1,5 +1,6 @@
 package fr.upem.matou.client.network;
 
+import static fr.upem.matou.shared.logger.Logger.formatNetworkData;
 import static fr.upem.matou.shared.logger.Logger.formatNetworkRequest;
 
 import java.io.IOException;
@@ -68,7 +69,7 @@ class ClientSession {
 		try {
 			return ClientCommunication.sendRequestPVMSG(sc, message);
 		} catch (IOException e) {
-			Logger.warning(e.toString());
+			Logger.warning(formatNetworkData(sc,e.toString()));
 			closePrivateConnection(username);
 			return false;
 		}
@@ -85,7 +86,7 @@ class ClientSession {
 		try {
 			return ClientCommunication.sendRequestPVFILE(sc, path);
 		} catch (IOException e) {
-			Logger.warning(e.toString());
+			Logger.warning(formatNetworkData(sc,e.toString()));
 			closePrivateConnection(username);
 			return false;
 		}
@@ -96,11 +97,11 @@ class ClientSession {
 		SocketChannel scFile = privateFiles.remove(username);
 		boolean closed = (scMessage != null) || (scFile != null);
 		if (scMessage != null) {
-			Logger.debug("SILENTLY CLOSE OF : " + scMessage);
+			Logger.debug(formatNetworkData(scMessage,"SILENTLY CLOSE (PV MESSAGE)"));
 			NetworkCommunication.silentlyClose(scMessage);
 		}
 		if (scFile != null) {
-			Logger.debug("SILENTLY CLOSE OF : " + scFile);
+			Logger.debug(formatNetworkData(scFile,"SILENTLY CLOSE (PV FILE)"));
 			NetworkCommunication.silentlyClose(scFile);
 		}
 		return closed;

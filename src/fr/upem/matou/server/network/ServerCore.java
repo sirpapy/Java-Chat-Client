@@ -64,6 +64,7 @@ public class ServerCore implements Closeable {
 			processSelectedKeys(selectedKeys);
 
 			selectedKeys.clear();
+			
 		}
 	}
 
