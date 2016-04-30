@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -45,6 +47,28 @@ class ClientCommunication {
 	private static final String FILENAME_SEPARATOR = "_";
 
 	private ClientCommunication() {
+	}
+
+	/*
+	 * Accepts a pending connection to the given address. All other pending connections are refused.
+	 * 
+	 * The ServerSocketChannel will be closed after this call.
+	 */
+	static SocketChannel acceptConnection(ServerSocketChannel ssc, InetAddress address) throws IOException {
+		try (ServerSocketChannel listening = ssc) {
+			SocketChannel pv;
+			while (true) {
+				pv = ssc.accept();
+				InetAddress connected = ((InetSocketAddress) pv.getRemoteAddress()).getAddress();
+				if (!address.equals(connected)) {
+					Logger.debug(formatNetworkData(pv, "CONNECTION REFUSED"));
+					NetworkCommunication.silentlyClose(pv);
+					continue;
+				}
+				Logger.debug(formatNetworkData(pv, "CONNECTION ACCEPTED"));
+				return pv;
+			}
+		} // close the ssc correctly
 	}
 
 	private static void writeFully(SocketChannel sc, ByteBuffer bb) throws IOException {

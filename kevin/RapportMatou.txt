@@ -2,6 +2,7 @@ Points forts :
 	- Très peu d'allocations côté serveur
 	- Un ClientCore peut créer plusieurs ClientInstance
 	- Ne dépend pas d'une seule interface utilisateur
+	- ThreadGroup
 
 Points faibles :
 	- Architecture compliquée (Core + Instance/Database + Session)
@@ -9,7 +10,7 @@ Points faibles :
 	
 Difficultés rencontrés :
 	- ByteBuffers...
-	- Gestion des évenements
+	- Gestion des évenements (inspiré de Visiteur)
 
 Bug connu :
 	- Localhost privé

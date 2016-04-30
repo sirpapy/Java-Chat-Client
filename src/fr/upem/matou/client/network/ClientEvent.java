@@ -13,7 +13,7 @@ import fr.upem.matou.shared.network.Username;
 public interface ClientEvent {
 
 	/**
-	 * Send a public message.
+	 * Sending a public message.
 	 */
 	public static class ClientEventSendMessage implements ClientEvent {
 		private final String message;
@@ -34,10 +34,11 @@ public interface ClientEvent {
 			requireNonNull(session);
 			return session.sendMessage(message);
 		}
+
 	}
 
 	/**
-	 * Close a private connection.
+	 * Closing a private connection.
 	 */
 	public static class ClientEventClosePrivate implements ClientEvent {
 		private final Username username;
@@ -62,7 +63,7 @@ public interface ClientEvent {
 	}
 
 	/**
-	 * Send a private connection request.
+	 * Sending a private connection request.
 	 */
 	public static class ClientEventOpenPrivate implements ClientEvent {
 		private final Username username;
@@ -87,7 +88,7 @@ public interface ClientEvent {
 	}
 
 	/**
-	 * Send a private connection acceptation.
+	 * Sending a private connection acceptation.
 	 */
 	public static class ClientEventAcceptPrivate implements ClientEvent {
 		private final Username username;
@@ -108,10 +109,11 @@ public interface ClientEvent {
 			requireNonNull(session);
 			return session.acceptPrivateConnection(username);
 		}
+
 	}
 
 	/**
-	 * Send a private file.
+	 * Sending a private file.
 	 */
 	public static class ClientEventSendPrivateFile implements ClientEvent {
 		private final Username username;
@@ -141,7 +143,7 @@ public interface ClientEvent {
 	}
 
 	/**
-	 * Send a private message.
+	 * Sending a private message.
 	 */
 	public static class ClientEventSendPrivateMessage implements ClientEvent {
 		private final Username username;

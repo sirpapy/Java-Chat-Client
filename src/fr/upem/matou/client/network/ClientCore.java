@@ -27,7 +27,7 @@ public class ClientCore implements Closeable {
 	 *             If an I/O error occurs.
 	 */
 	public ClientCore(String hostname, int port) throws IOException {
-		this.address = new InetSocketAddress(hostname, port);
+		address = new InetSocketAddress(hostname, port);
 	}
 
 	/**

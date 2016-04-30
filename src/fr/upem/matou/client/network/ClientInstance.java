@@ -35,16 +35,16 @@ class ClientInstance implements Closeable {
 	private boolean exit = false;
 
 	ClientInstance(InetSocketAddress address, UserInterface ui) throws IOException {
-		this.sc = SocketChannel.open(address);
-		this.session = new ClientSession(sc);
 		this.ui = ui;
+		sc = SocketChannel.open(address);
+		session = new ClientSession(sc);
 	}
 
 	private void setExit() {
 		synchronized (monitor) {
 			exit = true;
 			monitor.notifyAll();
-			Logger.debug("SET EXIT : TRUE");
+			Logger.debug("EXIT NOTIFICATION");
 		}
 	}
 
@@ -59,12 +59,8 @@ class ClientInstance implements Closeable {
 	}
 
 	private void interruptAllThreads() {
-		Logger.debug("INTERRUPT ALL THREADS");
+		Logger.debug("INTERRUPT THREAD GROUP");
 		threadGroup.interrupt();
-	}
-
-	private String usernameGetter() throws IOException {
-		return ui.getUsername();
 	}
 
 	private boolean usernameSender(String username) throws IOException {
@@ -94,7 +90,7 @@ class ClientInstance implements Closeable {
 		}
 	}
 
-	private boolean messageSender() throws IOException {
+	private boolean chatSender() throws IOException {
 		Optional<ClientEvent> optional = ui.getEvent();
 		if (!optional.isPresent()) {
 			return true;
@@ -111,7 +107,7 @@ class ClientInstance implements Closeable {
 	/*
 	 * Reads requests from the server.
 	 */
-	private void messageReceiver() throws IOException {
+	private void publicReceiver() throws IOException {
 		NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PROTOCOL : " + protocol));
 
@@ -196,7 +192,7 @@ class ClientInstance implements Closeable {
 	/*
 	 * Reads message requests from a client.
 	 */
-	private void privateCommunicationMessage(SocketChannel pv, Username username) throws IOException {
+	private void privateMessageReceiver(SocketChannel pv, Username username) throws IOException {
 		while (true) {
 			NetworkProtocol protocol = ClientCommunication.receiveRequestType(pv);
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PROTOCOL : " + protocol));
@@ -222,7 +218,7 @@ class ClientInstance implements Closeable {
 	/*
 	 * Reads file requests from a client.
 	 */
-	private void privateCommunicationFile(SocketChannel pv, Username username) throws IOException {
+	private void privateFileReceiver(SocketChannel pv, Username username) throws IOException {
 		while (true) {
 			NetworkProtocol protocol = ClientCommunication.receiveRequestType(pv);
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PROTOCOL : " + protocol));
@@ -245,23 +241,6 @@ class ClientInstance implements Closeable {
 		}
 	}
 
-	private static SocketChannel acceptCommunication(ServerSocketChannel ssc, InetAddress address) throws IOException {
-		try (ServerSocketChannel listening = ssc) {
-			SocketChannel pv;
-			while (true) {
-				pv = ssc.accept();
-				InetAddress connected = ((InetSocketAddress) pv.getRemoteAddress()).getAddress();
-				if (!address.equals(connected)) {
-					Logger.debug(formatNetworkData(pv, "[SOURCE] CONNECTION HIJACK !!!"));
-					NetworkCommunication.silentlyClose(pv);
-					continue;
-				}
-				Logger.debug(formatNetworkData(pv, "[SOURCE] CONNECTION ACCEPTED"));
-				return pv;
-			}
-		} // close the ssc correctly
-	}
-
 	private void privateCommunicationSource(Username username, InetAddress addressDst) throws IOException {
 		ServerSocketChannel sscMessage = ServerSocketChannel.open();
 		ServerSocketChannel sscFile = ServerSocketChannel.open();
@@ -276,30 +255,30 @@ class ClientInstance implements Closeable {
 		ClientCommunication.sendRequestPVCOPORT(sc, username.toString(), portMessage, portFile);
 
 		new Thread(threadGroup, () -> {
-			try (SocketChannel scMessage = acceptCommunication(sscMessage, addressDst)) {
+			try (SocketChannel scMessage = ClientCommunication.acceptConnection(sscMessage, addressDst)) {
 				Logger.debug(formatNetworkData(scMessage, "[SOURCE] MESSAGE CONNECTED"));
 				session.addNewPrivateMessageChannel(username, scMessage);
-				privateCommunicationMessage(scMessage, username);
+				privateMessageReceiver(scMessage, username);
 			} catch (IOException e) {
 				Logger.warning(e.toString());
 				session.closePrivateConnection(username);
 			} finally {
 				ui.displayNewPrivateMessageDisconnection(username);
 			}
-		}, "Private messages : " + username).start();
+		}, "Private message receiver : " + username).start();
 
 		new Thread(threadGroup, () -> {
-			try (SocketChannel scFile = acceptCommunication(sscFile, addressDst)) {
+			try (SocketChannel scFile = ClientCommunication.acceptConnection(sscFile, addressDst)) {
 				Logger.debug(formatNetworkData(scFile, "[SOURCE] FILE CONNECTED"));
 				session.addNewPrivateFileChannel(username, scFile);
-				privateCommunicationFile(scFile, username);
+				privateFileReceiver(scFile, username);
 			} catch (IOException e) {
 				Logger.warning(e.toString());
 				session.closePrivateConnection(username);
 			} finally {
 				ui.displayNewPrivateFileDisconnection(username);
 			}
-		}, "Private files : " + username).start();
+		}, "Private file receiver : " + username).start();
 
 	}
 
@@ -317,26 +296,26 @@ class ClientInstance implements Closeable {
 		new Thread(threadGroup, () -> {
 			try {
 				session.addNewPrivateMessageChannel(username, scMessage);
-				privateCommunicationMessage(scMessage, username);
+				privateMessageReceiver(scMessage, username);
 			} catch (IOException e) {
 				Logger.warning(e.toString());
 				session.closePrivateConnection(username);
 			} finally {
 				ui.displayNewPrivateMessageDisconnection(username);
 			}
-		}, "Private messages : " + username).start();
+		}, "Private message receiver : " + username).start();
 
 		new Thread(threadGroup, () -> {
 			try {
 				session.addNewPrivateFileChannel(username, scFile);
-				privateCommunicationFile(scFile, username);
+				privateFileReceiver(scFile, username);
 			} catch (IOException e) {
 				Logger.warning(e.toString());
 				session.closePrivateConnection(username);
 			} finally {
 				ui.displayNewPrivateFileDisconnection(username);
 			}
-		}, "Private files : " + username).start();
+		}, "Private file receiver : " + username).start();
 	}
 
 	private void launchPrivateConnection(Username username, InetAddress addressDst) {
@@ -359,50 +338,45 @@ class ClientInstance implements Closeable {
 		}, "Private destination connection : " + username).start();
 	}
 
-	private void threadMessageSender() {
-		try {
-			boolean stop = false;
-			while (!Thread.interrupted() && stop == false) {
-				try {
-					stop = messageSender();
-				} catch (IOException e) {
-					Logger.error(formatNetworkData(sc, e.toString()));
-					Logger.exception(e);
-					return;
-				}
-			}
-		} finally {
-			setExit();
-		}
-	}
-
-	private void threadMessageReceiver() {
-		try {
-			while (!Thread.interrupted()) {
-				try {
-					messageReceiver();
-				} catch (IOException e) {
-					Logger.error(formatNetworkData(sc, e.toString()));
-					Logger.exception(e);
-					return;
-				}
-			}
-		} finally {
-			setExit();
-		}
-	}
-
 	private boolean connectUsername(String username) throws IOException {
 		return usernameSender(username) && usernameReceiver(username);
 	}
 
 	private void processMessages() throws InterruptedException {
 		Logger.debug("USER CONNECTED");
-		Thread sender = new Thread(threadGroup, () -> threadMessageSender(), "Public sender");
-		Thread receiver = new Thread(threadGroup, () -> threadMessageReceiver(), "Public receiver");
-
-		sender.start();
-		receiver.start();
+		
+		new Thread(threadGroup, () -> {
+			try {
+				boolean stop = false;
+				while (!Thread.interrupted() && stop == false) {
+					try {
+						stop = chatSender();
+					} catch (IOException e) {
+						Logger.error(formatNetworkData(sc, e.toString()));
+						Logger.exception(e);
+						return;
+					}
+				}
+			} finally {
+				setExit();
+			}
+		}, "Chat sender").start();
+		
+		new Thread(threadGroup, () -> {
+			try {
+				while (!Thread.interrupted()) {
+					try {
+						publicReceiver();
+					} catch (IOException e) {
+						Logger.error(formatNetworkData(sc, e.toString()));
+						Logger.exception(e);
+						return;
+					}
+				}
+			} finally {
+				setExit();
+			}
+		}, "Public receiver").start();
 
 		waitForTerminaison();
 		Logger.debug("DISCONNECTION");
@@ -410,7 +384,7 @@ class ClientInstance implements Closeable {
 
 	void start() throws IOException, InterruptedException {
 		while (true) {
-			String username = usernameGetter();
+			String username = ui.getUsername();
 			if (!connectUsername(username)) {
 				continue;
 			}
