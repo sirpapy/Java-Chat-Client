@@ -43,7 +43,7 @@ class ClientInstance implements Closeable {
 	private void setExit() {
 		synchronized (monitor) {
 			exit = true;
-			monitor.notify();
+			monitor.notifyAll();
 			Logger.debug("SET EXIT : TRUE");
 		}
 	}

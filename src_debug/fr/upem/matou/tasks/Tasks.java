@@ -7,6 +7,7 @@ public class Tasks {
 
 	// FIXME : Commentaires de code
 	
+	// TODO : Vérifier qu'il n'y a pas d'entiers/chaines hardcodées
 	// TODO : Command line options
 	// TODO : Tracer les exceptions avec le logger
 	

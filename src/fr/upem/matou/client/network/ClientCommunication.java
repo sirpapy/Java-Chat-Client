@@ -28,6 +28,10 @@ import fr.upem.matou.shared.network.Username;
 /*
  * This class consists only of static methods. These methods are used by the client to ensure that communications meet
  * the protocol.
+ * 
+ * All "sendRequest" methods check arguments validity and return false if at least one argument is not valid.
+ * 
+ * All "receiveRequest" methods throw an IOException if the SocketChannel is closed.
  */
 class ClientCommunication {
 
@@ -36,6 +40,9 @@ class ClientCommunication {
 	private static final int MESSAGE_MAX_SIZE = NetworkCommunication.getMessageMaxSize();
 	private static final int FILENAME_MAX_SIZE = NetworkCommunication.getFilenameMaxSize();
 	private static final int CHUNK_SIZE = NetworkCommunication.getFileChunkSize();
+
+	private static final Path FILE_PATH = Paths.get("./files/");
+	private static final String FILENAME_SEPARATOR = "_";
 
 	private ClientCommunication() {
 	}
@@ -63,13 +70,19 @@ class ClientCommunication {
 		writeFully(sc, bb);
 	}
 
+	/*
+	 * Writes an encoded string.
+	 * 
+	 * [!] The argument ByteBuffer must be in read mode
+	 */
 	static void writeString(SocketChannel sc, ByteBuffer encoded) throws IOException {
 		int size = encoded.remaining();
 		writeInt(sc, size);
 		encoded.compact();
 		writeFully(sc, encoded);
 	}
-	
+
+	// For crash test only
 	static void writeString(SocketChannel sc, String string) throws IOException {
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(string);
 		writeString(sc, encoded);
@@ -248,6 +261,9 @@ class ClientCommunication {
 
 	private static InetAddress readAddress(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
+		if (size != 4 && size != 16) {
+			throw new IOException("Protocol violation - Invalid address size : " + size);
+		}
 		ByteBuffer bb = ByteBuffer.allocate(size);
 		readFully(sc, bb);
 		bb.flip();
@@ -358,7 +374,7 @@ class ClientCommunication {
 		String filename = readFilename(sc);
 		long totalSize = readLong(sc);
 
-		Path path = Files.createTempFile(Paths.get("./files"), username + "_", "_" + filename);
+		Path path = Files.createTempFile(FILE_PATH, username + FILENAME_SEPARATOR, FILENAME_SEPARATOR + filename);
 
 		Logger.debug(formatNetworkData(sc, "FILE DOWNLOADING START : " + path));
 		saveFileChunks(sc, path, totalSize);

@@ -31,7 +31,8 @@ public class ClientCore implements Closeable {
 	}
 
 	/**
-	 * Starts a chat with a predefined username.
+	 * Starts a chat with a predefined username. If this username is not available or not valid, the chat session will
+	 * end immediately.
 	 * 
 	 * @param username
 	 *            The choosen username.

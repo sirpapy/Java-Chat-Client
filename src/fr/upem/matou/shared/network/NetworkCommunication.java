@@ -198,7 +198,7 @@ public class NetworkCommunication {
 		try {
 			sc.close();
 		} catch (@SuppressWarnings("unused") IOException __) {
-			return;
+			// ignored
 		}
 	}
 }

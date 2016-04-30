@@ -35,6 +35,14 @@ public interface UserInterface extends Closeable {
 	public Optional<ClientEvent> getEvent() throws IOException;
 
 	/**
+	 * Displays an error message to the user.
+	 * 
+	 * @param type
+	 *            The error.
+	 */
+	public void displayError(ErrorType type);
+
+	/**
 	 * Displays a message to the user.
 	 * 
 	 * @param message
@@ -123,13 +131,5 @@ public interface UserInterface extends Closeable {
 	 *            The username.
 	 */
 	public void warnUnavailableUsername(String username);
-
-	/**
-	 * Displays an error message to the user.
-	 * 
-	 * @param type
-	 *            The error.
-	 */
-	public void displayError(ErrorType type);
 
 }

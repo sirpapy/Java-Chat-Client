@@ -23,7 +23,6 @@ import fr.upem.matou.shared.utils.ByteBuffers;
  * This class represents the state of a client connected to the chat server. A ServerSession is always attached to one
  * ServerDataBase and should be created by ServerDataBase.newServerSession(SocketChannel,SelectionKey).
  */
-@SuppressWarnings("resource")
 class ServerSession {
 
 	private static final int BUFFER_SIZE_INPUT = NetworkProtocol.getServerReadBufferSize();
