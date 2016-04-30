@@ -60,7 +60,7 @@ class ClientCommunication {
 			while (true) {
 				pv = ssc.accept();
 				InetAddress connected = ((InetSocketAddress) pv.getRemoteAddress()).getAddress();
-				if (!address.equals(connected)) {
+				if (!address.equals(connected)) { // the accepted address is not the expected address
 					Logger.debug(formatNetworkData(pv, "CONNECTION REFUSED"));
 					NetworkCommunication.silentlyClose(pv);
 					continue;
@@ -71,23 +71,35 @@ class ClientCommunication {
 		} // close the ssc correctly
 	}
 
+	/*
+	 * Writes all the given buffer (in write mode).
+	 */
 	private static void writeFully(SocketChannel sc, ByteBuffer bb) throws IOException {
 		bb.flip();
 		sc.write(bb);
 	}
 
+	/*
+	 * Writes a protocol type.
+	 */
 	static void writeProtocol(SocketChannel sc, NetworkProtocol protocol) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
 		bb.putInt(protocol.ordinal());
 		writeFully(sc, bb);
 	}
 
+	/*
+	 * Writes an integer.
+	 */
 	static void writeInt(SocketChannel sc, int value) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
 		bb.putInt(value);
 		writeFully(sc, bb);
 	}
 
+	/*
+	 * Writes a long.
+	 */
 	static void writeLong(SocketChannel sc, long value) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
 		bb.putLong(value);
@@ -97,7 +109,7 @@ class ClientCommunication {
 	/*
 	 * Writes an encoded string.
 	 * 
-	 * [!] The argument ByteBuffer must be in read mode
+	 * [!] The ByteBuffer argument must be in read mode.
 	 */
 	static void writeString(SocketChannel sc, ByteBuffer encoded) throws IOException {
 		int size = encoded.remaining();
@@ -106,18 +118,25 @@ class ClientCommunication {
 		writeFully(sc, encoded);
 	}
 
-	// For crash test only
+	/*
+	 * Writes a string. The protocol charset will be used to encode the string.
+	 * 
+	 * This method is for crash test only (the string validity is not checked here).
+	 */
 	static void writeString(SocketChannel sc, String string) throws IOException {
 		ByteBuffer encoded = PROTOCOL_CHARSET.encode(string);
 		writeString(sc, encoded);
 	}
 
+	/*
+	 * Writes file by chunks.
+	 */
 	private static void writeFileChunks(SocketChannel sc, Path path) throws IOException {
 		Logger.debug(formatNetworkData(sc, "FILE UPLOADING START : " + path));
 		try (InputStream is = Files.newInputStream(path, READ)) {
 			byte[] chunk = new byte[CHUNK_SIZE];
 			int read = 0;
-			while ((read = is.read(chunk)) != -1) {
+			while ((read = is.read(chunk)) != -1) { // Reads and writes by chunks
 				ByteBuffer wrap = ByteBuffer.wrap(chunk, 0, read);
 				sc.write(wrap);
 			}
@@ -151,6 +170,9 @@ class ClientCommunication {
 		return true;
 	}
 
+	/*
+	 * Sends a PVCOREQ request.
+	 */
 	static boolean sendRequestPVCOREQ(SocketChannel sc, String username) throws IOException {
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
 		if (!optional.isPresent()) {
@@ -161,6 +183,9 @@ class ClientCommunication {
 		return true;
 	}
 
+	/*
+	 * Sends a PVCOACC request.
+	 */
 	static boolean sendRequestPVCOACC(SocketChannel sc, String username) throws IOException {
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
 		if (!optional.isPresent()) {
@@ -171,6 +196,9 @@ class ClientCommunication {
 		return true;
 	}
 
+	/*
+	 * Sends a PVCOPORT request.
+	 */
 	static boolean sendRequestPVCOPORT(SocketChannel sc, String username, int portMessage, int portFile)
 			throws IOException {
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeUsername(username);
@@ -184,6 +212,9 @@ class ClientCommunication {
 		return true;
 	}
 
+	/*
+	 * Sends a PVMSG request.
+	 */
 	static boolean sendRequestPVMSG(SocketChannel sc, String message) throws IOException {
 		Optional<ByteBuffer> optional = NetworkCommunication.encodeMessage(message);
 		if (!optional.isPresent()) {
@@ -194,6 +225,9 @@ class ClientCommunication {
 		return true;
 	}
 
+	/*
+	 * Sends a PVFILE request.
+	 */
 	static boolean sendRequestPVFILE(SocketChannel sc, Path path) throws IOException {
 		try {
 
@@ -222,6 +256,9 @@ class ClientCommunication {
 		}
 	}
 
+	/*
+	 * Reads buffer until it is full. If the channel is closed, an IOException is thrown.
+	 */
 	private static void readFully(SocketChannel sc, ByteBuffer bb) throws IOException {
 		while (bb.hasRemaining()) {
 			int read = sc.read(bb);
@@ -231,6 +268,9 @@ class ClientCommunication {
 		}
 	}
 
+	/*
+	 * Reads a byte.
+	 */
 	private static byte readByte(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Byte.BYTES);
 		readFully(sc, bb);
@@ -238,6 +278,9 @@ class ClientCommunication {
 		return bb.get();
 	}
 
+	/*
+	 * Reads an integer.
+	 */
 	private static int readInt(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
 		readFully(sc, bb);
@@ -245,6 +288,9 @@ class ClientCommunication {
 		return bb.getInt();
 	}
 
+	/*
+	 * Reads a long.
+	 */
 	private static long readLong(SocketChannel sc) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
 		readFully(sc, bb);
@@ -252,6 +298,9 @@ class ClientCommunication {
 		return bb.getLong();
 	}
 
+	/*
+	 * Reads a string of a fixed size.
+	 */
 	private static String readString(SocketChannel sc, int size) throws IOException {
 		ByteBuffer bb = ByteBuffer.allocate(size);
 		readFully(sc, bb);
@@ -259,6 +308,9 @@ class ClientCommunication {
 		return PROTOCOL_CHARSET.decode(bb).toString();
 	}
 
+	/*
+	 * Reads a username (preceded by its size). Size is checked before reading.
+	 */
 	private static Username readUsername(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
 		if (size > USERNAME_MAX_SIZE) {
@@ -267,6 +319,9 @@ class ClientCommunication {
 		return new Username(readString(sc, size));
 	}
 
+	/*
+	 * Reads a message (preceded by its size). Size is checked before reading.
+	 */
 	private static String readMessage(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
 		if (size > MESSAGE_MAX_SIZE) {
@@ -275,6 +330,9 @@ class ClientCommunication {
 		return readString(sc, size);
 	}
 
+	/*
+	 * Reads a file name (preceded by its size). Size is checked before reading.
+	 */
 	private static String readFilename(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
 		if (size > FILENAME_MAX_SIZE) {
@@ -283,6 +341,9 @@ class ClientCommunication {
 		return readString(sc, size);
 	}
 
+	/*
+	 * Reads an IP address (preceded by its size). Size is checked before reading.
+	 */
 	private static InetAddress readAddress(SocketChannel sc) throws IOException {
 		int size = readInt(sc);
 		if (size != 4 && size != 16) {
@@ -299,18 +360,21 @@ class ClientCommunication {
 		return InetAddress.getByAddress(addr);
 	}
 
+	/*
+	 * Reads a file by chunks and writes it in the file system.
+	 */
 	private static void saveFileChunks(SocketChannel sc, Path path, long totalSize) throws IOException {
 		try (OutputStream os = Files.newOutputStream(path, WRITE, CREATE, TRUNCATE_EXISTING)) {
 			ByteBuffer bb = ByteBuffer.allocate(CHUNK_SIZE);
 			for (long totalRead = 0; totalRead < totalSize;) {
-				long diff = totalSize - totalRead;
-				long capacity = diff <= CHUNK_SIZE ? diff : CHUNK_SIZE; // bytes of the next chunk
+				long diff = totalSize - totalRead; // remaining bytes to read
+				long capacity = diff <= CHUNK_SIZE ? diff : CHUNK_SIZE; // bytes of the directly next chunk
 				bb.limit((int) capacity);
 				readFully(sc, bb);
 				bb.flip();
 				byte[] chunk = bb.array();
 				int read = bb.remaining();
-				totalRead += read;
+				totalRead += read; // updates the number of bytes already read
 				os.write(chunk, 0, read);
 			}
 		}
@@ -328,6 +392,9 @@ class ClientCommunication {
 		return protocol.get();
 	}
 
+	/*
+	 * Receives an ERROR request.
+	 */
 	static ErrorType receiveRequestERROR(SocketChannel sc) throws IOException {
 		int ordinal = readInt(sc);
 		Optional<ErrorType> error = ErrorType.getError(ordinal);
@@ -370,17 +437,26 @@ class ClientCommunication {
 		return username;
 	}
 
+	/*
+	 * Receives a PVCOREQNOTIF request.
+	 */
 	static Username receiveRequestPVCOREQNOTIF(SocketChannel sc) throws IOException {
 		Username username = readUsername(sc);
 		return username;
 	}
 
+	/*
+	 * Receives a PVCOESTASRC request.
+	 */
 	static SourceConnectionData receiveRequestPVCOESTASRC(SocketChannel sc) throws IOException {
 		Username username = readUsername(sc);
 		InetAddress address = readAddress(sc);
 		return new SourceConnectionData(username, address);
 	}
 
+	/*
+	 * Receives a PVCOESTADST request.
+	 */
 	static DestinationConnectionData receiveRequestPVCOESTADST(SocketChannel sc) throws IOException {
 		Username username = readUsername(sc);
 		InetAddress address = readAddress(sc);
@@ -389,15 +465,22 @@ class ClientCommunication {
 		return new DestinationConnectionData(username, address, portMessage, portFile);
 	}
 
+	/*
+	 * Receives a PVMSG request.
+	 */
 	static Message receiveRequestPVMSG(SocketChannel sc, Username username) throws IOException {
 		String message = readMessage(sc);
 		return new Message(username, message, true);
 	}
 
+	/*
+	 * Receives a PVFILE request.
+	 */
 	static Path receiveRequestPVFILE(SocketChannel sc, String username) throws IOException {
 		String filename = readFilename(sc);
 		long totalSize = readLong(sc);
 
+		// Ensures creation of a new file
 		Path path = Files.createTempFile(FILE_PATH, username + FILENAME_SEPARATOR, FILENAME_SEPARATOR + filename);
 
 		Logger.debug(formatNetworkData(sc, "FILE DOWNLOADING START : " + path));

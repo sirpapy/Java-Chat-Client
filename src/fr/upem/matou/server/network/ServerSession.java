@@ -143,7 +143,7 @@ class ServerSession {
 	 */
 	private void readUsernameArg2(ReaderUsername reader) {
 		bbRead.flip();
-		String string = ServerCommunication.readStringUTF8(bbRead);
+		String string = ServerCommunication.readString(bbRead);
 		reader.username = new Username(string);
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + reader.username));
 
@@ -170,7 +170,7 @@ class ServerSession {
 
 	private void readMessageArg2(ReaderMessage reader) {
 		bbRead.flip();
-		reader.message = ServerCommunication.readStringUTF8(bbRead);
+		reader.message = ServerCommunication.readString(bbRead);
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "MESSAGE : " + reader.message));
 
 		resetReadState();
@@ -196,7 +196,7 @@ class ServerSession {
 
 	private void readPortArg2(ReaderPort reader) {
 		bbRead.flip();
-		String string = ServerCommunication.readStringUTF8(bbRead);
+		String string = ServerCommunication.readString(bbRead);
 		reader.username = new Username(string);
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + reader.username));
 

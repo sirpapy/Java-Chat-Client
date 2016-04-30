@@ -13,6 +13,10 @@ import fr.upem.matou.shared.network.NetworkProtocol.Communicator;
 /*
  * This class consists only of static methods. These methods are used by the server to ensure that communications meet
  * the protocol.
+ * 
+ * All "addRequest" methods append data to a given ByteBuffer in write mode. If the buffer was successfully modified,
+ * then true is returned. But if the given buffer does not have enough space to hold all the expected request, then the
+ * buffer is not modified and false is returned.
  */
 class ServerCommunication {
 
@@ -22,10 +26,8 @@ class ServerCommunication {
 	private ServerCommunication() {
 	}
 
-	/**
+	/*
 	 * Returns the size of a server read buffer.
-	 * 
-	 * @return The size of a server read buffer.
 	 */
 	static int getServerReadBufferSize() {
 		int max = NetworkProtocol.getMaxArgumentSize(Communicator.CLIENT, Communicator.SERVER);
@@ -33,10 +35,8 @@ class ServerCommunication {
 		return max;
 	}
 
-	/**
+	/*
 	 * Returns the size of a server write buffer.
-	 * 
-	 * @return The size of a server write buffer.
 	 */
 	static int getServerWriteBufferSize() {
 		int max = NetworkProtocol.getMaxRequestSize(Communicator.SERVER, Communicator.CLIENT) * BUFFER_MULTIPLIER;
@@ -44,10 +44,8 @@ class ServerCommunication {
 		return max;
 	}
 
-	/**
+	/*
 	 * Returns the size of the server broadcast buffer.
-	 * 
-	 * @return The size of the server broadcast buffer.
 	 */
 	static int getServerBroadcastBufferSize() {
 		int max = NetworkProtocol.getMaxRequestSize(Communicator.SERVER, Communicator.CLIENT);
@@ -56,12 +54,17 @@ class ServerCommunication {
 	}
 
 	/*
-	 * Reads an UTF-8 string. The bytebuffer should be flipped before a call to this method.
+	 * Reads a string by decoding this buffer with the protocol charset.
+	 * 
+	 * [!] The ByteBuffer argument must be in read mode.
 	 */
-	static String readStringUTF8(ByteBuffer bb) {
+	static String readString(ByteBuffer bb) {
 		return PROTOCOL_CHARSET.decode(bb).toString();
 	}
 
+	/*
+	 * Adds an ERROR request to the buffer.
+	 */
 	static boolean addRequestERROR(ByteBuffer bbWrite, ErrorType type) {
 		int length = Integer.BYTES + Integer.BYTES;
 		if (bbWrite.remaining() < length) {
@@ -150,6 +153,9 @@ class ServerCommunication {
 		return true;
 	}
 
+	/*
+	 * Adds an PVCOREQNOTIF request to the buffer.
+	 */
 	static boolean addRequestPVCOREQNOTIF(ByteBuffer bbWrite, String username) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 
@@ -165,6 +171,9 @@ class ServerCommunication {
 		return true;
 	}
 
+	/*
+	 * Adds an PVCOESTASRC request to the buffer.
+	 */
 	static boolean addRequestPVCOESTASRC(ByteBuffer bbWrite, String username, InetAddress address) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 		byte[] addr = address.getAddress();
@@ -186,6 +195,9 @@ class ServerCommunication {
 		return true;
 	}
 
+	/*
+	 * Adds an PVCOESTADST request to the buffer.
+	 */
 	static boolean addRequestPVCOESTADST(ByteBuffer bbWrite, String username, InetAddress address, int portMessage,
 			int portFile) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);

@@ -36,3 +36,5 @@ Disclaimer :
 	
 Schéma :
 	- UML
+	
+Si rien n'est précisé : ByteBuffer en write mode
