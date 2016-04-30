@@ -28,7 +28,7 @@ public interface UserInterface extends Closeable {
 	/**
 	 * Retrieves an event requested by the user.
 	 * 
-	 * @return An event.
+	 * @return An optional describing the requested event or an empty optional if the user requested to leave the chat.
 	 * @throws IOException
 	 *             If an I/O error occurs.
 	 */
@@ -117,12 +117,12 @@ public interface UserInterface extends Closeable {
 	public void warnInvalidUsername(String username);
 
 	/**
-	 * Warns the user that this event is not valid.
+	 * Warns the user that this event is not valid during the message phase.
 	 * 
 	 * @param event
 	 *            The event.
 	 */
-	public void warnInvalidEvent(ClientEvent event);
+	public void warnInvalidMessageEvent(ClientEvent event);
 
 	/**
 	 * Warns the user that this username is not valid

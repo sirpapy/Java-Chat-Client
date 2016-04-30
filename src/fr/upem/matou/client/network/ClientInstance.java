@@ -12,11 +12,11 @@ import java.nio.channels.SocketChannel;
 import java.nio.file.Path;
 import java.util.Optional;
 
+import fr.upem.matou.client.network.ClientEvent.ClientEventConnection;
 import fr.upem.matou.client.ui.UserInterface;
 import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.ErrorType;
-import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 
@@ -64,9 +64,8 @@ class ClientInstance implements Closeable {
 	}
 
 	private boolean usernameSender(String username) throws IOException {
-		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ));
-		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + username));
-		if (!ClientCommunication.sendRequestCOREQ(sc, username)) {
+		ClientEvent event = new ClientEventConnection(new Username(username));
+		if (!event.execute(session)) {
 			ui.warnInvalidUsername(username);
 			return false;
 		}
@@ -76,7 +75,9 @@ class ClientInstance implements Closeable {
 	private boolean usernameReceiver(String username) throws IOException {
 		NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PROTOCOL : " + protocol));
+
 		switch (protocol) {
+
 		case CORES: {
 			boolean acceptation = ClientCommunication.receiveRequestCORES(sc);
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "ACCEPTATION : " + acceptation));
@@ -85,8 +86,10 @@ class ClientInstance implements Closeable {
 			}
 			return acceptation;
 		}
+
 		default:
 			throw new AssertionError("Unexpected protocol request : " + protocol);
+
 		}
 	}
 
@@ -98,7 +101,7 @@ class ClientInstance implements Closeable {
 		ClientEvent event = optional.get();
 
 		if (!event.execute(session)) {
-			ui.warnInvalidEvent(event);
+			ui.warnInvalidMessageEvent(event);
 			return false;
 		}
 		return false;
@@ -344,7 +347,7 @@ class ClientInstance implements Closeable {
 
 	private void processMessages() throws InterruptedException {
 		Logger.debug("USER CONNECTED");
-		
+
 		new Thread(threadGroup, () -> {
 			try {
 				boolean stop = false;
@@ -361,7 +364,7 @@ class ClientInstance implements Closeable {
 				setExit();
 			}
 		}, "Chat sender").start();
-		
+
 		new Thread(threadGroup, () -> {
 			try {
 				while (!Thread.interrupted()) {
@@ -379,6 +382,7 @@ class ClientInstance implements Closeable {
 		}, "Public receiver").start();
 
 		waitForTerminaison();
+
 		Logger.debug("DISCONNECTION");
 	}
 

@@ -39,6 +39,12 @@ class ClientSession {
 	void addNewPrivateFileChannel(Username username, SocketChannel sc) {
 		privateFiles.put(username, sc);
 	}
+	
+	boolean sendUsernameRequest(Username username) throws IOException {
+		Logger.info(formatNetworkRequest(publicChannel, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ));
+		Logger.info(formatNetworkRequest(publicChannel, NetworkLogType.WRITE, "USERNAME : " + username));
+		return ClientCommunication.sendRequestCOREQ(publicChannel, username.toString());
+	}
 
 	boolean sendMessage(String message) throws IOException {
 		Logger.info(formatNetworkRequest(publicChannel, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.MSG));

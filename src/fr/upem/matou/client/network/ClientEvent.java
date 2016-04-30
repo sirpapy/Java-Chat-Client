@@ -13,6 +13,31 @@ import fr.upem.matou.shared.network.Username;
 public interface ClientEvent {
 
 	/**
+	 * Sending a public connection request.
+	 */
+	public static class ClientEventConnection implements ClientEvent {
+		private final Username username;
+
+		/**
+		 * Public connection event.
+		 * 
+		 * @param username
+		 *            The requested username.
+		 */
+		public ClientEventConnection(Username username) {
+			requireNonNull(username);
+			this.username = username;
+		}
+
+		@Override
+		public boolean execute(ClientSession session) throws IOException {
+			requireNonNull(session);
+			return session.sendUsernameRequest(username);
+		}
+
+	}
+
+	/**
 	 * Sending a public message.
 	 */
 	public static class ClientEventSendMessage implements ClientEvent {
