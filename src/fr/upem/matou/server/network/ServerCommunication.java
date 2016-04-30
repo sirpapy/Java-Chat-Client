@@ -4,36 +4,73 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
+import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.network.ErrorType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 import fr.upem.matou.shared.network.NetworkProtocol;
+import fr.upem.matou.shared.network.NetworkProtocol.Communicator;
 
 /*
- * This class consists only of static methods.
- * These methods are used by the server to ensure that communications meet the protocol.
+ * This class consists only of static methods. These methods are used by the server to ensure that communications meet
+ * the protocol.
  */
 class ServerCommunication {
 
 	private static final Charset PROTOCOL_CHARSET = NetworkCommunication.getProtocolCharset();
+	private static final int BUFFER_MULTIPLIER = 10;
 
 	private ServerCommunication() {
 	}
 
-	/* Reads an UTF-8 string.
-	 * The bytebuffer should be flipped before a call to this method. */
+	/**
+	 * Returns the size of a server read buffer.
+	 * 
+	 * @return The size of a server read buffer.
+	 */
+	static int getServerReadBufferSize() {
+		int max = NetworkProtocol.getMaxArgumentSize(Communicator.CLIENT, Communicator.SERVER);
+		Logger.debug("SERVER READ BUFFER SIZE : " + max);
+		return max;
+	}
+
+	/**
+	 * Returns the size of a server write buffer.
+	 * 
+	 * @return The size of a server write buffer.
+	 */
+	static int getServerWriteBufferSize() {
+		int max = NetworkProtocol.getMaxRequestSize(Communicator.SERVER, Communicator.CLIENT) * BUFFER_MULTIPLIER;
+		Logger.debug("SERVER WRITE BUFFER SIZE : " + max);
+		return max;
+	}
+
+	/**
+	 * Returns the size of the server broadcast buffer.
+	 * 
+	 * @return The size of the server broadcast buffer.
+	 */
+	static int getServerBroadcastBufferSize() {
+		int max = NetworkProtocol.getMaxRequestSize(Communicator.SERVER, Communicator.CLIENT);
+		Logger.debug("SERVER BROADCAST BUFFER SIZE : " + max);
+		return max;
+	}
+
+	/*
+	 * Reads an UTF-8 string. The bytebuffer should be flipped before a call to this method.
+	 */
 	static String readStringUTF8(ByteBuffer bb) {
 		return PROTOCOL_CHARSET.decode(bb).toString();
 	}
-	
+
 	static boolean addRequestERROR(ByteBuffer bbWrite, ErrorType type) {
 		int length = Integer.BYTES + Integer.BYTES;
-		if(bbWrite.remaining() < length) {
+		if (bbWrite.remaining() < length) {
 			return false;
 		}
-		
+
 		bbWrite.putInt(NetworkProtocol.ERROR.ordinal());
 		bbWrite.putInt(type.ordinal());
-		
+
 		return true;
 	}
 
@@ -153,8 +190,8 @@ class ServerCommunication {
 		return true;
 	}
 
-	static boolean addRequestPVCOESTADST(ByteBuffer bbWrite, String username, InetAddress address,
-			int portMessage, int portFile) {
+	static boolean addRequestPVCOESTADST(ByteBuffer bbWrite, String username, InetAddress address, int portMessage,
+			int portFile) {
 		ByteBuffer encodedUsername = PROTOCOL_CHARSET.encode(username);
 		byte[] addr = address.getAddress();
 
@@ -177,5 +214,5 @@ class ServerCommunication {
 
 		return true;
 	}
-	
+
 }

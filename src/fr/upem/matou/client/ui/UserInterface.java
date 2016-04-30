@@ -12,7 +12,7 @@ import fr.upem.matou.shared.network.Username;
 
 /**
  * This interface provides methods to display information to the user and retrieve information entered by the user. All
- * implementations of this interface should be transparent.
+ * implementations of this interface should be transparent and thread-safe.
  */
 public interface UserInterface extends Closeable {
 
@@ -48,7 +48,7 @@ public interface UserInterface extends Closeable {
 	 * @param message
 	 *            The message to display
 	 */
-	public void displayMessage(Message message);
+	public void displayNewMessage(Message message);
 
 	/**
 	 * Displays a new connection event to the user.
@@ -56,7 +56,7 @@ public interface UserInterface extends Closeable {
 	 * @param username
 	 *            The connected username.
 	 */
-	public void displayNewConnectionEvent(Username username);
+	public void displayNewConnection(Username username);
 
 	/**
 	 * Displays a new disconnection event to the user.
@@ -64,7 +64,7 @@ public interface UserInterface extends Closeable {
 	 * @param username
 	 *            The disconnected username
 	 */
-	public void displayNewDisconnectionEvent(Username username);
+	public void displayNewDisconnection(Username username);
 
 	/**
 	 * Displays a new private connection request event to the user.
@@ -72,7 +72,7 @@ public interface UserInterface extends Closeable {
 	 * @param username
 	 *            The requesting username.
 	 */
-	public void displayNewPrivateRequestEvent(Username username);
+	public void displayNewPrivateRequest(Username username);
 
 	/**
 	 * Displays a new private connection acceptation event to the user.
@@ -80,7 +80,7 @@ public interface UserInterface extends Closeable {
 	 * @param username
 	 *            The accepting username.
 	 */
-	public void displayNewPrivateAcceptionEvent(Username username);
+	public void displayNewPrivateAcception(Username username);
 
 	/**
 	 * Displays a new private disconnection event (message channel) to the user.

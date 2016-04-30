@@ -85,7 +85,7 @@ public class Configuration {
 	public static ConfigEntry parseLine(String line) {
 		int limit = line.indexOf(AFFECTATION_SYMBOL);
 		if (limit == -1) {
-			throw new AssertionError("This line is not an valid configuration affectation");
+			throw new AssertionError("This line is not a valid configuration affectation");
 		}
 		String command = line.substring(0, limit);
 		String argument = line.substring(limit + 1);

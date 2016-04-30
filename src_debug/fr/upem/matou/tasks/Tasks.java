@@ -6,6 +6,10 @@ package fr.upem.matou.tasks;
 public class Tasks {
 
 	// FIXME : Commentaires de code
+	// TODO : Instanciation de classes static
+	// TODO : Performances d'accès au serveur (HashMap...)
+	// TODO : Check imports et dépendances
+	// TODO : Check static imports (si nécessaire)
 	
 	// TODO : Vérifier qu'il n'y a pas d'entiers/chaines hardcodées
 	// TODO : Command line options

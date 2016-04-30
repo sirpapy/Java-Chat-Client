@@ -1,7 +1,5 @@
 package fr.upem.matou.client.network;
 
-import static java.util.Objects.requireNonNull;
-
 import java.net.InetAddress;
 
 import fr.upem.matou.shared.network.Username;
@@ -9,13 +7,11 @@ import fr.upem.matou.shared.network.Username;
 /*
  * This object describes data of an opened private request.
  */
-class SourceConnection {
+class SourceConnectionData {
 	private final Username username;
 	private final InetAddress address;
 
-	SourceConnection(Username username, InetAddress address) {
-		requireNonNull(username);
-		requireNonNull(address);
+	SourceConnectionData(Username username, InetAddress address) {
 		this.username = username;
 		this.address = address;
 	}

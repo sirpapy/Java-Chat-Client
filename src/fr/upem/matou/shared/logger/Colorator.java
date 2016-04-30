@@ -162,7 +162,7 @@ public class Colorator {
 	}
 
 	/**
-	 * Main of the colorated test program.
+	 * Main of the colorator test program.
 	 * 
 	 * @param args
 	 *            Command-line arguments (ignored)

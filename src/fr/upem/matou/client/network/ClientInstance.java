@@ -88,7 +88,7 @@ class ClientInstance implements Closeable {
 		}
 
 		default:
-			throw new AssertionError("Unexpected protocol request : " + protocol);
+			throw new IOException("Unexpected protocol request : " + protocol);
 
 		}
 	}
@@ -128,7 +128,7 @@ class ClientInstance implements Closeable {
 			Message message = ClientCommunication.receiveRequestMSGBC(sc);
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + message.getUsername()));
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "MESSAGE : " + message.getContent()));
-			ui.displayMessage(message);
+			ui.displayNewMessage(message);
 
 			break;
 		}
@@ -136,7 +136,7 @@ class ClientInstance implements Closeable {
 		case CONOTIF: {
 			Username connected = ClientCommunication.receiveRequestCONOTIF(sc);
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + connected));
-			ui.displayNewConnectionEvent(connected);
+			ui.displayNewConnection(connected);
 
 			break;
 		}
@@ -144,7 +144,7 @@ class ClientInstance implements Closeable {
 		case DISCONOTIF: {
 			Username disconnected = ClientCommunication.receiveRequestDISCONOTIF(sc);
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + disconnected));
-			ui.displayNewDisconnectionEvent(disconnected);
+			ui.displayNewDisconnection(disconnected);
 
 			break;
 		}
@@ -152,25 +152,25 @@ class ClientInstance implements Closeable {
 		case PVCOREQNOTIF: {
 			Username requester = ClientCommunication.receiveRequestPVCOREQNOTIF(sc);
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + requester));
-			ui.displayNewPrivateRequestEvent(requester);
+			ui.displayNewPrivateRequest(requester);
 
 			break;
 		}
 
 		case PVCOESTASRC: {
-			SourceConnection sourceInfo = ClientCommunication.receiveRequestPVCOESTASRC(sc);
+			SourceConnectionData sourceInfo = ClientCommunication.receiveRequestPVCOESTASRC(sc);
 			Username username = sourceInfo.getUsername();
 			InetAddress address = sourceInfo.getAddress();
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + username));
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "ADDRESS : " + address));
-			ui.displayNewPrivateAcceptionEvent(username);
+			ui.displayNewPrivateAcception(username);
 			launchPrivateConnection(username, address);
 
 			break;
 		}
 
 		case PVCOESTADST: {
-			DestinationConnection destinationInfo = ClientCommunication.receiveRequestPVCOESTADST(sc);
+			DestinationConnectionData destinationInfo = ClientCommunication.receiveRequestPVCOESTADST(sc);
 			Username username = destinationInfo.getUsername();
 			InetAddress address = destinationInfo.getAddress();
 			int portMessage = destinationInfo.getPortMessage();
@@ -179,7 +179,7 @@ class ClientInstance implements Closeable {
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "ADDRESS : " + address));
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PORT MESSAGE : " + portMessage));
 			Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PORT FILE : " + portFile));
-			ui.displayNewPrivateAcceptionEvent(username);
+			ui.displayNewPrivateAcception(username);
 			launchPrivateConnection(username, address, portMessage, portFile);
 
 			break;
@@ -206,7 +206,7 @@ class ClientInstance implements Closeable {
 				Message message = ClientCommunication.receiveRequestPVMSG(pv, username);
 				Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + message.getUsername()));
 				Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "MESSAGE : " + message.getContent()));
-				ui.displayMessage(message);
+				ui.displayNewMessage(message);
 
 				break;
 			}

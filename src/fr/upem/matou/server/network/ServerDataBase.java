@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import fr.upem.matou.shared.logger.Logger;
-import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 
 /*
@@ -22,7 +21,7 @@ import fr.upem.matou.shared.network.Username;
 class ServerDataBase {
 	
 	private static final int MAX_CLIENT = 10;
-	private static final int BUFFER_SIZE_BROADCAST = NetworkProtocol.getServerBroadcastBufferSize();
+	private static final int BUFFER_SIZE_BROADCAST = ServerCommunication.getServerBroadcastBufferSize();
 
 	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
 	private final HashMap<SocketChannel, Username> connected = new HashMap<>();

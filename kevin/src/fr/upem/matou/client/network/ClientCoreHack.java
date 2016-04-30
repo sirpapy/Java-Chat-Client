@@ -80,7 +80,7 @@ public class ClientCoreHack implements Closeable {
 		}
 
 		case PVCOESTASRC: {
-			SourceConnection sourceInfo = ClientCommunication.receiveRequestPVCOESTASRC(sc);
+			SourceConnectionData sourceInfo = ClientCommunication.receiveRequestPVCOESTASRC(sc);
 			Username username = sourceInfo.getUsername();
 			InetAddress address = sourceInfo.getAddress();
 			System.out.println("USERNAME : " + username);
@@ -90,7 +90,7 @@ public class ClientCoreHack implements Closeable {
 		}
 
 		case PVCOESTADST: {
-			DestinationConnection destinationInfo = ClientCommunication.receiveRequestPVCOESTADST(sc);
+			DestinationConnectionData destinationInfo = ClientCommunication.receiveRequestPVCOESTADST(sc);
 			Username username = destinationInfo.getUsername();
 			InetAddress address = destinationInfo.getAddress();
 			int portMessage = destinationInfo.getPortMessage();

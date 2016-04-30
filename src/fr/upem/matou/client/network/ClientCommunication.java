@@ -375,18 +375,18 @@ class ClientCommunication {
 		return username;
 	}
 
-	static SourceConnection receiveRequestPVCOESTASRC(SocketChannel sc) throws IOException {
+	static SourceConnectionData receiveRequestPVCOESTASRC(SocketChannel sc) throws IOException {
 		Username username = readUsername(sc);
 		InetAddress address = readAddress(sc);
-		return new SourceConnection(username, address);
+		return new SourceConnectionData(username, address);
 	}
 
-	static DestinationConnection receiveRequestPVCOESTADST(SocketChannel sc) throws IOException {
+	static DestinationConnectionData receiveRequestPVCOESTADST(SocketChannel sc) throws IOException {
 		Username username = readUsername(sc);
 		InetAddress address = readAddress(sc);
 		int portMessage = readInt(sc);
 		int portFile = readInt(sc);
-		return new DestinationConnection(username, address, portMessage, portFile);
+		return new DestinationConnectionData(username, address, portMessage, portFile);
 	}
 
 	static Message receiveRequestPVMSG(SocketChannel sc, Username username) throws IOException {

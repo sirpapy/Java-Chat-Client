@@ -12,8 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import fr.upem.matou.shared.logger.Logger;
-
 /**
  * This class defines the communication protocol that both server and client have to meet.
  */
@@ -96,8 +94,21 @@ public enum NetworkProtocol {
 
 	;
 
-	static enum Communicator {
-		CLIENT, SERVER;
+	/**
+	 * Describes a network type.
+	 */
+	public static enum Communicator {
+
+		/**
+		 * A client
+		 */
+		CLIENT,
+
+		/**
+		 * A server
+		 */
+		SERVER;
+
 	}
 
 	private final Communicator source;
@@ -110,7 +121,7 @@ public enum NetworkProtocol {
 		this.target = target;
 		this.description = description;
 		ArrayList<Integer> args = new ArrayList<>();
-		args.add(Integer.BYTES);
+		args.add(Integer.BYTES); // Size of the protocol type (minimal request size)
 		for (int size : sizes) {
 			args.add(size);
 		}
@@ -138,48 +149,36 @@ public enum NetworkProtocol {
 		return Optional.of(protocol);
 	}
 
-	private static int getMaxRequestSize(Communicator source, Communicator target) {
+	/**
+	 * Returns the size of the largest request from Communicator "source" to Communicator "target".
+	 * 
+	 * @param source
+	 *            The sender of the request.
+	 * @param target
+	 *            The receiver of the request.
+	 * @return The size of the largest request.
+	 */
+	public static int getMaxRequestSize(Communicator source, Communicator target) {
 		NetworkProtocol[] values = values();
 		return Arrays.stream(values).filter(e -> e.source == source && e.target == target)
 				.mapToInt(e -> e.argumentSizes.stream().mapToInt(Integer::intValue).sum()).max().getAsInt();
+		// Cannot be empty because of the minimal size of the protocol type
 	}
 
-	private static int getMaxArgumentSize(Communicator source, Communicator target) {
+	/**
+	 * Returns the size of the largest request argument from Communicator "source" to Communicator "target".
+	 * 
+	 * @param source
+	 *            The sender of the request.
+	 * @param target
+	 *            The receiver of the request.
+	 * @return The size of the largest request argument.
+	 */
+	public static int getMaxArgumentSize(Communicator source, Communicator target) {
 		NetworkProtocol[] values = values();
 		return Arrays.stream(values).filter(e -> e.source == source && e.target == target)
 				.mapToInt(e -> e.argumentSizes.stream().mapToInt(Integer::intValue).max().getAsInt()).max().getAsInt();
+		// Cannot be empty because of the minimal size of the protocol type
 	}
 
-	/**
-	 * Returns the size of a server read buffer.
-	 * 
-	 * @return The size of a server read buffer.
-	 */
-	public static int getServerReadBufferSize() {
-		int max = getMaxArgumentSize(CLIENT, SERVER);
-		Logger.debug("SERVER READ BUFFER SIZE : " + max);
-		return max;
-	}
-
-	/**
-	 * Returns the size of a server write buffer.
-	 * 
-	 * @return The size of a server write buffer.
-	 */
-	public static int getServerWriteBufferSize() {
-		int max = getMaxRequestSize(SERVER, CLIENT) * NetworkCommunication.BUFFER_MULTIPLIER;
-		Logger.debug("SERVER WRITE BUFFER SIZE : " + max);
-		return max;
-	}
-
-	/**
-	 * Returns the size of the server broadcast buffer.
-	 * 
-	 * @return The size of the server broadcast buffer.
-	 */
-	public static int getServerBroadcastBufferSize() {
-		int max = getMaxRequestSize(SERVER, CLIENT);
-		Logger.debug("SERVER BROADCAST BUFFER SIZE : " + max);
-		return max;
-	}
 }

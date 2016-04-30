@@ -10,8 +10,9 @@ public class Username {
 
 	/**
 	 * Returns a new username from a string.
-	 *  
-	 * @param name The username
+	 * 
+	 * @param name
+	 *            The username
 	 */
 	public Username(String name) {
 		this.name = Objects.requireNonNull(name);

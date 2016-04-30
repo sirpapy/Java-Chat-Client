@@ -18,7 +18,6 @@ public class NetworkCommunication {
 	static final int USERNAME_MAX_SIZE = 32;
 	static final int MESSAGE_MAX_SIZE = 512;
 	static final int FILE_CHUNK_SIZE = 4096;
-	static final int BUFFER_MULTIPLIER = 10;
 	static final int FILENAME_MAX_SIZE = 64;
 
 	private NetworkCommunication() {
@@ -90,7 +89,7 @@ public class NetworkCommunication {
 	}
 
 	/**
-	 * Returns the charset to use to meet the protocol.
+	 * Returns the charset to use in order to meet the protocol.
 	 * 
 	 * @return The protocol charset
 	 */

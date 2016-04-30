@@ -18,8 +18,11 @@ import java.util.Set;
 public class SelectorLogger {
 
 	private static final PrintStream OUTPUT = System.out;
-	
+
 	private static boolean LOG_SELECT = false;
+
+	private SelectorLogger() {
+	}
 
 	/**
 	 * Enables or disables selector logging.
@@ -30,7 +33,7 @@ public class SelectorLogger {
 	public static void activateSelect(boolean activation) {
 		LOG_SELECT = activation;
 	}
-	
+
 	private static String remoteAddressToString(SocketChannel sc) {
 		try {
 			return sc.getRemoteAddress().toString();

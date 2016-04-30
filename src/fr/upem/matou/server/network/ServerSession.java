@@ -25,8 +25,8 @@ import fr.upem.matou.shared.utils.ByteBuffers;
  */
 class ServerSession {
 
-	private static final int BUFFER_SIZE_INPUT = NetworkProtocol.getServerReadBufferSize();
-	private static final int BUFFER_SIZE_OUTPUT = NetworkProtocol.getServerWriteBufferSize();
+	private static final int BUFFER_SIZE_INPUT = ServerCommunication.getServerReadBufferSize();
+	private static final int BUFFER_SIZE_OUTPUT = ServerCommunication.getServerWriteBufferSize();
 	private static final int USERNAME_MAX_SIZE = NetworkCommunication.getUsernameMaxSize();
 	private static final int MESSAGE_MAX_SIZE = NetworkCommunication.getMessageMaxSize();
 

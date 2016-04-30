@@ -48,7 +48,7 @@ public class ShellInterface implements UserInterface {
 			}
 			Optional<ClientEvent> event = ShellCommand.parseLine(line);
 			if (!event.isPresent()) {
-				warnInvalidCommand();
+				warnInvalidCommand(line);
 				continue;
 			}
 			return event;
@@ -56,7 +56,7 @@ public class ShellInterface implements UserInterface {
 	}
 
 	@Override
-	public void displayMessage(Message message) {
+	public void displayNewMessage(Message message) {
 		requireNonNull(message);
 
 		boolean isPrivate = message.isPrivate();
@@ -76,25 +76,25 @@ public class ShellInterface implements UserInterface {
 	}
 
 	@Override
-	public void displayNewConnectionEvent(Username username) {
+	public void displayNewConnection(Username username) {
 		requireNonNull(username);
 		output.println("<" + username + " joins the chat>");
 	}
 
 	@Override
-	public void displayNewDisconnectionEvent(Username username) {
+	public void displayNewDisconnection(Username username) {
 		requireNonNull(username);
 		output.println("<" + username + " left the chat>");
 	}
 
 	@Override
-	public void displayNewPrivateRequestEvent(Username username) {
+	public void displayNewPrivateRequest(Username username) {
 		requireNonNull(username);
 		output.println("<" + username + " asks for a private connection>");
 	}
 
 	@Override
-	public void displayNewPrivateAcceptionEvent(Username username) {
+	public void displayNewPrivateAcception(Username username) {
 		requireNonNull(username);
 		output.println("<" + username + " accepts the private connection>");
 	}
@@ -120,25 +120,25 @@ public class ShellInterface implements UserInterface {
 
 	@Override
 	public void warnInvalidUsername(String username) {
-		error.println("This username is not valid");
+		error.println("This username is not valid : " + username);
 	}
 
 	@Override
 	public void warnUnavailableUsername(String username) {
-		error.println("This username is not available");
+		error.println("This username is not available : " + username);
 	}
 
 	@Override
 	public void warnInvalidMessageEvent(ClientEvent event) {
-		error.println("This message is not valid");
+		error.println("This request is not valid");
 	}
 
-	private void warnInvalidCommand() {
-		error.println("Invalid command" + "\n<message> : send a public message"
+	private void warnInvalidCommand(String line) {
+		error.println("Invalid command : " + line + "\n<message> : send a public message"
 				+ "\n/open <username> : ask for a private connection"
 				+ "\n/accept <username> : accept a private connection"
 				+ "\n/pv <username> <message> : send a private message"
-				+ "\n/file <username> <filepath> : send a private file");
+				+ "\n/file <username> <filepath> : send a private file" + "\n/exit : leave the chat");
 	}
 
 	@Override
