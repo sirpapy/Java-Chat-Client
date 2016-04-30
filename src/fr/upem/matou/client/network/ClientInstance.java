@@ -231,7 +231,7 @@ class ClientInstance implements Closeable {
 			case PVFILE: {
 				Path path = ClientCommunication.receiveRequestPVFILE(pv, username.toString());
 				Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + username));
-				Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PATH : " + path));
+				Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "FILENAME : " + path.getFileName()));
 				ui.displayNewFileReception(username.toString(), path);
 
 				break;

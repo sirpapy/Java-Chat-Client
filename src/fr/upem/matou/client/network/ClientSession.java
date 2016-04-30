@@ -88,7 +88,7 @@ class ClientSession {
 		}
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.PVFILE));
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "USERNAME : " + username));
-		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PATH : " + path));
+		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "FILENAME : " + path.getFileName()));
 		try {
 			return ClientCommunication.sendRequestPVFILE(sc, path);
 		} catch (IOException e) {

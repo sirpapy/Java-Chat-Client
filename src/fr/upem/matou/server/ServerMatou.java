@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
@@ -72,11 +73,12 @@ public class ServerMatou {
 		}
 	}
 
-	private static void loadConfig() {
+	private static void loadConfig() throws IOException {
 		try (Stream<String> lines = Files.lines(SERVER_CONFIG)) {
 			lines.map(Configuration::removeComments).filter(Configuration::isAffectation)
 					.forEach(ServerMatou::loadConfigLine);
-		} catch (@SuppressWarnings("unused") IOException __) {
+		} catch (@SuppressWarnings("unused") NoSuchFileException __) {
+			// There is no configuration file
 			return;
 		}
 	}
@@ -92,11 +94,12 @@ public class ServerMatou {
 	 * 
 	 * @param args
 	 *            Command line arguments
-	 * @throws FileNotFoundException
-	 *             If some other error occurs while opening or creating the log file.
+	 * @throws IOException
+	 *             If an I/O error occurs during initialization (loading the configuration file and parsing the command
+	 *             line arguments)
 	 * 
 	 */
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws IOException {
 
 		int opt;
 		for (opt = 0; opt < args.length; opt++) {
