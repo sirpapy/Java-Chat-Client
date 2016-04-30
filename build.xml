@@ -4,7 +4,6 @@
 	<!-- Project properties -->
 	<property name="dir.sources" value="src" />
 	<property name="dir.classes" value="classes" />
-	<property name="dir.libraries" value="libs" />
 	<property name="dir.documentation" value="docs/api" />
 	<property name="dir.files" value="files" />
 	<property name="file.client.jar" value="client.jar" />
@@ -14,18 +13,15 @@
 
 	<!-- Classpath -->
 	<path id="project.classpath">
-		<fileset dir="${dir.libraries}">
-			<include name="*.jar" />
-		</fileset>
 		<pathelement location="${dir.classes}" />
 	</path>
 
-	<!-- MANIFEST.MF generation from classpath -->
+	<!-- Client MANIFEST.MF generation from classpath -->
 	<manifestclasspath property="client.MANIFEST.MF" jarfile="${class.client.main}">
 		<classpath refid="project.classpath" />
 	</manifestclasspath>
 
-	<!-- MANIFEST.MF generation from classpath -->
+	<!-- Server MANIFEST.MF generation from classpath -->
 	<manifestclasspath property="server.MANIFEST.MF" jarfile="${class.server.main}">
 		<classpath refid="project.classpath" />
 	</manifestclasspath>
@@ -61,7 +57,7 @@
 	</target>
 
 	<!-- Runnable jar generation -->
-	<target name="jar" depends="compile" description="Generate the runnable jar file">
+	<target name="jar" depends="compile" description="Generate runnable jar files">
 		<jar basedir="${dir.classes}" jarfile="${file.client.jar}">
 			<manifest>
 				<attribute name="Main-Class" value="${class.client.main}" />

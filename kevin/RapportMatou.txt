@@ -22,10 +22,13 @@ Features / Implémentation :
 	- Format du Logger
 	- On ne met pas à jour OP_ACCEPT car il faut pouvoir accepter une connexion pour la refuser
 	- Un seul bytebuffer d'écriture
+	- Fichier de configuration
+	- Si le fichier "files" a disparu...
 
 Améliorations possibles :
 	- Déconnecter les inactifs non authentifiés depuis plus d'1 minute.
 	- Déconnecter les inactifs authentifiés depuis plus de 10 minutes.
+	- Pouvoir refuser des fichiers
 	
 Disclaimer :
 	- Colorator
