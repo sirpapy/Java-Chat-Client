@@ -1,0 +1,30 @@
+Points forts :
+	- Très peu d'allocations côté serveur
+	- Un ClientCore peut créer plusieurs ClientInstance
+	- Ne dépend pas d'une seule interface utilisateur
+
+Points faibles :
+	- Architecture compliquée (Core + Instance/Database + Session)
+	- Systèmes d'évenements...
+	
+Difficultés rencontrés :
+	- ByteBuffers...
+	- Gestion des évenements
+
+Bug connu :
+	- Localhost privé
+	- Le Sender Thread n'est pas interrompu à cause du Shell
+	- Alphabet bizarre (Georgian)
+
+Features / Implémentation :
+	- Format du Logger
+	- On ne met pas à jour OP_ACCEPT car il faut pouvoir accepter une connexion pour la refuser
+	- Un seul bytebuffer d'écriture
+
+Améliorations possibles :
+	- Déconnecter les inactifs non authentifiés depuis plus d'1 minute.
+	- Déconnecter les inactifs authentifiés depuis plus de 10 minutes.
+	
+Disclaimer :
+	- Colorator
+	- SelectorLogger

@@ -20,7 +20,7 @@ public class Tasks {
 	
 	// TODO : Vérifier qu'il n'y a pas de code mort
 	// TODO : Ecrire la javadoc
-	// TODO : Ecrire le rapport + disclaimers (colorator)
+	// TODO : Ecrire le rapport
 	// TODO : Build.xml
 	
 	// TEMP : Désactiver le logger dans le fichier de config
