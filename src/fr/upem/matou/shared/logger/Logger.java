@@ -12,11 +12,14 @@ import java.text.DateFormat;
 
 /**
  * This class provides static methods in order to log events by priority.
+ * 
+ * This logger has two output stream : the normal output and the exception output. All logging methods will write in one
+ * and only one output.
  */
 public class Logger {
 
 	/**
-	 * This enum describes the direction of a network event (incoming or outgoing).
+	 * This enum describes the direction of a network request (incoming or outgoing).
 	 */
 	public static enum NetworkLogType {
 
@@ -32,18 +35,16 @@ public class Logger {
 
 	}
 
-	private static PrintStream OUTPUT = System.err;
-	private static PrintStream EXCEPT = System.err;
-
-	private static boolean HEADER_INFO = false; // display more info
-
+	private static PrintStream OUTPUT = System.err; // Normal output
 	private static boolean LOG_ERROR = false;
 	private static boolean LOG_WARNING = false;
 	private static boolean LOG_INFO = false;
 	private static boolean LOG_DEBUG = false;
 
+	private static PrintStream EXCEPT = System.err; // Exception output
 	private static boolean LOG_EXCEPTION = true;
 
+	private static boolean HEADER_INFO = false; // display more info
 	private static final String SEPARATOR = " | ";
 
 	private Logger() {
@@ -72,7 +73,7 @@ public class Logger {
 	}
 
 	/**
-	 * Enables or disables the header info of the logger.
+	 * Enables or disables the header info of the logger. The header contains detailed info about time and threads.
 	 * 
 	 * @param activation
 	 *            true to enable or false to disable.
@@ -147,6 +148,9 @@ public class Logger {
 		}
 	}
 
+	/*
+	 * Formats a message associated with a severity level. The message is not modified unless HEADER_INFO is set.
+	 */
 	private static String formatLog(String level, String message) {
 		if (!HEADER_INFO) {
 			return message;
@@ -198,7 +202,7 @@ public class Logger {
 			break;
 		}
 
-		if (!HEADER_INFO) {
+		if (!HEADER_INFO) { // Only significant information
 			return String.join(SEPARATOR, direction, message);
 		}
 
@@ -209,46 +213,10 @@ public class Logger {
 	}
 
 	/**
-	 * Logs a debug message to the error output.
+	 * Logs an error message to the logger normal output.
 	 * 
 	 * @param message
-	 *            The message
-	 */
-	public static void debug(String message) {
-		if (LOG_DEBUG) {
-			OUTPUT.println(colorPurple(formatLog("DEBUG", message)));
-		}
-	}
-
-	/**
-	 * Logs a network event to the normal output.
-	 * 
-	 * @param message
-	 *            The message
-	 */
-	public static void info(String message) {
-		if (LOG_INFO) {
-			OUTPUT.println(colorGreen(formatLog("INFO", message)));
-		}
-	}
-
-	/**
-	 * Logs a warning to the error output.
-	 * 
-	 * @param message
-	 *            The message
-	 */
-	public static void warning(String message) {
-		if (LOG_WARNING) {
-			OUTPUT.println(colorYellow(formatLog("WARNING", message)));
-		}
-	}
-
-	/**
-	 * Logs an error to the error output.
-	 * 
-	 * @param message
-	 *            The message
+	 *            The message.
 	 */
 	public static void error(String message) {
 		if (LOG_ERROR) {
@@ -257,10 +225,46 @@ public class Logger {
 	}
 
 	/**
-	 * Logs an exception to the error output.
+	 * Logs a warning message to the logger normal output.
+	 * 
+	 * @param message
+	 *            The message.
+	 */
+	public static void warning(String message) {
+		if (LOG_WARNING) {
+			OUTPUT.println(colorYellow(formatLog("WARNING", message)));
+		}
+	}
+
+	/**
+	 * Logs an informative message to the logger normal output.
+	 * 
+	 * @param message
+	 *            The message.
+	 */
+	public static void info(String message) {
+		if (LOG_INFO) {
+			OUTPUT.println(colorGreen(formatLog("INFO", message)));
+		}
+	}
+
+	/**
+	 * Logs a debug message to the logger normal output.
+	 * 
+	 * @param message
+	 *            The message.
+	 */
+	public static void debug(String message) {
+		if (LOG_DEBUG) {
+			OUTPUT.println(colorPurple(formatLog("DEBUG", message)));
+		}
+	}
+
+	/**
+	 * Logs an exception to the logger exception output.
 	 * 
 	 * @param exception
-	 *            The message
+	 *            The message.
 	 */
 	public static void exception(Exception exception) {
 		if (LOG_EXCEPTION) {
