@@ -1,5 +1,6 @@
 package fr.upem.matou.client;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -22,8 +23,7 @@ public class ClientMatou {
 
 	private ClientMatou() {
 	}
-	
-	@SuppressWarnings("resource")
+
 	private static void loadConfigLine(String line) {
 		ConfigEntry entry = Configuration.parseLine(line);
 		String command = entry.getCommand();
@@ -61,24 +61,6 @@ public class ClientMatou {
 			Logger.activateHeader(activation);
 			break;
 		}
-		case "LOG_OUTPUT": {
-			try {
-				PrintStream ps = new PrintStream(argument);
-				Logger.attachOutput(ps);
-			} catch (@SuppressWarnings("unused") IOException __) {
-				// Ignored
-			}
-			break;
-		}
-		case "LOG_EXCEPT": {
-			try {
-				PrintStream ps = new PrintStream(argument);
-				Logger.attachException(ps);
-			} catch (@SuppressWarnings("unused") IOException __) {
-				// Ignored
-			}
-			break;
-		}
 		default:
 			break;
 		}
@@ -92,9 +74,12 @@ public class ClientMatou {
 			return;
 		}
 	}
-	
+
 	private static void usage() {
-		System.err.println("Usage : host port [username]");
+		System.err.println(
+				"Usage : [options] host port [username]" + "\nAvailable options :" + "\n-help : displays all options"
+						+ "\n-logger path : redirects the normal output of the logger to the given path"
+						+ "\n-exception path : redirects the exception output of the logger to the given path");
 	}
 
 	/**
@@ -102,25 +87,67 @@ public class ClientMatou {
 	 * 
 	 * @param args
 	 *            Command line arguments
+	 * @throws FileNotFoundException
+	 *             If some other error occurs while opening or creating the log file.
+	 * 
 	 */
-	public static void main(String[] args) {
-		if (args.length < 2 || args.length > 3) {
+	public static void main(String[] args) throws FileNotFoundException {
+
+		int opt;
+		for (opt = 0; opt < args.length; opt++) {
+
+			if (!args[opt].startsWith("-")) {
+				break;
+			}
+
+			switch (args[opt]) {
+
+			case "-logger": {
+				String arg = args[++opt];
+				PrintStream ps = new PrintStream(arg);
+				Logger.attachOutput(ps);
+				break;
+			}
+
+			case "-exception": {
+				String arg = args[++opt];
+				PrintStream ps = new PrintStream(arg);
+				Logger.attachException(ps);
+				break;
+			}
+
+			case "-help": {
+				usage();
+				return;
+			}
+
+			default:
+				System.err.println("Unknown option : " + args[opt]);
+				usage();
+				return;
+
+			}
+		}
+		// Now "opt" is the first index of non optional arguments
+
+		int remaining = args.length - opt;
+		if (remaining < 2 || remaining > 3) { // Incorrect number of remaining arguments
 			usage();
 			return;
 		}
 
 		loadConfig();
-		
-		String host = args[0];
-		int port = Integer.parseInt(args[1]);
-		
-		String username = null;
-		if(args.length >= 3) {
-			username = args[2];
+
+		String host = args[opt];
+		int port = Integer.parseInt(args[opt + 1]);
+
+		String username = null; // Optional argument
+		if (remaining == 3) {
+			username = args[opt + 2];
 		}
-		
+
 		try (ClientCore client = new ClientCore(host, port)) {
-			if(username==null) {
+			if (username == null) {
 				client.startChat();
 			} else {
 				client.startChat(username);
@@ -131,6 +158,6 @@ public class ClientMatou {
 		} catch (InterruptedException e) {
 			Logger.warning(e.toString());
 		}
-		
+
 	}
 }

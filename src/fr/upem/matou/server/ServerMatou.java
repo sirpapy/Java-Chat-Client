@@ -1,5 +1,6 @@
 package fr.upem.matou.server;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -24,13 +25,12 @@ public class ServerMatou {
 	private ServerMatou() {
 	}
 
-	@SuppressWarnings("resource")
 	private static void loadConfigLine(String line) {
 		ConfigEntry entry = Configuration.parseLine(line);
 		String command = entry.getCommand();
 		String argument = entry.getArgument();
 		System.out.println(command + ":" + argument);
-		
+
 		switch (command) {
 		case "COLORATOR": {
 			boolean activation = Boolean.parseBoolean(argument);
@@ -67,24 +67,6 @@ public class ServerMatou {
 			Logger.activateHeader(activation);
 			break;
 		}
-		case "LOG_OUTPUT": {
-			try {
-				PrintStream ps = new PrintStream(argument);
-				Logger.attachOutput(ps);
-			} catch (@SuppressWarnings("unused") IOException __) {
-				// Ignored
-			}
-			break;
-		}
-		case "LOG_EXCEPT": {
-			try {
-				PrintStream ps = new PrintStream(argument);
-				Logger.attachException(ps);
-			} catch (@SuppressWarnings("unused") IOException __) {
-				// Ignored
-			}
-			break;
-		}
 		default:
 			break;
 		}
@@ -100,7 +82,9 @@ public class ServerMatou {
 	}
 
 	private static void usage() {
-		System.err.println("Usage : port");
+		System.err.println("Usage : [options] port" + "\nAvailable options :" + "\n-help : displays all options"
+				+ "\n-logger path : redirects the normal output of the logger to the given path"
+				+ "\n-exception path : redirects the exception output of the logger to the given path");
 	}
 
 	/**
@@ -108,16 +92,59 @@ public class ServerMatou {
 	 * 
 	 * @param args
 	 *            Command line arguments
+	 * @throws FileNotFoundException
+	 *             If some other error occurs while opening or creating the log file.
+	 * 
 	 */
-	public static void main(String[] args) {
-		if (args.length != 1) {
+	public static void main(String[] args) throws FileNotFoundException {
+
+		int opt;
+		for (opt = 0; opt < args.length; opt++) {
+
+			if (!args[opt].startsWith("-")) {
+				break;
+			}
+
+			switch (args[opt]) {
+
+			case "-logger": {
+				String arg = args[++opt];
+				PrintStream ps = new PrintStream(arg);
+				Logger.attachOutput(ps);
+				break;
+			}
+
+			case "-exception": {
+				String arg = args[++opt];
+				PrintStream ps = new PrintStream(arg);
+				Logger.attachException(ps);
+				break;
+			}
+
+			case "-help": {
+				usage();
+				return;
+			}
+
+			default:
+				System.err.println("Unknown option : " + args[opt]);
+				usage();
+				return;
+
+			}
+		}
+		// Now "opt" is the first index of non optional arguments
+
+		int remaining = args.length - opt;
+		if (remaining != 1) { // Incorrect number of remaining arguments
 			usage();
 			return;
 		}
 
 		loadConfig();
 
-		int port = Integer.parseInt(args[0]);
+		int port = Integer.parseInt(args[opt]);
+
 		try (ServerCore server = new ServerCore(port)) {
 			server.launch();
 		} catch (IOException e) {

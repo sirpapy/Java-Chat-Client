@@ -3,6 +3,7 @@ Points forts :
 	- Un ClientCore peut créer plusieurs ClientInstance
 	- Ne dépend pas d'une seule interface utilisateur
 	- ThreadGroup
+	- Pseudo ignorant la casse
 
 Points faibles :
 	- Architecture compliquée (Core + Instance/Database + Session)
@@ -29,3 +30,6 @@ Améliorations possibles :
 Disclaimer :
 	- Colorator
 	- SelectorLogger
+	
+Schéma :
+	- UML
