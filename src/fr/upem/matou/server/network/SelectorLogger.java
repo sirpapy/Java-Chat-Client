@@ -15,7 +15,7 @@ import java.util.Set;
 /**
  * This class provides static methods in order to log selector events.
  */
-public class ServerLogger {
+public class SelectorLogger {
 
 	private static final PrintStream OUTPUT = System.out;
 	

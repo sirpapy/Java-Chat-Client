@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import fr.upem.matou.server.network.ServerCore;
-import fr.upem.matou.server.network.ServerLogger;
+import fr.upem.matou.server.network.SelectorLogger;
 import fr.upem.matou.shared.logger.Colorator;
 import fr.upem.matou.shared.logger.Logger;
 import fr.upem.matou.shared.utils.Configuration;
@@ -59,7 +59,7 @@ public class ServerMatou {
 		}
 		case "SELECT": {
 			boolean activation = Boolean.parseBoolean(argument);
-			ServerLogger.activateSelect(activation);
+			SelectorLogger.activateSelect(activation);
 			break;
 		}
 		case "HEADER": {

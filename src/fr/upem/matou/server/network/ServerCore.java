@@ -57,10 +57,10 @@ public class ServerCore implements Closeable {
 
 		while (!Thread.interrupted()) {
 
-			ServerLogger.logSelector(selector);
+			SelectorLogger.logSelector(selector);
 			selector.select();
 
-			ServerLogger.logSelectedKeys(selectedKeys);
+			SelectorLogger.logSelectedKeys(selectedKeys);
 			processSelectedKeys(selectedKeys);
 
 			selectedKeys.clear();
