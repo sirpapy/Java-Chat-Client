@@ -3,7 +3,6 @@ package fr.upem.matou.client.network;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Optional;
 
 import fr.upem.matou.client.ui.ShellInterface;
 import fr.upem.matou.client.ui.UserInterface;
@@ -32,20 +31,6 @@ public class ClientCore implements Closeable {
 	}
 
 	/**
-	 * Starts a chat without a predefined username. User will have to choose a username manually.
-	 * 
-	 * @throws IOException
-	 *             If an I/O error occurs.
-	 * @throws InterruptedException
-	 *             If an interruption occurs.
-	 */
-	public void startChat() throws IOException, InterruptedException {
-		try (ClientInstance chat = new ClientInstance(address, ui)) {
-			chat.start();
-		}
-	}
-
-	/**
 	 * Starts a chat with a predefined username.
 	 * 
 	 * @param username
@@ -62,20 +47,16 @@ public class ClientCore implements Closeable {
 	}
 
 	/**
-	 * Starts a chat with a predefined username.
+	 * Starts a chat without a predefined username. User will have to choose a username manually.
 	 * 
-	 * @param username
-	 *            An optional describing a username.
 	 * @throws IOException
 	 *             If an I/O error occurs.
 	 * @throws InterruptedException
 	 *             If an interruption occurs.
 	 */
-	public void startChat(Optional<String> username) throws IOException, InterruptedException {
-		if (username.isPresent()) {
-			startChat(username.get());
-		} else {
-			startChat();
+	public void startChat() throws IOException, InterruptedException {
+		try (ClientInstance chat = new ClientInstance(address, ui)) {
+			chat.start();
 		}
 	}
 

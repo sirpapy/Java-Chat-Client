@@ -366,7 +366,8 @@ class ClientInstance implements Closeable {
 				try {
 					stop = messageSender();
 				} catch (IOException e) {
-					Logger.warning(formatNetworkData(sc,e.toString()));
+					Logger.error(formatNetworkData(sc, e.toString()));
+					Logger.exception(e);
 					return;
 				}
 			}
@@ -381,7 +382,7 @@ class ClientInstance implements Closeable {
 				try {
 					messageReceiver();
 				} catch (IOException e) {
-					Logger.warning(formatNetworkData(sc,e.toString()));
+					Logger.error(formatNetworkData(sc, e.toString()));
 					Logger.exception(e);
 					return;
 				}
@@ -429,7 +430,7 @@ class ClientInstance implements Closeable {
 
 	@Override
 	public void close() throws IOException {
-		Logger.debug("CHAT INSTANCE CLOSING");
+		Logger.debug(formatNetworkData(sc, "CHAT INSTANCE CLOSING"));
 		sc.close();
 		interruptAllThreads();
 	}

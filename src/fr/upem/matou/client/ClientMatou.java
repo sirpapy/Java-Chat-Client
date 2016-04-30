@@ -5,7 +5,6 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import fr.upem.matou.client.network.ClientCore;
@@ -121,8 +120,11 @@ public class ClientMatou {
 		}
 		
 		try (ClientCore client = new ClientCore(host, port)) {
-			client.startChat(Optional.ofNullable(username));
-			client.startChat(Optional.ofNullable(username));
+			if(username==null) {
+				client.startChat();
+			} else {
+				client.startChat(username);
+			}
 		} catch (IOException e) {
 			Logger.error(e.toString());
 			Logger.exception(e);
