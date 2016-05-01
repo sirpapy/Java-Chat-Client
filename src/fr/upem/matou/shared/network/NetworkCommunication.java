@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 /**
- * This class gathers the common factors between Client & Server communication. All these methods should be used in
+ * This class gathers the common factors between Client and Server communication. All these methods should be used in
  * order to meet the protocol requirements.
  */
 public class NetworkCommunication {

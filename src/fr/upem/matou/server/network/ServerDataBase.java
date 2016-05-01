@@ -20,7 +20,7 @@ import fr.upem.matou.shared.network.Username;
  */
 class ServerDataBase {
 
-	private static final int MAX_CLIENT = 10;
+	private static final int MAX_CLIENT = 10; // Maximum number of connected clients
 	private static final int BUFFER_SIZE_BROADCAST = ServerCommunication.getServerBroadcastBufferSize();
 
 	private final HashMap<SocketChannel, ServerSession> sessions = new HashMap<>();
