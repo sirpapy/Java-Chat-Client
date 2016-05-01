@@ -1,3 +1,17 @@
+Features / Implémentation :
+	- On ne met pas à jour OP_ACCEPT car il faut pouvoir accepter une connexion pour la refuser
+	- Un seul bytebuffer d'écriture
+	- Si le fichier "files" a disparu...
+
+
+	
+Disclaimer :
+	- Colorator
+	- SelectorLogger
+	
+Si rien n'est précisé : ByteBuffer en write mode
+Commandes : exit, etc
+
 Points forts :
 	- Très peu d'allocations côté serveur
 	- Un ClientCore peut créer plusieurs ClientInstance
@@ -17,25 +31,10 @@ Bug connu :
 	- Localhost privé
 	- Le Sender Thread n'est pas interrompu à cause du Shell
 	- Pseudo et alphabet bizarre (Georgian)
-
-Features / Implémentation :
-	- Format du Logger
-	- On ne met pas à jour OP_ACCEPT car il faut pouvoir accepter une connexion pour la refuser
-	- Un seul bytebuffer d'écriture
-	- Fichier de configuration
-	- Si le fichier "files" a disparu...
-
+	- SOURCE accepte DESTINATION si même IP
+	
 Améliorations possibles :
 	- Déconnecter les inactifs non authentifiés depuis plus d'1 minute.
 	- Déconnecter les inactifs authentifiés depuis plus de 10 minutes.
 	- Pouvoir refuser des fichiers
-	
-Disclaimer :
-	- Colorator
-	- SelectorLogger
-	
-Schéma :
-	- UML
-	
-Si rien n'est précisé : ByteBuffer en write mode
-Commandes : exit, etc
+	- Annuler une demande /open

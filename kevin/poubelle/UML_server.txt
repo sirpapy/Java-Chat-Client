@@ -1,0 +1,34 @@
+package fr.upem.matou.server {
+	class ServerMatou
+}
+
+package fr.upem.matou.server.network {
+	class ServerCommunication
+	class ServerCore
+	class ServerDataBase
+	class ServerSession
+	class SelectorLogger
+}
+
+package fr.upem.matou.shared.network {
+	class NetworkCommunication
+	enum NetworkProtocol
+	enum ErrorType
+	class Username
+}
+
+package fr.upem.matou.shared.logger {
+	class Logger
+	class Colorator
+}
+
+package fr.upem.matou.shared.utils {
+	class ByteBuffers
+	class Configuration
+}
+
+class ServerCore {
+	+ServerCore(int port)
+	+launch() : void
+	+close() : void
+}
