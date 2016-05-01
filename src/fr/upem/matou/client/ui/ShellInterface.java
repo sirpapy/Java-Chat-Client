@@ -120,21 +120,21 @@ public class ShellInterface implements UserInterface {
 
 	@Override
 	public void warnInvalidUsername(String username) {
-		error.println("This username is not valid : " + username);
+		error.println("[!] This username is not valid : " + username + " [!]");
 	}
 
 	@Override
 	public void warnUnavailableUsername(String username) {
-		error.println("This username is not available : " + username);
+		error.println("[!] This username is not available : " + username + "[!]");
 	}
 
 	@Override
 	public void warnInvalidMessageEvent(ClientEvent event) {
-		error.println("This request is not valid");
+		error.println("[!] This request is not valid [!]");
 	}
 
 	private void warnInvalidCommand(String line) {
-		error.println("Invalid command : " + line + "\n<message> : send a public message"
+		error.println("[!] Invalid command : " + line + " [!]\n<message> : send a public message"
 				+ "\n/open <username> : ask for a private connection"
 				+ "\n/accept <username> : accept a private connection"
 				+ "\n/pv <username> <message> : send a private message"
@@ -148,16 +148,16 @@ public class ShellInterface implements UserInterface {
 		switch (type) {
 
 		case USRNOTCO:
-			error.println("This user is not connected");
+			error.println("[!] This user is not connected [!]");
 			break;
 
 		case USRNOTPVREQ:
-			error.println("This user did not send a private connection request");
+			error.println("[!] This user did not send a private connection request [!]");
 			break;
 
 		case UNK:
 		default:
-			error.println("Unknown error");
+			error.println("[!] Unknown error [!]");
 			break;
 
 		}

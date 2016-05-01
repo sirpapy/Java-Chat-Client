@@ -41,14 +41,15 @@ Exécuter le client : java -jar client.jar [options] hostname port [username]
 	username : pseudo à utiliser (facultatif)
 	
 Options (serveur et client) :
-	-logger path : rediriger la sortie normale du logger dans un fichier (au lieu de la sortie d'erreur du terminal)
-	-exception path : rediriger la sortie des exception du logger dans un fichier (au lieu de la sortie d'erreur du terminal)
+	-logger path : rediriger la sortie normale du logger dans un fichier (au lieu du terminal)
+	-exception path : rediriger la sortie des exception du logger dans un fichier (au lieu du terminal)
 	
 --------------------------------------------------------------------------------
 
 Fichier de configuration
 
-	S'ils existent, les fichiers de configurations sont chargés au lancement de l'application. 
+	Les fichiers de configurations sont chargés au lancement de l'application.
+	Si aucun fichier de configuration ne peut être chargé, alors c'est la configuration par défaut du code source qui sera appliquée à l'exécution.
 	
 	Le caractère '#' est utilisé pour les commentaires dans le fichier de configuration. Tout ce qui suit ce caractère est alors ignoré lors du chargement du fichier.
 	Le caractère '=' est utilisé comme opérateur d'affectation dans le fichier de configuration.
@@ -66,4 +67,41 @@ Fichier de configuration
 	Champ(s) disponible(s) dans les fichier de configuration du serveur uniquement :
 	SELECT
 	
+--------------------------------------------------------------------------------
+
+Comportement par défaut
+	Si aucune option n'est fournie en ligne de commande : le logger utilise la sortie d'erreur standard (stderr) pour tous les évenements.
+	Si aucun fichier de configuration n'est chargé : le logger n'affiche que les exceptions.
+	
+Valeurs du fichier de configuration par défaut du client : 
+	COLORATOR=false
+	HEADER=false
+	ERROR=true
+	WARNING=true
+	INFO=false
+	DEBUG=false
+	
+Valeurs du fichier de configuration par défaut du serveur : 
+	COLORATOR=false
+	HEADER=false
+	ERROR=true
+	WARNING=true
+	INFO=false
+	DEBUG=false
+	SELECT=true
+	
+--------------------------------------------------------------------------------
+
+Colorateur
+	Le colorateur utilise les séquences d'échappement ANSI du terminal. 
+	Il fonctionne correctement sur la plupart des terminaux GNU/Linux et améliore la lisibilité du logger.
+	
+Code couleur
+	Rouge : erreur (problème critique)
+	Jaune : avertissement (problème non critique)
+	Vert : information sur les données échangées sur le réseau
+	Violet : message de debug
+	Bleu (serveur) : liste des clés dans le sélecteur
+	Cyan (serveur) : liste des clés sélectionnées par le sélecteur
+
 --------------------------------------------------------------------------------
