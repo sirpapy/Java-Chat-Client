@@ -1,9 +1,3 @@
-Features / Implémentation :
-	- On ne met pas à jour OP_ACCEPT car il faut pouvoir accepter une connexion pour la refuser
-	- Un seul bytebuffer d'écriture
-	- Si le fichier "files" a disparu...
-
-
 	
 Disclaimer :
 	- Colorator
