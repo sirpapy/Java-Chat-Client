@@ -136,14 +136,6 @@ public class ShellInterface implements UserInterface {
 		error.println("[!] This request is not valid [!]");
 	}
 
-	private void warnInvalidCommand(String line) {
-		error.println("[!] Invalid command : " + line + " [!]\n<message> : send a public message"
-				+ "\n/open <username> : ask for a private connection"
-				+ "\n/accept <username> : accept a private connection"
-				+ "\n/pv <username> <message> : send a private message"
-				+ "\n/file <username> <filepath> : send a private file" + "\n/exit : leave the chat");
-	}
-
 	@Override
 	public void warnError(ErrorType type) {
 		requireNonNull(type);
@@ -164,6 +156,14 @@ public class ShellInterface implements UserInterface {
 			break;
 
 		}
+	}
+	
+	private void warnInvalidCommand(String line) {
+		error.println("[!] Invalid command : " + line + " [!]\n<message> : send a public message"
+				+ "\n/open <username> : ask for a private connection"
+				+ "\n/accept <username> : accept a private connection"
+				+ "\n/pv <username> <message> : send a private message"
+				+ "\n/file <username> <filepath> : send a private file" + "\n/exit : leave the chat");
 	}
 
 	@Override

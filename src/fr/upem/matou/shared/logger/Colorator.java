@@ -24,7 +24,7 @@ public class Colorator {
 
 	private Colorator() {
 	}
-	
+
 	/**
 	 * Enables or disables the colorator.
 	 * 
@@ -157,15 +157,15 @@ public class Colorator {
 	/**
 	 * Print all colors.
 	 */
-	public static void printColors() {
-		System.out.println(Colorator.colorBlack("BLACK"));
-		System.out.println(Colorator.colorBlue("BLUE"));
-		System.out.println(Colorator.colorCyan("CYAN"));
-		System.out.println(Colorator.colorGreen("GREEN"));
-		System.out.println(Colorator.colorPurple("PURPLE"));
-		System.out.println(Colorator.colorRed("RED"));
+	private static void printColors() {
 		System.out.println(Colorator.colorWhite("WHITE"));
+		System.out.println(Colorator.colorRed("RED"));
 		System.out.println(Colorator.colorYellow("YELLOW"));
+		System.out.println(Colorator.colorGreen("GREEN"));
+		System.out.println(Colorator.colorCyan("CYAN"));
+		System.out.println(Colorator.colorBlue("BLUE"));
+		System.out.println(Colorator.colorPurple("PURPLE"));
+		System.out.println(Colorator.colorBlack("BLACK"));
 	}
 
 	/**

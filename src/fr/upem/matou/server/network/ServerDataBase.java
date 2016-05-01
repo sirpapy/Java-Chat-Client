@@ -108,7 +108,7 @@ class ServerDataBase {
 	/*
 	 * Returns the session associated with this SocketChannel.
 	 */
-	Optional<ServerSession> sessionOf(SocketChannel sc) { // O(1)
+	private Optional<ServerSession> sessionOf(SocketChannel sc) { // O(1)
 		return Optional.ofNullable(sessions.get(sc));
 	}
 

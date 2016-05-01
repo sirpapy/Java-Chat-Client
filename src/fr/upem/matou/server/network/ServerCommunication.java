@@ -58,7 +58,7 @@ class ServerCommunication {
 	 * 
 	 * [!] The ByteBuffer argument must be in read mode.
 	 */
-	static String readString(ByteBuffer bb) {
+	static String decodeString(ByteBuffer bb) {
 		return PROTOCOL_CHARSET.decode(bb).toString();
 	}
 

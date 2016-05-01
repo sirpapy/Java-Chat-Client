@@ -71,20 +71,20 @@ class ServerSession {
 		resetReadState();
 	}
 
-	boolean isAuthent() {
-		return authent;
-	}
-
-	void setAuthent() {
-		authent = true;
-	}
-
 	ByteBuffer getReadBuffer() {
 		return bbRead;
 	}
 
 	ByteBuffer getWriteBuffer() {
 		return bbWrite;
+	}
+
+	boolean isAuthent() {
+		return authent;
+	}
+
+	private void setAuthent() {
+		authent = true;
 	}
 
 	/*
@@ -153,7 +153,7 @@ class ServerSession {
 	 */
 	private void readUsernameArg2(ReaderUsername reader) {
 		bbRead.flip();
-		String string = ServerCommunication.readString(bbRead);
+		String string = ServerCommunication.decodeString(bbRead);
 		reader.username = new Username(string);
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + reader.username));
 
@@ -189,7 +189,7 @@ class ServerSession {
 	 */
 	private void readMessageArg2(ReaderMessage reader) {
 		bbRead.flip();
-		reader.message = ServerCommunication.readString(bbRead);
+		reader.message = ServerCommunication.decodeString(bbRead);
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "MESSAGE : " + reader.message));
 
 		resetReadState();
@@ -224,7 +224,7 @@ class ServerSession {
 	 */
 	private void readPortArg2(ReaderPort reader) {
 		bbRead.flip();
-		String string = ServerCommunication.readString(bbRead);
+		String string = ServerCommunication.decodeString(bbRead);
 		reader.username = new Username(string);
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "USERNAME : " + reader.username));
 
@@ -669,7 +669,7 @@ class ServerSession {
 	/*
 	 * Computes the new interest ops of the client.
 	 */
-	int computeInterestOps() {
+	private int computeInterestOps() {
 		int ops = 0;
 
 		if (bbWrite.position() > 0) { // There is something to write

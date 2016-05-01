@@ -19,8 +19,8 @@ public class NetworkCommunication {
 	// Maximum sizes in bytes :
 	static final int USERNAME_MAX_SIZE = 32;
 	static final int MESSAGE_MAX_SIZE = 512;
-	static final int FILE_CHUNK_SIZE = 4096;
 	static final int FILENAME_MAX_SIZE = 64;
+	private static final int FILE_CHUNK_SIZE = 4096;
 
 	private NetworkCommunication() {
 	}
