@@ -46,6 +46,23 @@ Options (serveur et client) :
 	
 --------------------------------------------------------------------------------
 
+Lancer un client de chat
+	Si un pseudo a été indiqué à la fin de la ligne de commande, le client va essayer de se connecter au serveur avec ce pseudo. En cas d'echec, le client s'arrête immédiatement.
+	Si aucun pseudo n'a été indiqué à la fin de la ligne de commande, l'utilisateur devra indiquer un pseudo manuellement sur le terminal afin que le client essaye de se connecter au serveur avec ce pseudo. En cas d'échec, le client attendra un nouveau pseudo jusqu'à recevoir un pseudo valid.
+	Une fois connecté et authentifié, le client est identifié de manière unique par ce pseudo durant toute sa session.
+	Le pseudo d'un client est libéré à sa déconnexion.
+	
+Les commandes de chat (une fois connecté et authentifié)
+	<message> : envoyer un message
+	/open <pseudo> : demander à ouvrir une connexion privé avec quelqu'un (il faut qu'il soit connecté actuellement)
+	/accept <pseudo> : accepter d'ouvrir une connexion privée avec quelqu'un (il faut qu'il ait demandé la connexion au préalable)
+	/pv <pseudo> <message> : envoyer un message privé à quelqu'un (il faut être connecté en privé avec cette personne au préalable)
+	/file <pseudo> <fichier> : envoyer un fichier privé à quelqu'un (il faut être connecté en privé avec cette personne au préalable)
+	/close <pseudo> : fermer la connexion privée avec quelqu'un (il faut être connecté en privé avec cette personne actuellement)
+	/exit : quitter le chat (toutes les connexions actives seront fermées)
+	
+--------------------------------------------------------------------------------
+
 Fichier de configuration
 
 	Les fichiers de configurations sont chargés au lancement de l'application.
