@@ -1,5 +1,7 @@
 package fr.upem.matou.client.network;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -43,6 +45,7 @@ public class ClientCore implements Closeable {
 	 *             If an interruption occurs.
 	 */
 	public void startChat(String username) throws IOException, InterruptedException {
+		requireNonNull(username);
 		try (ClientInstance chat = new ClientInstance(address, ui)) {
 			chat.start(username);
 		}

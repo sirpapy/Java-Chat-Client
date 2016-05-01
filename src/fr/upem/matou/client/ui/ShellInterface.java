@@ -120,16 +120,19 @@ public class ShellInterface implements UserInterface {
 
 	@Override
 	public void warnInvalidUsername(String username) {
+		requireNonNull(username);
 		error.println("[!] This username is not valid : " + username + " [!]");
 	}
 
 	@Override
 	public void warnUnavailableUsername(String username) {
+		requireNonNull(username);
 		error.println("[!] This username is not available : " + username + "[!]");
 	}
 
 	@Override
 	public void warnInvalidMessageEvent(ClientEvent event) {
+		requireNonNull(event);
 		error.println("[!] This request is not valid [!]");
 	}
 

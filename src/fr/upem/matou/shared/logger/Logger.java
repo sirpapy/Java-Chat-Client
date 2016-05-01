@@ -152,6 +152,8 @@ public class Logger {
 	 * Formats a message associated with a severity level. The message is not modified unless HEADER_INFO is set.
 	 */
 	private static String formatLog(String level, String message) {
+		requireNonNull(level);
+		requireNonNull(message);
 		if (!HEADER_INFO) {
 			return message;
 		}
@@ -173,8 +175,11 @@ public class Logger {
 	 * @return The formated message.
 	 */
 	public static String formatNetworkData(SocketChannel sc, String message) {
+		requireNonNull(message);
+		
 		String local = localAddressToString(sc);
 		String remote = remoteAddressToString(sc);
+		
 		return String.join(SEPARATOR, local + " -> " + remote, message);
 	}
 
@@ -190,6 +195,9 @@ public class Logger {
 	 * @return The formated message.
 	 */
 	public static String formatNetworkRequest(SocketChannel sc, NetworkLogType type, String message) {
+		requireNonNull(type);
+		requireNonNull(message);
+		
 		String direction = "";
 		switch (type) {
 		case READ:
@@ -267,6 +275,7 @@ public class Logger {
 	 *            The message.
 	 */
 	public static void exception(Exception exception) {
+		requireNonNull(exception);
 		if (LOG_EXCEPTION) {
 			EXCEPT.println("--------------------------------------------------------------------------------");
 			exception.printStackTrace(EXCEPT);

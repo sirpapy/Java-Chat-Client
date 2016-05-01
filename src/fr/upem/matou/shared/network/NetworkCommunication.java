@@ -191,6 +191,7 @@ public class NetworkCommunication {
 	 *            The SocketChannel to close.
 	 */
 	public static void silentlyClose(SocketChannel sc) {
+		requireNonNull(sc);
 		try {
 			sc.close();
 		} catch (@SuppressWarnings("unused") IOException __) {

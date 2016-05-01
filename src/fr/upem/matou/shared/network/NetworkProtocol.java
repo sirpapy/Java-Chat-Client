@@ -5,6 +5,7 @@ import static fr.upem.matou.shared.network.NetworkCommunication.MESSAGE_MAX_SIZE
 import static fr.upem.matou.shared.network.NetworkCommunication.USERNAME_MAX_SIZE;
 import static fr.upem.matou.shared.network.NetworkProtocol.Communicator.CLIENT;
 import static fr.upem.matou.shared.network.NetworkProtocol.Communicator.SERVER;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -160,6 +161,8 @@ public enum NetworkProtocol {
 	 * @return The size of the largest request.
 	 */
 	public static int getMaxRequestSize(Communicator source, Communicator target) {
+		requireNonNull(source);
+		requireNonNull(target);
 		NetworkProtocol[] values = values();
 		return Arrays.stream(values).filter(e -> e.source == source && e.target == target)
 				.mapToInt(e -> e.argumentSizes.stream().mapToInt(Integer::intValue).sum()).max().getAsInt();
@@ -176,6 +179,8 @@ public enum NetworkProtocol {
 	 * @return The size of the largest request argument.
 	 */
 	public static int getMaxArgumentSize(Communicator source, Communicator target) {
+		requireNonNull(source);
+		requireNonNull(target);
 		NetworkProtocol[] values = values();
 		return Arrays.stream(values).filter(e -> e.source == source && e.target == target)
 				.mapToInt(e -> e.argumentSizes.stream().mapToInt(Integer::intValue).max().getAsInt()).max().getAsInt();

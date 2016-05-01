@@ -1,5 +1,7 @@
 package fr.upem.matou.shared.utils;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * This class provides static methods in order to parse a configuration file.
  */
@@ -17,15 +19,7 @@ public class Configuration {
 		private final String command;
 		private final String argument;
 
-		/**
-		 * Constructs a new configuration entry.
-		 * 
-		 * @param command
-		 *            The command.
-		 * @param argument
-		 *            The argument.
-		 */
-		public ConfigEntry(String command, String argument) {
+		ConfigEntry(String command, String argument) {
 			this.command = command;
 			this.argument = argument;
 		}
@@ -57,6 +51,7 @@ public class Configuration {
 	 * @return The line without comments.
 	 */
 	public static String removeComments(String line) {
+		requireNonNull(line);
 		int comment = line.indexOf(COMMENT_SYMBOL);
 		if (comment == -1) {
 			return line;
@@ -72,6 +67,7 @@ public class Configuration {
 	 * @return true if this line is an affectation or false otherwise.
 	 */
 	public static boolean isAffectation(String line) {
+		requireNonNull(line);
 		return line.chars().anyMatch(c -> c == AFFECTATION_SYMBOL);
 	}
 
@@ -83,6 +79,7 @@ public class Configuration {
 	 * @return A ConfigEntry describing this line.
 	 */
 	public static ConfigEntry parseLine(String line) {
+		requireNonNull(line);
 		int limit = line.indexOf(AFFECTATION_SYMBOL);
 		if (limit == -1) {
 			throw new AssertionError("This line is not a valid configuration affectation");
