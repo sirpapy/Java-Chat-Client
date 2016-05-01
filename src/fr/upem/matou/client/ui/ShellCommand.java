@@ -7,7 +7,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import fr.upem.matou.client.network.ClientEvent;
-import fr.upem.matou.client.network.ClientEvent.*;
+import fr.upem.matou.client.network.ClientEvent.ClientEventAcceptPrivate;
+import fr.upem.matou.client.network.ClientEvent.ClientEventClosePrivate;
+import fr.upem.matou.client.network.ClientEvent.ClientEventOpenPrivate;
+import fr.upem.matou.client.network.ClientEvent.ClientEventSendMessage;
+import fr.upem.matou.client.network.ClientEvent.ClientEventSendPrivateFile;
+import fr.upem.matou.client.network.ClientEvent.ClientEventSendPrivateMessage;
 
 /*
  * This class is used to convert an input string command to a ClientEvent.
@@ -16,14 +21,14 @@ class ShellCommand {
 
 	private static final String COMMAND_TOKEN = "/";
 	private static final String EXIT_COMMAND = COMMAND_TOKEN + "exit";
-	
+
 	private ShellCommand() {
 	}
 
 	private static boolean isCommandMessage(String input) {
 		return input.startsWith(COMMAND_TOKEN);
 	}
-	
+
 	static boolean isExit(String input) {
 		return input.equals(EXIT_COMMAND);
 	}

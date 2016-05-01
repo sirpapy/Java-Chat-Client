@@ -1,6 +1,6 @@
 package fr.upem.matou.shared.network;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 
 /**
  * This object represents a Username. A username is a string where case is ignored.
@@ -15,7 +15,7 @@ public class Username {
 	 *            The username
 	 */
 	public Username(String name) {
-		this.name = Objects.requireNonNull(name);
+		this.name = requireNonNull(name);
 	}
 
 	@Override

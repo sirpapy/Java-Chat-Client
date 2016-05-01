@@ -5,26 +5,13 @@ package fr.upem.matou.tasks;
 @SuppressWarnings("javadoc")
 public class Tasks {
 
-	// TODO : Performances d'accès au serveur (HashMap...)
-	// TODO : Check imports et dépendances
-	// TODO : Check static imports (si nécessaire)
-	
 	// TODO : Vérifier qu'il n'y a pas d'entiers/chaines hardcodées
-	// TODO : Command line options
-	// TODO : Tracer les exceptions avec le logger
 	
-	// TODO : Logger sur les exceptions -> Logger.warning/Logger.error
 	// TODO : Tests unitaires
-	// TODO : Check warnings et suppress
 	// TODO : Programmation par contrat
-	// TODO : Visibilité minimale
-	// TODO : Crash Test
-	
+	// TODO : Visibilité minimale	
 	// TODO : Vérifier qu'il n'y a pas de code mort
-	// TODO : Ecrire la javadoc
-	// TODO : Ecrire le rapport
-	// TODO : Build.xml
 	
-	// TEMP : Désactiver le logger dans le fichier de config
+	// TODO : Ecrire le rapport
 	
 }

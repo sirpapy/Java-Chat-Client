@@ -1,6 +1,7 @@
 package fr.upem.matou.server.network;
 
-import static fr.upem.matou.shared.logger.Colorator.*;
+import static fr.upem.matou.shared.logger.Colorator.colorBlue;
+import static fr.upem.matou.shared.logger.Colorator.colorCyan;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -37,7 +38,7 @@ public class SelectorLogger {
 	private static String remoteAddressToString(SocketChannel sc) {
 		try {
 			return sc.getRemoteAddress().toString();
-		} catch (@SuppressWarnings("unused") IOException ignored) {
+		} catch (@SuppressWarnings("unused") IOException __) {
 			return "???";
 		}
 	}
