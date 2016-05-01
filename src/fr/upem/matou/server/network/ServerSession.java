@@ -21,7 +21,7 @@ import fr.upem.matou.shared.utils.ByteBuffers;
 
 /*
  * This class represents the state of a client connected to the chat server. A ServerSession is always attached to one
- * ServerDataBase and should be created by ServerDataBase.newServerSession(SocketChannel,SelectionKey).
+ * and only one ServerDataBase and should be created by ServerDataBase.newServerSession(SocketChannel,SelectionKey).
  */
 class ServerSession {
 
@@ -87,6 +87,9 @@ class ServerSession {
 		return bbWrite;
 	}
 
+	/*
+	 * Appends the given buffer to the write buffer (if there is enough place).
+	 */
 	void appendWriteBuffer(ByteBuffer bb) {
 		boolean succeeded = ByteBuffers.append(bbWrite, bb);
 		if (!succeeded) {
@@ -94,6 +97,9 @@ class ServerSession {
 		}
 	}
 
+	/*
+	 * Clears this buffer and sets a new limit.
+	 */
 	private final static void clearAndLimit(ByteBuffer bb, int size) {
 		bb.clear();
 		bb.limit(size);
@@ -117,13 +123,16 @@ class ServerSession {
 		arg++;
 	}
 
+	/*
+	 * Prepares the read state in order to read a Username.
+	 */
 	private void setReaderUsername() {
 		serverReader = new ReaderUsername();
 		advanceReadState(Integer.BYTES);
 	}
 
 	/*
-	 * Process the read buffer to retrieves the first argument of the COREQ request and updates the current state.
+	 * Process the read buffer to retrieves the first argument of the ReaderUsername and updates the current read state.
 	 */
 	private void readUsernameArg1(ReaderUsername reader) {
 		bbRead.flip();
@@ -139,7 +148,8 @@ class ServerSession {
 	}
 
 	/*
-	 * Process the read buffer to retrieves the second argument of the COREQ request and updates the current state.
+	 * Process the read buffer to retrieves the second argument of the ReaderUsername and updates the current read
+	 * state.
 	 */
 	private void readUsernameArg2(ReaderUsername reader) {
 		bbRead.flip();
@@ -150,11 +160,17 @@ class ServerSession {
 		resetReadState();
 	}
 
+	/*
+	 * Prepares the read state in order to read a Message.
+	 */
 	private void setReaderMessage() {
 		serverReader = new ReaderMessage();
 		advanceReadState(Integer.BYTES);
 	}
 
+	/*
+	 * Process the read buffer to retrieves the first argument of the ReaderMessage and updates the current read state.
+	 */
 	private void readMessageArg1(ReaderMessage reader) {
 		bbRead.flip();
 		reader.sizeMessage = bbRead.getInt();
@@ -168,6 +184,9 @@ class ServerSession {
 		advanceReadState(reader.sizeMessage);
 	}
 
+	/*
+	 * Process the read buffer to retrieves the second argument of the ReaderMessage and updates the current read state.
+	 */
 	private void readMessageArg2(ReaderMessage reader) {
 		bbRead.flip();
 		reader.message = ServerCommunication.readString(bbRead);
@@ -176,11 +195,17 @@ class ServerSession {
 		resetReadState();
 	}
 
+	/*
+	 * Prepares the read state in order to read a username and a two ports.
+	 */
 	private void setReaderPort() {
 		serverReader = new ReaderPort();
 		advanceReadState(Integer.BYTES);
 	}
 
+	/*
+	 * Process the read buffer to retrieves the first argument of the PortReader and updates the current read state.
+	 */
 	private void readPortArg1(ReaderPort reader) {
 		bbRead.flip();
 		reader.sizeUsername = bbRead.getInt();
@@ -194,6 +219,9 @@ class ServerSession {
 		advanceReadState(reader.sizeUsername);
 	}
 
+	/*
+	 * Process the read buffer to retrieves the second argument of the PortReader and updates the current read state.
+	 */
 	private void readPortArg2(ReaderPort reader) {
 		bbRead.flip();
 		String string = ServerCommunication.readString(bbRead);
@@ -203,6 +231,9 @@ class ServerSession {
 		advanceReadState(Integer.BYTES);
 	}
 
+	/*
+	 * Process the read buffer to retrieves the third argument of the PortReader and updates the current read state.
+	 */
 	private void readPortArg3(ReaderPort reader) {
 		bbRead.flip();
 		reader.portMessage = bbRead.getInt();
@@ -210,6 +241,9 @@ class ServerSession {
 		advanceReadState(Integer.BYTES);
 	}
 
+	/*
+	 * Process the read buffer to retrieves the fourth argument of the PortReader and updates the current read state.
+	 */
 	private void readPortArg4(ReaderPort reader) {
 		bbRead.flip();
 		reader.portFile = bbRead.getInt();
@@ -218,7 +252,8 @@ class ServerSession {
 	}
 
 	/*
-	 * Retrives the protocol request type from the read buffer and updates current state by setting the protocol type.
+	 * Retrives the protocol request type from the read buffer and updates the current read state by setting the
+	 * protocol type if valid.
 	 */
 	private int processRequestType() {
 		bbRead.flip();
@@ -232,6 +267,9 @@ class ServerSession {
 		return ordinal;
 	}
 
+	/*
+	 * Answers by an ERROR request and fills the write buffer.
+	 */
 	private void answerERROR(ErrorType type) {
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.ERROR));
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.WRITE, "ERROR : " + type));
@@ -242,6 +280,9 @@ class ServerSession {
 		}
 	}
 
+	/*
+	 * Checks if the current state of the client is valid with a COREQ request.
+	 */
 	private boolean checkCOREQ() {
 		return !isAuthent();
 	}
@@ -308,10 +349,16 @@ class ServerSession {
 		}
 	}
 
+	/*
+	 * Checks if the current state of the client is valid with a MSG request.
+	 */
 	private boolean checkMSG() {
 		return isAuthent();
 	}
 
+	/*
+	 * Process a MSG request.
+	 */
 	private void processMSG() {
 		if (arg == 0) {
 			if (!checkMSG()) {
@@ -338,6 +385,9 @@ class ServerSession {
 		}
 	}
 
+	/*
+	 * Answers by a MSGBC request and fills the broadcast buffer.
+	 */
 	private void answerMSGBC(String message) {
 		if (!NetworkCommunication.checkMessageValidity(message)) {
 			Logger.warning(formatNetworkData(sc, "INVALID MESSAGE : " + message));
@@ -358,10 +408,16 @@ class ServerSession {
 		db.updateStateReadAll();
 	}
 
+	/*
+	 * Checks if the current state of the client is valid with a PVCOREQ request.
+	 */
 	private boolean checkPVCOREQ() {
 		return isAuthent();
 	}
 
+	/*
+	 * Process a PVCOREQ request.
+	 */
 	private void processPVCOREQ() {
 		if (arg == 0) {
 			if (!checkPVCOREQ()) {
@@ -388,6 +444,9 @@ class ServerSession {
 		}
 	}
 
+	/*
+	 * Answers by a PVCOREQNOTIF request and fills the write buffer of the target.
+	 */
 	private void answerPVCOREQNOTIF(Username requested) {
 		Username requester = db.usernameOf(sc).get();
 		if (requested.equals(requester)) {
@@ -421,10 +480,16 @@ class ServerSession {
 		session.updateKey();
 	}
 
+	/*
+	 * Checks if the current state of the client is valid with a PVCOACC request.
+	 */
 	private boolean checkPVCOACC() {
 		return isAuthent();
 	}
 
+	/*
+	 * Process a PVCOACC request.
+	 */
 	private void processPVCOACC() {
 		if (arg == 0) {
 			if (!checkPVCOACC()) {
@@ -451,6 +516,9 @@ class ServerSession {
 		}
 	}
 
+	/*
+	 * Answers by a PVCOESTASRC request and fills the write buffer of the target.
+	 */
 	private void answerPVCOESTASRC(Username destination) {
 		Username source = db.usernameOf(sc).get();
 		if (destination.equals(source)) {
@@ -480,10 +548,16 @@ class ServerSession {
 		session.updateKey();
 	}
 
+	/*
+	 * Checks if the current state of the client is valid with a PVCOPORT request.
+	 */
 	private boolean checkPVCOPORT() {
 		return isAuthent();
 	}
 
+	/*
+	 * Process a PVCOPORT request.
+	 */
 	private void processPVCOPORT() {
 		if (arg == 0) {
 			if (!checkPVCOPORT()) {
@@ -516,6 +590,9 @@ class ServerSession {
 		}
 	}
 
+	/*
+	 * Answers by a PVCOESTADST request and fills the write buffer of the target.
+	 */
 	private void answerPVCOESTADST(Username source, int portMessage, int portFile) {
 		Username destination = db.usernameOf(sc).get();
 

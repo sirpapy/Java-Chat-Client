@@ -29,6 +29,9 @@ class ShellCommand {
 		return input.equals(EXIT_COMMAND);
 	}
 
+	/*
+	 * Parses the line.
+	 */
 	static Optional<ClientEvent> parseLine(String input) {
 		if (!isCommandMessage(input)) {
 			return Optional.of(new ClientEventSendMessage(input));

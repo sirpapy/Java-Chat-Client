@@ -5,7 +5,8 @@ import java.net.InetAddress;
 import fr.upem.matou.shared.network.Username;
 
 /*
- * This object describes data of an accepted private request.
+ * This object describes data of a private connection as a destination (the requested of the connection). These data are
+ * about the source (the requester).
  */
 class DestinationConnectionData {
 	private final Username username;

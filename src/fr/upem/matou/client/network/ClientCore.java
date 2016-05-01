@@ -9,7 +9,8 @@ import fr.upem.matou.client.ui.UserInterface;
 import fr.upem.matou.shared.logger.Logger;
 
 /**
- * This class is the core of the chat client.
+ * This class is the core of the chat client. A ClientCore is a associated to a chat server. To start chatting, use
+ * {@link #startChat()} or {@link #startChat(String)}.
  */
 public class ClientCore implements Closeable {
 

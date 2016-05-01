@@ -21,7 +21,7 @@ import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 
 /*
- * This class represents the state of the chat client. This class is thread-safe.
+ * This class represents the state of a chat client connected to a chat server. This class is thread-safe.
  */
 @SuppressWarnings("resource")
 class ClientInstance implements Closeable {
@@ -40,6 +40,9 @@ class ClientInstance implements Closeable {
 		session = new ClientSession(sc);
 	}
 
+	/*
+	 * Asks for terminaison.
+	 */
 	private void setExit() {
 		synchronized (monitor) {
 			exit = true;
@@ -48,6 +51,9 @@ class ClientInstance implements Closeable {
 		}
 	}
 
+	/*
+	 * Waits until terminaison.
+	 */
 	private void waitForTerminaison() throws InterruptedException {
 		synchronized (monitor) {
 			Logger.debug("WAIT FOR TERMINAISON : START WAITING");
@@ -58,11 +64,17 @@ class ClientInstance implements Closeable {
 		Logger.debug("WAIT FOR TERMINAISON : END WAITING");
 	}
 
+	/*
+	 * Interrupts all working threads of the current chat instance.
+	 */
 	private void interruptAllThreads() {
 		Logger.debug("INTERRUPT THREAD GROUP");
 		threadGroup.interrupt();
 	}
 
+	/*
+	 * Sends a public connection request for this username.
+	 */
 	private boolean usernameSender(String username) throws IOException {
 		ClientEvent event = new ClientEventConnection(new Username(username));
 		if (!event.execute(session)) {
@@ -72,6 +84,9 @@ class ClientInstance implements Closeable {
 		return true;
 	}
 
+	/*
+	 * Receives the public connection response for this username.
+	 */
 	private boolean usernameReceiver(String username) throws IOException {
 		NetworkProtocol protocol = ClientCommunication.receiveRequestType(sc);
 		Logger.info(formatNetworkRequest(sc, NetworkLogType.READ, "PROTOCOL : " + protocol));
@@ -93,6 +108,9 @@ class ClientInstance implements Closeable {
 		}
 	}
 
+	/*
+	 * Executes events and sends requests.
+	 */
 	private boolean chatSender() throws IOException {
 		Optional<ClientEvent> optional = ui.getEvent();
 		if (!optional.isPresent()) {
@@ -244,6 +262,9 @@ class ClientInstance implements Closeable {
 		}
 	}
 
+	/*
+	 * Establishes a private connection as a source.
+	 */
 	private void privateCommunicationSource(Username username, InetAddress addressDst) throws IOException {
 		ServerSocketChannel sscMessage = ServerSocketChannel.open();
 		ServerSocketChannel sscFile = ServerSocketChannel.open();
@@ -285,6 +306,9 @@ class ClientInstance implements Closeable {
 
 	}
 
+	/*
+	 * Establishes a private connection as a destination.
+	 */
 	private void privateCommunicationDestination(Username username, InetAddress addressSrc, int portMessage,
 			int portFile) throws IOException {
 		SocketChannel scMessage = SocketChannel.open(new InetSocketAddress(addressSrc, portMessage));
@@ -321,6 +345,9 @@ class ClientInstance implements Closeable {
 		}, "private file receiver : " + username).start();
 	}
 
+	/*
+	 * Launches a private connection as a source.
+	 */
 	private void launchPrivateConnection(Username username, InetAddress addressDst) {
 		new Thread(threadGroup, () -> {
 			try {
@@ -331,6 +358,9 @@ class ClientInstance implements Closeable {
 		}, "private source connection : " + username).start();
 	}
 
+	/*
+	 * Launches a private connection as a destination.
+	 */
 	private void launchPrivateConnection(Username username, InetAddress addressSrc, int portMessage, int portFile) {
 		new Thread(threadGroup, () -> {
 			try {
@@ -341,10 +371,16 @@ class ClientInstance implements Closeable {
 		}, "private destination connection : " + username).start();
 	}
 
+	/*
+	 * Tries to connect to the chat server with the given username.
+	 */
 	private boolean connectUsername(String username) throws IOException {
 		return usernameSender(username) && usernameReceiver(username);
 	}
 
+	/*
+	 * Launches sender and receiver threads and waits until terminaison of one of them.
+	 */
 	private void processMessages() throws InterruptedException {
 		Logger.debug("USER CONNECTED");
 
@@ -386,6 +422,9 @@ class ClientInstance implements Closeable {
 		Logger.debug("DISCONNECTION");
 	}
 
+	/*
+	 * Starts the chat without a predefined username.
+	 */
 	void start() throws IOException, InterruptedException {
 		while (true) {
 			String username = ui.getUsername();
@@ -398,6 +437,9 @@ class ClientInstance implements Closeable {
 		processMessages();
 	}
 
+	/*
+	 * Starts the chat with a predefined username.
+	 */
 	void start(String username) throws IOException, InterruptedException {
 		if (!connectUsername(username)) {
 			return;

@@ -52,7 +52,7 @@ class ServerDataBase {
 	ByteBuffer getBroadcastBuffer() {
 		return bbBroadcast;
 	}
-	
+
 	/*
 	 * Checks if a username is available.
 	 */
@@ -93,7 +93,7 @@ class ServerDataBase {
 		Username disconnected = authenticated.remove(channel);
 		if (disconnected != null) {
 			privateRequests.remove(disconnected);
-			removeAllRequestTo(disconnected);
+			removeAllRequestTo(disconnected); // cancel all pending private requests
 		}
 		return Optional.ofNullable(disconnected);
 	}
@@ -161,9 +161,9 @@ class ServerDataBase {
 		}
 		return set.remove(source);
 	}
-	
+
 	/*
-	 * Updates the read state of all clients. If the broadcast bytebuffer is not empty, then all the client's write
+	 * Updates the read state of all clients. If the broadcast bytebuffer is not empty, then all client's write
 	 * bytebuffer are filled by the broadcast bytebuffer. The broadcast bytebuffer is cleared after this operation.
 	 */
 	void updateStateReadAll() { // O(n)

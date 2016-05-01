@@ -19,7 +19,7 @@ import fr.upem.matou.shared.logger.Logger.NetworkLogType;
 import fr.upem.matou.shared.network.NetworkCommunication;
 
 /**
- * This class is the core of the chat server.
+ * This class is the core of the chat server. To launch the server, use {@link #launch()}.
  */
 @SuppressWarnings("resource")
 public class ServerCore implements Closeable {
@@ -47,7 +47,7 @@ public class ServerCore implements Closeable {
 	}
 
 	/**
-	 * Starts a server chat.
+	 * Starts a server chat. This method will never end until the thread is interrupted.
 	 * 
 	 * @throws IOException
 	 *             If an I/O error occurs.
@@ -64,10 +64,13 @@ public class ServerCore implements Closeable {
 			processSelectedKeys(selectedKeys);
 
 			selectedKeys.clear();
-			
+
 		}
 	}
 
+	/*
+	 * Process all selected keys.
+	 */
 	private void processSelectedKeys(Set<SelectionKey> selectedKeys) throws IOException {
 		for (SelectionKey key : selectedKeys) {
 			if (key.isValid() && key.isAcceptable()) {
@@ -89,6 +92,9 @@ public class ServerCore implements Closeable {
 		}
 	}
 
+	/*
+	 * Process a selection key likely ready for accepting a new connection.
+	 */
 	private void doAccept(SelectionKey key) throws IOException {
 		ServerSocketChannel channel = (ServerSocketChannel) key.channel();
 		SocketChannel acceptedChannel = channel.accept();
@@ -100,7 +106,7 @@ public class ServerCore implements Closeable {
 		acceptedChannel.configureBlocking(false);
 		SelectionKey registeredKey = acceptedChannel.register(selector, SelectionKey.OP_READ);
 		Optional<ServerSession> optional = db.newServerSession(acceptedChannel, registeredKey);
-		if (!optional.isPresent()) {
+		if (!optional.isPresent()) { // Server full
 			Logger.warning(formatNetworkData(acceptedChannel, "Server is full"));
 			NetworkCommunication.silentlyClose(acceptedChannel);
 			return;
@@ -109,6 +115,9 @@ public class ServerCore implements Closeable {
 		registeredKey.attach(session);
 	}
 
+	/*
+	 * Process a selection key likely ready for reading.
+	 */
 	private static void doRead(SelectionKey key) throws IOException {
 		SocketChannel channel = (SocketChannel) key.channel();
 		ServerSession session = (ServerSession) key.attachment();
@@ -124,6 +133,9 @@ public class ServerCore implements Closeable {
 		session.updateKey();
 	}
 
+	/*
+	 * Process a selection key likely ready for writing.
+	 */
 	private static void doWrite(SelectionKey key) throws IOException {
 		SocketChannel channel = (SocketChannel) key.channel();
 		ServerSession session = (ServerSession) key.attachment();

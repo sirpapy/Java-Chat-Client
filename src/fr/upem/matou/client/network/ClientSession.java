@@ -15,7 +15,7 @@ import fr.upem.matou.shared.network.NetworkProtocol;
 import fr.upem.matou.shared.network.Username;
 
 /*
- * This class represents the state of the client connected to the chat server.
+ * This class contains all connected channels of a chat client. When a ClientEvent is executed, it uses these methods.
  * This class is thread-safe.
  */
 @SuppressWarnings("resource")
@@ -39,7 +39,7 @@ class ClientSession {
 	void addNewPrivateFileChannel(Username username, SocketChannel sc) {
 		privateFiles.put(username, sc);
 	}
-	
+
 	boolean sendUsernameRequest(Username username) throws IOException {
 		Logger.info(formatNetworkRequest(publicChannel, NetworkLogType.WRITE, "PROTOCOL : " + NetworkProtocol.COREQ));
 		Logger.info(formatNetworkRequest(publicChannel, NetworkLogType.WRITE, "USERNAME : " + username));
@@ -75,7 +75,7 @@ class ClientSession {
 		try {
 			return ClientCommunication.sendRequestPVMSG(sc, message);
 		} catch (IOException e) {
-			Logger.warning(formatNetworkData(sc,e.toString()));
+			Logger.warning(formatNetworkData(sc, e.toString()));
 			closePrivateConnection(username);
 			return false;
 		}
@@ -92,7 +92,7 @@ class ClientSession {
 		try {
 			return ClientCommunication.sendRequestPVFILE(sc, path);
 		} catch (IOException e) {
-			Logger.warning(formatNetworkData(sc,e.toString()));
+			Logger.warning(formatNetworkData(sc, e.toString()));
 			closePrivateConnection(username);
 			return false;
 		}
@@ -103,11 +103,11 @@ class ClientSession {
 		SocketChannel scFile = privateFiles.remove(username);
 		boolean closed = (scMessage != null) || (scFile != null);
 		if (scMessage != null) {
-			Logger.debug(formatNetworkData(scMessage,"SILENTLY CLOSE (PV MESSAGE)"));
+			Logger.debug(formatNetworkData(scMessage, "SILENTLY CLOSE (PV MESSAGE)"));
 			NetworkCommunication.silentlyClose(scMessage);
 		}
 		if (scFile != null) {
-			Logger.debug(formatNetworkData(scFile,"SILENTLY CLOSE (PV FILE)"));
+			Logger.debug(formatNetworkData(scFile, "SILENTLY CLOSE (PV FILE)"));
 			NetworkCommunication.silentlyClose(scFile);
 		}
 		return closed;
