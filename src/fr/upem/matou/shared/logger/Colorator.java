@@ -22,6 +22,9 @@ public class Colorator {
 	private static final String ANSI_CYAN = "\u001B[36m";
 	private static final String ANSI_WHITE = "\u001B[37m";
 
+	private Colorator() {
+	}
+	
 	/**
 	 * Enables or disables the colorator.
 	 * 

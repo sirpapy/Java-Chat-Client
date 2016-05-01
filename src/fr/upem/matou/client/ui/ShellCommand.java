@@ -17,7 +17,6 @@ class ShellCommand {
 	private static final String COMMAND_TOKEN = "/";
 	private static final String EXIT_COMMAND = COMMAND_TOKEN + "exit";
 	
-
 	private ShellCommand() {
 	}
 

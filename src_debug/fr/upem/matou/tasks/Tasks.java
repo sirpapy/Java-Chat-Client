@@ -5,8 +5,6 @@ package fr.upem.matou.tasks;
 @SuppressWarnings("javadoc")
 public class Tasks {
 
-	// FIXME : Commentaires de code
-	// TODO : Instanciation de classes static
 	// TODO : Performances d'accès au serveur (HashMap...)
 	// TODO : Check imports et dépendances
 	// TODO : Check static imports (si nécessaire)
